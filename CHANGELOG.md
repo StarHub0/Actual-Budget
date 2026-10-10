@@ -1,6 +1,35 @@
 # Changelog
 
 
+## v0.1.92
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.91...v0.1.92)
+
+### 🚀 Enhancements
+
+- Filter the calendar by account, category, flow and scheduled bills ([497c9dc](https://github.com/aelxxs/actual-budget-tweaks/commit/497c9dc))
+- Show each day's balance on the calendar for the accounts shown ([44ee051](https://github.com/aelxxs/actual-budget-tweaks/commit/44ee051))
+- Edit a scheduled bill from the calendar's day panel ([ed1975d](https://github.com/aelxxs/actual-budget-tweaks/commit/ed1975d))
+
+### 🩹 Fixes
+
+- Let Escape leave the calendar open, like any other page ([1eb07fa](https://github.com/aelxxs/actual-budget-tweaks/commit/1eb07fa))
+- Keep ABT's dashboard styling off single reports ([81dcb14](https://github.com/aelxxs/actual-budget-tweaks/commit/81dcb14))
+- Count uncategorized transactions as Actual does, not split parents ([bbc1049](https://github.com/aelxxs/actual-budget-tweaks/commit/bbc1049))
+- Show live sidebar balances for accounts in collapsed native groups ([ac7022d](https://github.com/aelxxs/actual-budget-tweaks/commit/ac7022d))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.91 ([c1f4819](https://github.com/aelxxs/actual-budget-tweaks/commit/c1f4819))
+
+### 🎨 Styles
+
+- Match the calendar's month button and weekday bar to the page ([46c18e6](https://github.com/aelxxs/actual-budget-tweaks/commit/46c18e6))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.91
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.90...v0.1.91)
