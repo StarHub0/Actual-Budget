@@ -14,6 +14,10 @@ const COLUMN_PAGES = [
 ];
 
 const HELP = '[data-testid="help-menu-button"]';
+// Actual wraps dashboards and single reports in the same test id; a dashboard's id is a UUID.
+const REPORTS = '[data-testid="reports-page"]';
+const DASHBOARD_PATH =
+	/^\/reports(\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?\/?$/i;
 
 /** Marks Actual elements that base.css styles but that carry no stable hook of their own. */
 export const nativeHooks = {
@@ -65,6 +69,11 @@ export const nativeHooks = {
 			const page = COLUMN_PAGES.find((p) => path.includes(`/${p}`)) ?? "";
 			if (column && column.dataset.abtPage !== page) {
 				column.dataset.abtPage = page;
+			}
+			const reports = document.querySelector(REPORTS);
+			const dashboard = DASHBOARD_PATH.test(path);
+			if (reports && reports.hasAttribute("data-abt-reports-dashboard") !== dashboard) {
+				reports.toggleAttribute("data-abt-reports-dashboard", dashboard);
 			}
 			for (const input of document.querySelectorAll("input[data-rac]")) {
 				if (input.previousElementSibling instanceof SVGElement) {
