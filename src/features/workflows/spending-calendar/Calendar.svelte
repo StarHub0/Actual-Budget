@@ -32,8 +32,6 @@
 	import { dayHeat, maxDaySpent, summarizeMonth } from "./summary";
 	import type { DayData } from "./types";
 
-	const { onClose } = $props<{ onClose: () => void }>();
-
 	const ARROW_STEPS: Record<string, number> = {
 		ArrowLeft: -1,
 		ArrowRight: 1,
@@ -281,13 +279,9 @@
 		});
 
 		function onKey(e: KeyboardEvent) {
-			if (e.key === "Escape") {
-				if (filtersOpen || pickerOpen) {
-					filtersOpen = pickerOpen = false;
-					return;
-				}
-				closeDayPanel();
-				onClose();
+			// The calendar is a page, so Escape only closes its own popovers.
+			if (e.key === "Escape" && (filtersOpen || pickerOpen)) {
+				filtersOpen = pickerOpen = false;
 				return;
 			}
 			onArrowKey(e);

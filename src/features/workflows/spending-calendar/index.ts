@@ -88,7 +88,6 @@ export function openCalendar(): void {
 
 	calendarInstance = mount(Calendar, {
 		target: calendarContainer,
-		props: { onClose: closeCalendar },
 	});
 
 	updateActiveState();
