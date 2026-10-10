@@ -278,16 +278,14 @@ export async function refreshUncategorizedCounts(accounts: SidebarAccount[]): Pr
 	const txs = !onBudget.length
 		? []
 		: await query<Pick<Transaction, "account">[]>("transactions", {
+				// Actual's own uncategorizedTransactions(): split lines rather than their parents, and
+				// transfers only when they leave the budget.
 				filter: {
-					tombstone: false,
 					account: { $oneof: onBudget },
 					category: null,
-					is_child: false,
-					transfer_id: null,
+					$or: [{ "payee.transfer_acct.offbudget": true, "payee.transfer_acct": null }],
 				},
 				select: ["account"],
-				// "none" leaves out split parents.
-				options: { splits: "none" },
 			});
 
 	const counts = new Map<string, number>();
