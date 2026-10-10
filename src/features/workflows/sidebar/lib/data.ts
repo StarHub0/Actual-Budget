@@ -1,5 +1,5 @@
 import type { Account, Transaction } from "@lib/types/actual-schema";
-import { dispatch, query, send } from "@lib/utilities/actual-api";
+import { calculate, dispatch, query, send } from "@lib/utilities/actual-api";
 import { readCell } from "@lib/utilities/budget-cells";
 import { findUncategorizedButton } from "@lib/utilities/native-ui";
 
@@ -31,10 +31,27 @@ function toSyncStatus(syncStatus: string | null | undefined): SyncStatus {
 	return "error";
 }
 
-// Mirrors the native sidebar's own `get-cell` lookup rather than summing
-// transactions ourselves. Null when the sheet isn't ready yet, as just after a load.
-async function loadBalance(accountId: string): Promise<number | null> {
-	return readCell("__global", `balance-${accountId}`);
+/**
+ * An account's balance. Actual's sheet cell only exists while a native sidebar row shows the
+ * account, which a collapsed group never does; without one, or before the sheet is ready, this
+ * runs Actual's own balance query (bindings.accountBalance).
+ */
+async function loadBalance(accountId: string, hasRow = false): Promise<number | null> {
+	if (hasRow) {
+		const cell = await readCell("__global", `balance-${accountId}`);
+		if (cell !== null) {
+			return cell;
+		}
+	}
+	try {
+		return await calculate<number>(
+			"transactions",
+			{ $sum: "$amount" },
+			{ filter: { account: accountId }, options: { splits: "none" } },
+		);
+	} catch {
+		return null;
+	}
 }
 
 /**
@@ -54,7 +71,8 @@ export async function loadSidebarAccounts(
 
 	const prevUncategorized = new Map(previous.map((a) => [a.id, a.uncategorized]));
 	const live = accounts.filter((a) => !a.tombstone);
-	const balances = await Promise.all(live.map((a) => loadBalance(a.id)));
+	const withRows = readNativeAccountRows();
+	const balances = await Promise.all(live.map((a) => loadBalance(a.id, withRows.has(a.id))));
 
 	return live.map((a, i) => ({
 		id: a.id,
@@ -71,13 +89,15 @@ export async function loadSidebarAccounts(
 /** Returns the ids whose balance changed, and those that couldn't be read to retry later. */
 export async function refreshBalances(
 	accounts: SidebarAccount[],
+	/** Accounts drawn in the native sidebar, whose live cells hold their balances. */
+	withRows: Set<string> = new Set(),
 ): Promise<{ changed: string[]; failed: string[] }> {
 	const changed: string[] = [];
 	const failed: string[] = [];
 	if (!accounts.length) {
 		return { changed, failed };
 	}
-	const balances = await Promise.all(accounts.map((a) => loadBalance(a.id)));
+	const balances = await Promise.all(accounts.map((a) => loadBalance(a.id, withRows.has(a.id))));
 	accounts.forEach((account, i) => {
 		const balance = balances[i];
 		if (balance == null) {
@@ -244,6 +264,19 @@ export function readNativeSyncingAccountIds(): Set<string> {
 		}
 	}
 	return ids;
+}
+
+/** The native sidebar's totals (all, on and off budget, groups), which still show when groups collapse. */
+export function readNativeTotalsText(): string {
+	// Not the whole document, whose budget table is full of cells.
+	const root = document.querySelector(`[${NATIVE_ROOT_ATTR}]`);
+	if (!root) {
+		return "";
+	}
+	return [...root.querySelectorAll<HTMLElement>("[data-cellname]")]
+		.filter((el) => !el.dataset.cellname?.startsWith(BALANCE_CELL_PREFIX))
+		.map((el) => `${el.dataset.cellname}=${el.textContent}`)
+		.join("|");
 }
 
 // Balance cell is spreadsheet-bound and re-renders on its own on sync/tx changes.

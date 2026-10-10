@@ -30,9 +30,11 @@
 	import { LAYOUT_KEY, toLayout, type SidebarLayout } from "./lib/layout";
 	import type { SidebarAccount } from "./lib/data";
 	import {
+		NATIVE_ROOT_ATTR,
 		closeAccount,
 		loadSidebarAccounts,
 		readNativeAccountBalanceTexts,
+		readNativeTotalsText,
 		readNativeSyncingAccountIds,
 		readNativeUncategorizedButtonText,
 		refreshBalances,
@@ -270,22 +272,65 @@
 	// Each account's native balance text when we last read its balance. An account counts as
 	// changed the first time it's seen too, since the first load can run before the sheet is ready.
 	const lastBalanceTexts = new Map<string, string>();
+	// Accounts in a collapsed native group have no row to watch, so a change to the native
+	// totals re-reads them instead.
+	let lastTotalsText = "";
 
-	$effect(() => {
-		return watchDom(() => {
-			const nowTexts = readNativeAccountBalanceTexts();
-			const changedAccounts = accounts.filter((a) => {
-				const text = nowTexts.get(a.id);
-				return text !== undefined && lastBalanceTexts.get(a.id) !== text;
-			});
-			if (!changedAccounts.length) return;
-			for (const a of changedAccounts) lastBalanceTexts.set(a.id, nowTexts.get(a.id)!);
-			refreshBalances(changedAccounts).then(({ changed, failed }) => {
-				for (const id of changed) invalidateAccountDetail(id);
-				// Forgotten, so the next DOM change tries again.
-				for (const id of failed) lastBalanceTexts.delete(id);
-			});
+	function checkBalances() {
+		const nowTexts = readNativeAccountBalanceTexts();
+		const totals = readNativeTotalsText();
+		const totalsChanged = totals !== lastTotalsText;
+		lastTotalsText = totals;
+		const changedAccounts = accounts.filter((a) => {
+			const text = nowTexts.get(a.id);
+			if (text === undefined) {
+				return totalsChanged;
+			}
+			return lastBalanceTexts.get(a.id) !== text;
 		});
+		const withRows = new Set(nowTexts.keys());
+		if (!changedAccounts.length) return;
+		for (const a of changedAccounts) {
+			const text = nowTexts.get(a.id);
+			if (text !== undefined) {
+				lastBalanceTexts.set(a.id, text);
+			}
+		}
+		refreshBalances(changedAccounts, withRows).then(({ changed, failed }) => {
+			for (const id of changed) invalidateAccountDetail(id);
+			// Forgotten, so the next DOM change tries again.
+			for (const id of failed) lastBalanceTexts.delete(id);
+			if (failed.some((id) => !nowTexts.has(id))) {
+				lastTotalsText = "";
+			}
+		});
+	}
+
+	// Actual rewrites a balance's text in place, which the page-wide watcher (new elements only)
+	// misses, so the native sidebar gets its own watcher for text; the page one only finds it.
+	$effect(() => {
+		let root: Element | null = null;
+		let stopRoot: (() => void) | null = null;
+		const stopPage = watchDom(() => {
+			const current = document.querySelector(`[${NATIVE_ROOT_ATTR}]`);
+			if (current === root) {
+				// Without the native sidebar marked, fall back to checking on every page change.
+				if (!root) {
+					checkBalances();
+				}
+				return;
+			}
+			stopRoot?.();
+			root = current;
+			// Checks once on attaching, then on each change inside it.
+			stopRoot = root
+				? watchDom(checkBalances, root, { childList: true, subtree: true, characterData: true })
+				: null;
+		});
+		return () => {
+			stopPage();
+			stopRoot?.();
+		};
 	});
 
 	// This sidebar persists across a budget switch (never remounts), so
