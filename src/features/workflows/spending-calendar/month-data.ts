@@ -1,6 +1,14 @@
-import type { Account, Category, Payee, Schedule, Transaction } from "@lib/types/actual-schema";
+import type {
+	Account,
+	Category,
+	CategoryGroup,
+	Payee,
+	Schedule,
+	Transaction,
+} from "@lib/types/actual-schema";
 import { query, send } from "@lib/utilities/actual-api";
 import { isoDate } from "@lib/utilities/months";
+import type { CalendarFilters } from "./filters";
 import type { DayData, DayTransaction } from "./types";
 
 export const MONTH_NAMES = [
@@ -111,6 +119,9 @@ export function createMonthLoader() {
 	let payeeTransferAcct = new Map<string, string | null>();
 	let accountNames = new Map<string, string>();
 	let accountOffbudget = new Map<string, boolean>();
+	let accountList: Pick<Account, "id" | "name" | "type" | "offbudget" | "closed">[] = [];
+	let categoryList: Pick<Category, "id" | "name" | "group" | "is_income">[] = [];
+	let groupList: Pick<CategoryGroup, "id" | "name" | "is_income">[] = [];
 	const categoryNames = new Map<string, string>();
 	const incomeCategoryIds = new Set<string>();
 	/** Expanded recurrence dates per schedule id, grown as the user pages further ahead. */
@@ -140,20 +151,28 @@ export function createMonthLoader() {
 	async function load(
 		year: number,
 		month: number,
-		{ hideOffBudget, firstDayOfWeek = 0 }: { hideOffBudget: boolean; firstDayOfWeek?: number },
+		{ filters, firstDayOfWeek = 0 }: { filters: CalendarFilters; firstDayOfWeek?: number },
 	): Promise<DayData[]> {
+		const hiddenAccounts = new Set(filters.hiddenAccounts);
+		const hiddenCategories = new Set(filters.hiddenCategories);
+		const isHidden = (account: string | null | undefined) =>
+			!!account &&
+			(hiddenAccounts.has(account) || (filters.hideOffBudget && !!accountOffbudget.get(account)));
+		const inFlow = (amount: number) =>
+			filters.flow === "all" || (filters.flow === "spending" ? amount < 0 : amount > 0);
 		const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}-`;
 		const daysInMonth = new Date(year, month + 1, 0).getDate();
 		const startDate = `${monthPrefix}01`;
 		const endDate = `${monthPrefix}${String(daysInMonth).padStart(2, "0")}`;
 
-		const [transactions, schedules, payees, categories, accounts] = await Promise.all([
+		const [transactions, schedules, payees, categories, groups, accounts] = await Promise.all([
 			query<Transaction[]>("transactions", {
 				filter: { $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }] },
 			}),
-			query<Schedule[]>("schedules"),
+			filters.showScheduled ? query<Schedule[]>("schedules") : Promise.resolve([]),
 			payeeNames.size ? Promise.resolve(null) : query<Payee[]>("payees"),
 			categoryNames.size ? Promise.resolve(null) : query<Category[]>("categories"),
+			groupList.length ? Promise.resolve(null) : query<CategoryGroup[]>("category_groups"),
 			accountNames.size ? Promise.resolve(null) : query<Account[]>("accounts"),
 		]);
 
@@ -162,6 +181,9 @@ export function createMonthLoader() {
 			payeeTransferAcct = new Map(payees.map((p) => [p.id, p.transfer_acct ?? null]));
 		}
 		if (categories) {
+			categoryList = categories
+				.filter((c) => !c.tombstone)
+				.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 			for (const c of categories) {
 				categoryNames.set(c.id, c.name);
 				if (c.is_income) {
@@ -169,9 +191,19 @@ export function createMonthLoader() {
 				}
 			}
 		}
+		if (groups) {
+			// Income last, as Actual's budget page lists it.
+			groupList = groups
+				.filter((g) => !g.tombstone)
+				.sort(
+					(a, b) =>
+						Number(a.is_income) - Number(b.is_income) || (a.sort_order ?? 0) - (b.sort_order ?? 0),
+				);
+		}
 		if (accounts) {
 			accountNames = new Map(accounts.map((a) => [a.id, a.name]));
 			accountOffbudget = new Map(accounts.map((a) => [a.id, a.offbudget]));
+			accountList = accounts.filter((a) => !a.tombstone);
 		}
 
 		// A transfer between two accounts with the same on/off-budget status is
@@ -215,7 +247,11 @@ export function createMonthLoader() {
 			if (!t.date || isPureTransfer(t)) {
 				continue;
 			}
-			if (hideOffBudget && accountOffbudget.get(t.account)) {
+			if (
+				isHidden(t.account) ||
+				(t.category && hiddenCategories.has(t.category)) ||
+				!inFlow(t.amount ?? 0)
+			) {
 				continue;
 			}
 			const day = parseInt(t.date.split("-")[2]);
@@ -237,7 +273,8 @@ export function createMonthLoader() {
 				!s.completed &&
 				!s.tombstone &&
 				!isPureTransferSchedule(s) &&
-				!(hideOffBudget && s._account && accountOffbudget.get(s._account)),
+				!isHidden(s._account) &&
+				inFlow(parseScheduleAmount(s._amount)),
 		);
 
 		const todayIso = isoDate(new Date());
@@ -329,7 +366,14 @@ export function createMonthLoader() {
 		return buildGrid(year, month, byDay, todayIso, firstDayOfWeek);
 	}
 
-	return { load, categoryNames, incomeCategoryIds };
+	return {
+		load,
+		categoryNames,
+		incomeCategoryIds,
+		accounts: () => accountList,
+		categories: () => categoryList,
+		categoryGroups: () => groupList,
+	};
 }
 
 /**

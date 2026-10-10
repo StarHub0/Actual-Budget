@@ -2,7 +2,6 @@
 	import { sidepanel } from "@features/core/side-panel";
 	import { SIDEBAR_ATTR } from "@features/core/side-panel/api";
 	import MonthPicker from "@lib/components/MonthPicker.svelte";
-	import Switch from "@lib/components/Switch.svelte";
 	import { loadCategoryColors } from "@lib/utilities/category-colors";
 	import { loadCurrency } from "@lib/utilities/currency";
 	import {
@@ -12,11 +11,11 @@
 		weekdayNames,
 	} from "@lib/utilities/date-format.svelte";
 	import { watchDom } from "@lib/utilities/dom-watcher";
-	import { onOutsideClick, positionPopover } from "@lib/utilities/popover";
-	import { getValue, setValue } from "@lib/utilities/store";
 	import { mount, onMount, tick, unmount } from "svelte";
 	import { cubicOut } from "svelte/easing";
 	import { fly } from "svelte/transition";
+	import CalendarFilters from "./CalendarFilters.svelte";
+	import { loadFilters, saveFilters, type CalendarFilters as Filters } from "./filters";
 	import CalendarSkeleton from "./CalendarSkeleton.svelte";
 	import DayCell from "./DayCell.svelte";
 	import DayDetail from "./DayDetail.svelte";
@@ -35,7 +34,6 @@
 
 	const { onClose } = $props<{ onClose: () => void }>();
 
-	const HIDE_OFFBUDGET_KEY = "spending-calendar-hide-offbudget";
 	const ARROW_STEPS: Record<string, number> = {
 		ArrowLeft: -1,
 		ArrowRight: 1,
@@ -57,7 +55,13 @@
 	let loadSeq = 0;
 	let navDir = $state(0);
 	let gridVersion = $state(0);
-	let hideOffBudget = $state(true);
+	let filters = $state<Filters | null>(null);
+	// What the filters list, refreshed from the loader after each load.
+	let lists = $state({
+		accounts: loader.accounts(),
+		categories: loader.categories(),
+		categoryGroups: loader.categoryGroups(),
+	});
 	let selectedIso = $state<string | null>(null);
 	let focusIso = $state<string | null>(null);
 	let pendingFocus: { open: boolean } | null = null;
@@ -65,8 +69,6 @@
 	let gridEl = $state<HTMLElement | null>(null);
 	let pickerOpen = $state(false);
 	let filtersOpen = $state(false);
-	let filterButton = $state<HTMLElement | null>(null);
-	let filterMenu = $state<HTMLElement | null>(null);
 	let detailInstance: ReturnType<typeof mount> | null = null;
 	let detailContainer: HTMLElement | null = null;
 	let headerInstance: ReturnType<typeof mount> | null = null;
@@ -106,20 +108,29 @@
 		setMonth(now.getFullYear(), now.getMonth());
 	}
 
-	async function loadMonth() {
+	/** A refilter keeps the month on screen, so its cells update in place instead of sliding in. */
+	async function loadMonth({ refilter = false } = {}) {
+		if (!filters) return;
 		const seq = ++loadSeq;
-		loading = true;
+		loading = !refilter;
 		try {
 			const prefs = await loadDatePrefs();
 			const grid = await loader.load(year, month, {
-				hideOffBudget,
+				filters,
 				firstDayOfWeek: prefs.firstDayOfWeek,
 			});
 			// A slower, older request must not overwrite the month paged to since.
 			if (seq !== loadSeq) return;
 			firstDayOfWeek = prefs.firstDayOfWeek;
+			lists = {
+				accounts: loader.accounts(),
+				categories: loader.categories(),
+				categoryGroups: loader.categoryGroups(),
+			};
 			days = grid;
-			gridVersion++;
+			if (!refilter) {
+				gridVersion++;
+			}
 			if (pendingFocus && focusIso) {
 				const { open } = pendingFocus;
 				pendingFocus = null;
@@ -136,12 +147,12 @@
 		}
 	}
 
-	async function setHideOffBudget(hidden: boolean) {
-		hideOffBudget = hidden;
-		navDir = 0;
+	function setFilters(patch: Partial<Filters>) {
+		if (!filters) return;
+		filters = { ...filters, ...patch };
 		closeDayPanel();
-		await setValue(HIDE_OFFBUDGET_KEY, hidden);
-		loadMonth();
+		loadMonth({ refilter: true });
+		saveFilters($state.snapshot(filters));
 	}
 
 	function focusCell(iso: string, open: boolean) {
@@ -263,19 +274,11 @@
 		selectedIso = null;
 	}
 
-	$effect(() => {
-		if (!filtersOpen || !filterMenu || !filterButton) return;
-		positionPopover(filterMenu, filterButton, { align: "right" });
-		return onOutsideClick([filterMenu, filterButton], () => (filtersOpen = false));
-	});
-
 	onMount(() => {
-		Promise.all([loadCurrency(), loadCategoryColors(), getValue(HIDE_OFFBUDGET_KEY, true)]).then(
-			([, , off]) => {
-				hideOffBudget = off;
-				loadMonth();
-			},
-		);
+		Promise.all([loadCurrency(), loadCategoryColors(), loadFilters()]).then(([, , saved]) => {
+			filters = saved;
+			loadMonth();
+		});
 
 		function onKey(e: KeyboardEvent) {
 			if (e.key === "Escape") {
@@ -323,28 +326,9 @@
 			{/if}
 		</div>
 		<div class="cal-header__right">
-			<button
-				type="button"
-				class="abt-btn abt-btn--sm abt-btn--icon abt-btn--ghost"
-				class:is-active={filtersOpen}
-				title="Filters"
-				aria-label="Filters"
-				aria-expanded={filtersOpen}
-				bind:this={filterButton}
-				onclick={() => (filtersOpen = !filtersOpen)}
-			>
-				<svg
-					width="16"
-					height="16"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg
-				>
-			</button>
+			{#if filters}
+				<CalendarFilters bind:open={filtersOpen} {filters} {...lists} onChange={setFilters} />
+			{/if}
 			<span class="cal-header__sep"></span>
 			<button
 				class="abt-btn abt-btn--sm abt-btn--icon abt-btn--ghost"
@@ -417,19 +401,6 @@
 			</div>
 		{/key}
 	{/if}
-
-	{#if filtersOpen}
-		<div class="cal-filters" bind:this={filterMenu}>
-			<div class="cal-filters__title">Show</div>
-			<label class="cal-filters__row">
-				<span>Off-budget accounts</span>
-				<Switch
-					checked={!hideOffBudget}
-					onCheckedChange={(checked) => setHideOffBudget(!checked)}
-				/>
-			</label>
-		</div>
-	{/if}
 </div>
 
 <style>
@@ -471,39 +442,11 @@
 		gap: 6px;
 	}
 
-	.is-active {
-		background: var(--abt-fill-hover);
-		color: var(--color-pageText);
-	}
-
 	.cal-header__sep {
 		width: 1px;
 		height: 18px;
 		margin: 0 2px;
 		background: var(--abt-line);
-	}
-
-	.cal-filters__title {
-		padding: 5px 8px 4px;
-		font-size: var(--abt-text-xs);
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-		color: var(--color-pageTextSubdued);
-	}
-
-	.cal-filters__row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-		padding: 5px 8px;
-		border-radius: var(--abt-radius-sm);
-		font-size: var(--abt-text-md);
-		cursor: pointer;
-	}
-
-	.cal-filters__row:hover {
-		background: var(--abt-fill-hover);
 	}
 
 	.cal-grid {
@@ -537,16 +480,5 @@
 		backdrop-filter: blur(6px);
 		z-index: 1;
 		margin-bottom: 1px;
-	}
-
-	.cal-filters {
-		position: fixed;
-		z-index: 9999;
-		min-width: 200px;
-		padding: 4px;
-		border: 1px solid var(--color-tableBorder);
-		border-radius: var(--abt-radius);
-		background: var(--color-tooltipBackground, var(--color-pageBackground));
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 	}
 </style>

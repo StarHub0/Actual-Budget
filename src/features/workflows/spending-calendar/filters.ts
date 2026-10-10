@@ -1,0 +1,31 @@
+import { getValue, setValue } from "@lib/utilities/store";
+
+export type Flow = "all" | "spending" | "income";
+
+export interface CalendarFilters {
+	flow: Flow;
+	showScheduled: boolean;
+	hideOffBudget: boolean;
+	/** Hidden rather than shown ids, so accounts and categories added later show by default. */
+	hiddenAccounts: string[];
+	hiddenCategories: string[];
+}
+
+/** What "Clear all" restores; off-budget accounts stay as chosen, since that's a view preference. */
+export const CLEARED: Pick<
+	CalendarFilters,
+	"flow" | "showScheduled" | "hiddenAccounts" | "hiddenCategories"
+> = { flow: "all", showScheduled: true, hiddenAccounts: [], hiddenCategories: [] };
+
+const FILTERS_KEY = "spending-calendar-filters";
+const LEGACY_OFFBUDGET_KEY = "spending-calendar-hide-offbudget";
+
+export async function loadFilters(): Promise<CalendarFilters> {
+	const hideOffBudget = await getValue(LEGACY_OFFBUDGET_KEY, true);
+	const saved = await getValue<Partial<CalendarFilters>>(FILTERS_KEY, {});
+	return { ...CLEARED, hideOffBudget, ...saved };
+}
+
+export function saveFilters(filters: CalendarFilters): Promise<void> {
+	return setValue(FILTERS_KEY, filters);
+}
