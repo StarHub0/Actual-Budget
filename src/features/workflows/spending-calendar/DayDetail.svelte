@@ -46,13 +46,16 @@
 </script>
 
 {#snippet txDetails(tx: DayTransaction, showCategory: boolean)}
-	{#if (showCategory && tx.categoryName) || tx.accountName}
+	{#if (showCategory && tx.categoryName) || tx.accountName || tx.outsideBalance}
 		<div class="dd__tx-meta">
 			{#if showCategory && tx.categoryName}
 				<span style="color: {catColor(tx.categoryId)}">{tx.categoryName}</span>
 			{/if}
 			{#if tx.accountName}
 				<span>{tx.accountName}</span>
+			{/if}
+			{#if tx.outsideBalance}
+				<span title="Pick a single account to count it">No account, not in balance</span>
 			{/if}
 		</div>
 	{/if}

@@ -8,6 +8,7 @@ import type {
 } from "@lib/types/actual-schema";
 import { query, send } from "@lib/utilities/actual-api";
 import { isoDate } from "@lib/utilities/months";
+import { dailyBalances, projectSchedule, scheduleEffect } from "./balance";
 import type { CalendarFilters } from "./filters";
 import type { DayData, DayTransaction } from "./types";
 
@@ -278,6 +279,10 @@ export function createMonthLoader() {
 		);
 
 		const todayIso = isoDate(new Date());
+		// Only accounts the filter lists, so unticking them all leaves nothing behind (closed ones).
+		const selected = new Set(
+			accountList.filter((a) => !a.closed && !isHidden(a.id)).map((a) => a.id),
+		);
 		const occurrences = new Map<string, Set<string>>();
 		function addOccurrence(id: string, date: string) {
 			const dates = occurrences.get(id) ?? new Set<string>();
@@ -298,8 +303,8 @@ export function createMonthLoader() {
 		// current one onward needs the recurrence expanded to find the rest. The
 		// expansion starts at today, so past days never gain projected entries.
 		const monthsAhead = monthsFromNow(year, month);
+		const count = Math.min((monthsAhead + 1) * 31 + 1, 400);
 		if (monthsAhead >= 0) {
-			const count = Math.min((monthsAhead + 1) * 31 + 1, 400);
 			await Promise.all(
 				visibleSchedules.map(async (s) => {
 					// A one-off schedule stores a plain date, not a recurrence to expand.
@@ -359,11 +364,43 @@ export function createMonthLoader() {
 					accountName: (s._account && accountNames.get(s._account)) || "",
 					notes: "",
 					...(date < todayIso ? { missed: true } : { upcoming: true }),
+					...(filters.showBalance &&
+						!s._account &&
+						selected.size !== 1 &&
+						date >= todayIso && { outsideBalance: true }),
 				});
 			}
 		}
 
-		return buildGrid(year, month, byDay, todayIso, firstDayOfWeek);
+		let balances: Map<number, number> | null = null;
+		if (filters.showBalance && selected.size) {
+			const projected =
+				monthsAhead >= 0
+					? await Promise.all(
+							schedules
+								.filter((s) => !s.completed && !s.tombstone)
+								.map(async (s) => {
+									const transferAcct = (s._payee && payeeTransferAcct.get(s._payee)) || null;
+									const effect = scheduleEffect(s, selected, transferAcct);
+									if (!effect) {
+										return [];
+									}
+									const dates =
+										s._date && typeof s._date !== "string" ? await loadUpcomingDates(s, count) : [];
+									return projectSchedule(s, dates, effect, todayIso, endDate);
+								}),
+						)
+					: [];
+			balances = await dailyBalances({
+				accounts: selected,
+				startDate,
+				daysInMonth,
+				transactions,
+				projected: projected.flat(),
+			});
+		}
+
+		return buildGrid(year, month, byDay, todayIso, firstDayOfWeek, balances);
 	}
 
 	return {
@@ -386,6 +423,7 @@ export function buildGrid(
 	byDay: Map<number, DayTransaction[]>,
 	todayIso: string,
 	firstDayOfWeek = 0,
+	balances: Map<number, number> | null = null,
 ): DayData[] {
 	const monthPrefix = `${year}-${String(month + 1).padStart(2, "0")}-`;
 	const leading = (new Date(year, month, 1).getDay() - firstDayOfWeek + 7) % 7;
@@ -411,6 +449,8 @@ export function buildGrid(
 			total,
 			spent,
 			transactions: txs,
+			balance: balances?.get(d),
+			balanceFlat: d > 1 && iso !== todayIso && balances?.get(d) === balances?.get(d - 1),
 			hasMissed: txs.some((t) => t.missed),
 			isToday: iso === todayIso,
 			isFuture: iso > todayIso,

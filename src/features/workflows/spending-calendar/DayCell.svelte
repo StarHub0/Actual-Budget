@@ -116,6 +116,17 @@
 			{/each}
 		</div>
 	{/if}
+
+	{#if day.balance !== undefined && day.isCurrentMonth}
+		<div
+			class="cal-cell__balance abt-privacy-number"
+			class:is-neg={day.balance < 0}
+			class:is-flat={day.balanceFlat}
+			title="Balance at the end of the day{day.isFuture ? ', with scheduled bills' : ''}"
+		>
+			{fmtMoney(day.balance)}
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -328,6 +339,28 @@
 		gap: 1px;
 		margin-top: auto;
 		padding-top: 4px;
+	}
+
+	.cal-cell__balance {
+		margin-top: auto;
+		padding-top: 4px;
+		font-size: var(--abt-text-sm);
+		font-variant-numeric: tabular-nums;
+		color: var(--abt-muted);
+		text-align: right;
+	}
+
+	.cal-cell__bars + .cal-cell__balance {
+		margin-top: 0;
+	}
+
+	.cal-cell__balance.is-flat {
+		color: var(--abt-subtle);
+	}
+
+	.cal-cell__balance.is-neg {
+		color: var(--color-errorText);
+		font-weight: 600;
 	}
 
 	.cal-bar {

@@ -156,6 +156,13 @@
 				onCheckedChange={(checked) => onChange({ hideOffBudget: !checked })}
 			/>
 		</label>
+		<label class="cf__toggle" title="Each day's closing balance across the accounts shown">
+			<span>Daily balance</span>
+			<Switch
+				checked={filters.showBalance}
+				onCheckedChange={(showBalance) => onChange({ showBalance })}
+			/>
+		</label>
 		<div class="cf__tabs">
 			<Tabs
 				tabs={[
