@@ -3,6 +3,7 @@
 	import Section from "@lib/components/panel/Section.svelte";
 	import { getCategoryColor } from "@lib/utilities/category-colors";
 	import { fmtMoney } from "@lib/utilities/currency";
+	import { editSchedule } from "./schedules";
 	import type { DayTransaction } from "./types";
 
 	const {
@@ -46,7 +47,7 @@
 </script>
 
 {#snippet txDetails(tx: DayTransaction, showCategory: boolean)}
-	{#if (showCategory && tx.categoryName) || tx.accountName || tx.outsideBalance}
+	{#if (showCategory && tx.categoryName) || tx.accountName || tx.outsideBalance || tx.scheduleId}
 		<div class="dd__tx-meta">
 			{#if showCategory && tx.categoryName}
 				<span style="color: {catColor(tx.categoryId)}">{tx.categoryName}</span>
@@ -56,6 +57,11 @@
 			{/if}
 			{#if tx.outsideBalance}
 				<span title="Pick a single account to count it">No account, not in balance</span>
+			{/if}
+			{#if tx.scheduleId}
+				<button type="button" class="dd__edit" onclick={() => editSchedule(tx.scheduleId!)}
+					>Edit schedule</button
+				>
 			{/if}
 		</div>
 	{/if}
@@ -140,6 +146,20 @@
 		gap: 6px;
 		font-size: var(--abt-text-sm);
 		color: var(--color-pageTextSubdued);
+	}
+
+	.dd__edit {
+		margin-left: auto;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--abt-accent-text);
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.dd__edit:hover {
+		text-decoration: underline;
 	}
 
 	.dd__tx-notes {

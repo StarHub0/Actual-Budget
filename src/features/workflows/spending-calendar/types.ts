@@ -6,6 +6,8 @@ export interface DayTransaction {
 	accountName: string;
 	notes: string;
 	upcoming?: boolean;
+	/** The schedule an upcoming or missed bill comes from. */
+	scheduleId?: string;
 	/** A bill with no account, which the daily balance can't place. */
 	outsideBalance?: boolean;
 	missed?: boolean;

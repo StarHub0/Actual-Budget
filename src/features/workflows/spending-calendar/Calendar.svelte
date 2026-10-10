@@ -15,6 +15,7 @@
 	import { cubicOut } from "svelte/easing";
 	import { fly } from "svelte/transition";
 	import CalendarFilters from "./CalendarFilters.svelte";
+	import { SCHEDULE_EDITOR } from "./schedules";
 	import { loadFilters, saveFilters, type CalendarFilters as Filters } from "./filters";
 	import CalendarSkeleton from "./CalendarSkeleton.svelte";
 	import DayCell from "./DayCell.svelte";
@@ -128,6 +129,15 @@
 			days = grid;
 			if (!refilter) {
 				gridVersion++;
+			}
+			// Keeps an open day panel on the same day, showing what changed.
+			if (refilter && selectedIso) {
+				const day = grid.find((d) => d.isCurrentMonth && d.iso === selectedIso);
+				if (day && hasTransactions(day)) {
+					openDayPanel(day);
+				} else {
+					closeDayPanel();
+				}
 			}
 			if (pendingFocus && focusIso) {
 				const { open } = pendingFocus;
@@ -288,8 +298,16 @@
 		}
 		window.addEventListener("keydown", onKey);
 		// The panel's own close button doesn't notify us, so follow its presence instead.
+		// A schedule edited in Actual's editor shows once the editor closes.
+		let editorOpen = false;
 		const unwatch = watchDom(() => {
 			if (selectedIso && !sidepanel.isOpen()) selectedIso = null;
+			const open = !!document.querySelector(SCHEDULE_EDITOR);
+			if (editorOpen && !open) {
+				loader.invalidate();
+				loadMonth({ refilter: true });
+			}
+			editorOpen = open;
 		});
 		return () => {
 			unwatch();

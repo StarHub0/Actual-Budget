@@ -363,6 +363,7 @@ export function createMonthLoader() {
 					categoryName: "",
 					accountName: (s._account && accountNames.get(s._account)) || "",
 					notes: "",
+					scheduleId: s.id,
 					...(date < todayIso ? { missed: true } : { upcoming: true }),
 					...(filters.showBalance &&
 						!s._account &&
@@ -409,6 +410,11 @@ export function createMonthLoader() {
 		incomeCategoryIds,
 		accounts: () => accountList,
 		categories: () => categoryList,
+		/** Forgets schedule expansions and payees, after an edit may have changed either. */
+		invalidate: () => {
+			upcomingDates.clear();
+			payeeNames = new Map();
+		},
 		categoryGroups: () => groupList,
 	};
 }
