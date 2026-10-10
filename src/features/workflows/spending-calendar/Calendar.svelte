@@ -475,9 +475,8 @@
 		padding: 10px 0;
 		position: sticky;
 		top: 0;
-		/* Sticky over scrolling cells, so mostly opaque; the blur keeps the pattern from reading as a seam. */
-		background: color-mix(in srgb, var(--color-pageBackground, #1a1b26) 85%, transparent);
-		backdrop-filter: blur(6px);
+		/* Sticky over scrolling cells, so opaque. */
+		background: var(--color-pageBackground);
 		z-index: 1;
 		margin-bottom: 1px;
 	}

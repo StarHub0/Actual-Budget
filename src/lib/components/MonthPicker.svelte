@@ -204,7 +204,7 @@
 		margin: 0 0 0 -8px;
 		padding: 2px 8px;
 		border: none;
-		border-radius: var(--abt-radius-sm);
+		border-radius: var(--abt-radius);
 		background: none;
 		color: inherit;
 		font: inherit;
