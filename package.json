@@ -20,7 +20,7 @@
 		"test:coverage": "node --experimental-vm-modules --test scripts/next-month-coverage.test.mjs",
 		"test:lifecycle": "node --experimental-vm-modules --test scripts/template-plan-lifecycle.test.mjs",
 		"lint": "eslint .",
-		"format": "prettier --write .",
+		"format": "eslint --fix . && prettier --write .",
 		"format:check": "prettier --check .",
 		"generate:features-manifest": "node scripts/generate-features-manifest.mjs",
 		"generate:large-budget": "node scripts/generate-large-budget.mjs",

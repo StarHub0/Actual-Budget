@@ -50,6 +50,7 @@ export default ts.config(
 			"@typescript-eslint/no-explicit-any": "off",
 			"no-undef": "off",
 			"svelte/require-each-key": "error",
+			curly: ["error", "all"],
 			// Flags throwaway Map/Set/Date locals; this codebase copies and reassigns state instead of mutating it.
 			"svelte/prefer-svelte-reactivity": "off",
 			// These comments suppress Svelte compiler/svelte-check a11y diagnostics
