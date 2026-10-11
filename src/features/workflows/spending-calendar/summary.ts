@@ -71,7 +71,7 @@ export function groupByPayee(txs: DayTransaction[]): GroupedTransaction[] {
 export function spendingByCategory(txs: DayTransaction[]): [string, number][] {
 	const acc: Record<string, number> = {};
 	for (const t of txs) {
-		if (!t.missed && t.amount < 0) {
+		if (!t.missed && !t.transfer && t.amount < 0) {
 			acc[t.categoryId] = (acc[t.categoryId] || 0) - t.amount;
 		}
 	}

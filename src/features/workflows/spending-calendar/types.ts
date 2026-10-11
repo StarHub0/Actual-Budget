@@ -11,6 +11,8 @@ export interface DayTransaction {
 	/** A bill with no account, which the daily balance can't place. */
 	outsideBalance?: boolean;
 	missed?: boolean;
+	/** Between on-budget (or off-budget) accounts, one of them hidden: not spending. */
+	transfer?: boolean;
 }
 
 export interface DayData {

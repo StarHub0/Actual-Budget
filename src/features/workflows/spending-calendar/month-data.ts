@@ -210,45 +210,29 @@ export function createMonthLoader() {
 			accountList = accounts.filter((a) => !a.tombstone);
 		}
 
-		// A transfer between two accounts with the same on/off-budget status is
-		// just money moving between buckets (no real spending), so it's excluded
-		// entirely; a transfer crossing the on/off-budget boundary acts like a
-		// real expense/income and is kept.
+		// A transfer between two accounts with the same on/off-budget status is just money
+		// moving between buckets. With both ends shown it nets out and is left off; with one
+		// hidden, it's what moved the shown account's balance, so it's listed (as no spending).
+		// One crossing the on/off-budget boundary acts like real spending or income.
 		const transactionById = new Map(transactions.map((t) => [t.id, t]));
-		function isPureTransfer(t: Transaction): boolean {
-			if (!t.transfer_id) {
-				return false;
-			}
-			const other = transactionById.get(t.transfer_id);
-			if (!other) {
-				return false;
-			}
-			const fromOff = accountOffbudget.get(t.account);
-			const toOff = accountOffbudget.get(other.account);
-			if (fromOff == null || toOff == null) {
-				return false;
-			}
-			return fromOff === toOff;
+		function pureTransferAccount(t: Transaction): string | null {
+			const other = t.transfer_id ? transactionById.get(t.transfer_id) : undefined;
+			return other && isPure(t.account, other.account) ? other.account : null;
 		}
-		function isPureTransferSchedule(s: Schedule): boolean {
-			if (!s._payee) {
-				return false;
-			}
-			const transferAcct = payeeTransferAcct.get(s._payee);
-			if (!transferAcct) {
-				return false;
-			}
-			const fromOff = accountOffbudget.get(s._account || "");
-			const toOff = accountOffbudget.get(transferAcct);
-			if (fromOff == null || toOff == null) {
-				return false;
-			}
-			return fromOff === toOff;
+		function pureTransferScheduleAccount(s: Schedule): string | null {
+			const other = s._payee ? payeeTransferAcct.get(s._payee) : null;
+			return other && isPure(s._account || "", other) ? other : null;
+		}
+		function isPure(from: string, to: string): boolean {
+			const fromOff = accountOffbudget.get(from);
+			const toOff = accountOffbudget.get(to);
+			return fromOff != null && toOff != null && fromOff === toOff;
 		}
 
 		const byDay = new Map<number, DayTransaction[]>();
 		for (const t of transactions) {
-			if (!t.date || isPureTransfer(t)) {
+			const transferTo = pureTransferAccount(t);
+			if (!t.date || (transferTo && !isHidden(transferTo))) {
 				continue;
 			}
 			if (
@@ -269,17 +253,20 @@ export function createMonthLoader() {
 				categoryName: (t.category && categoryNames.get(t.category)) || "",
 				accountName: accountNames.get(t.account) || "",
 				notes: t.notes || "",
+				...(transferTo && { transfer: true }),
 			});
 		}
 
-		const visibleSchedules = schedules.filter(
-			(s) =>
+		const visibleSchedules = schedules.filter((s) => {
+			const transferTo = pureTransferScheduleAccount(s);
+			return (
 				!s.completed &&
 				!s.tombstone &&
-				!isPureTransferSchedule(s) &&
+				!(transferTo && !isHidden(transferTo)) &&
 				!isHidden(s._account) &&
-				inFlow(parseScheduleAmount(s._amount)),
-		);
+				inFlow(parseScheduleAmount(s._amount))
+			);
+		});
 
 		const todayIso = isoDate(new Date());
 		// Only accounts the filter lists, so unticking them all leaves nothing behind (closed ones).
@@ -367,6 +354,7 @@ export function createMonthLoader() {
 					accountName: (s._account && accountNames.get(s._account)) || "",
 					notes: "",
 					scheduleId: s.id,
+					...(pureTransferScheduleAccount(s) && { transfer: true }),
 					...(date < todayIso ? { missed: true } : { upcoming: true }),
 					...(filters.showBalance &&
 						!s._account &&
@@ -460,7 +448,7 @@ export function buildGrid(
 		const txs = byDay.get(d) || [];
 		const total = txs.reduce((sum, t) => sum + (t.missed ? 0 : t.amount), 0);
 		const spent = txs.reduce(
-			(sum, t) => sum + (!t.missed && !t.upcoming && t.amount < 0 ? -t.amount : 0),
+			(sum, t) => sum + (!t.missed && !t.upcoming && !t.transfer && t.amount < 0 ? -t.amount : 0),
 			0,
 		);
 		const iso = `${monthPrefix}${String(d).padStart(2, "0")}`;

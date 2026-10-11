@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ArrowLeftRight } from "@lucide/svelte";
 	import Row from "@lib/components/panel/Row.svelte";
 	import Section from "@lib/components/panel/Section.svelte";
 	import { getCategoryColor } from "@lib/utilities/category-colors";
@@ -17,6 +18,14 @@
 		return fmtMoney(cents);
 	}
 
+	// A transfer's payee is the other account; both ends, in the direction the money went.
+	function payeeOf(tx: DayTransaction): string {
+		if (!tx.transfer) {
+			return tx.payee;
+		}
+		return tx.amount < 0 ? `${tx.accountName} → ${tx.payee}` : `${tx.payee} → ${tx.accountName}`;
+	}
+
 	function catColor(id: string): string {
 		return getCategoryColor(id);
 	}
@@ -24,7 +33,7 @@
 	const categoryBreakdown = $derived.by(() => {
 		const map = new Map<string, { name: string; amount: number; id: string }>();
 		for (const t of transactions) {
-			if (t.amount >= 0 || t.upcoming || t.missed) {
+			if (t.amount >= 0 || t.upcoming || t.missed || t.transfer) {
 				continue;
 			}
 			const key = t.categoryId || "__uncategorized";
@@ -49,12 +58,12 @@
 </script>
 
 {#snippet txDetails(tx: DayTransaction, showCategory: boolean)}
-	{#if (showCategory && tx.categoryName) || tx.accountName || tx.outsideBalance || tx.scheduleId}
+	{#if (showCategory && tx.categoryName) || (tx.accountName && !tx.transfer) || tx.outsideBalance || tx.scheduleId}
 		<div class="dd__tx-meta">
 			{#if showCategory && tx.categoryName}
 				<span style="color: {catColor(tx.categoryId)}">{tx.categoryName}</span>
 			{/if}
-			{#if tx.accountName}
+			{#if tx.accountName && !tx.transfer}
 				<span>{tx.accountName}</span>
 			{/if}
 			{#if tx.outsideBalance}
@@ -91,15 +100,19 @@
 		<Section title="Transactions" count={actualTxs.length}>
 			{#each actualTxs as tx, i (i)}
 				<Row
-					name={tx.payee}
+					name={payeeOf(tx)}
 					sensitive
 					value={fmt(tx.amount)}
 					tone={tx.amount < 0 ? "negative" : tx.amount > 0 ? "positive" : undefined}
 				>
 					{#snippet leading()}
-						{#if tx.categoryId}
-							<span class="dd__tx-dot" style="background: {catColor(tx.categoryId)}"></span>
-						{/if}
+						<span class="dd__tx-lead">
+							{#if tx.transfer}
+								<ArrowLeftRight size={12} aria-label="Transfer" />
+							{:else if tx.categoryId}
+								<span class="dd__tx-dot" style="background: {catColor(tx.categoryId)}"></span>
+							{/if}
+						</span>
 					{/snippet}
 					{@render txDetails(tx, true)}
 				</Row>
@@ -110,7 +123,7 @@
 	{#if missedTxs.length > 0}
 		<Section title="Missed" tone="error" count={missedTxs.length}>
 			{#each missedTxs as tx, i (i)}
-				<Row name={tx.payee} sensitive value={fmt(tx.amount)} tone="negative">
+				<Row name={payeeOf(tx)} sensitive value={fmt(tx.amount)} tone="negative">
 					{@render txDetails(tx, false)}
 				</Row>
 			{/each}
@@ -120,7 +133,7 @@
 	{#if upcomingTxs.length > 0}
 		<Section title="Upcoming" count={upcomingTxs.length}>
 			{#each upcomingTxs as tx, i (i)}
-				<Row name={tx.payee} sensitive dim value={fmt(tx.amount)} tone="negative">
+				<Row name={payeeOf(tx)} sensitive dim value={fmt(tx.amount)} tone="negative">
 					{@render txDetails(tx, false)}
 				</Row>
 			{/each}
@@ -145,8 +158,18 @@
 
 	.dd__tx-meta {
 		display: flex;
+		align-items: baseline;
 		gap: 6px;
 		font-size: var(--abt-text-sm);
+		color: var(--color-pageTextSubdued);
+	}
+
+	/* One width for the dot and the transfer icon, so every name starts in line. */
+	.dd__tx-lead {
+		display: grid;
+		place-items: center;
+		width: 12px;
+		flex-shrink: 0;
 		color: var(--color-pageTextSubdued);
 	}
 
