@@ -1,9 +1,11 @@
 import { defineSetting } from "@features/types";
-import TagStylingPreview from "./previews/TagStyling.svelte";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import TagStylingPreview from "./previews/TagStyling.svelte";
 
 const STORAGE_KEY = "tag-styling";
 const ATTR = "data-abt-tag";
+// Mobile draws a tag as a coloured span in the transaction list's rows, not a button.
+const MOBILE_TAG = '[role="option"] span[class]';
 
 const CSS = `
 	button[data-react-aria-pressable][data-abt-tag] {
@@ -26,6 +28,14 @@ const CSS = `
 		opacity: 0.45;
 		font-weight: 400;
 		margin-right: 1px;
+	}
+
+	span[data-abt-tag="mobile"] {
+		display: inline-block;
+		padding: 1px 7px !important;
+		border-radius: var(--abt-radius-sm) !important;
+		font-weight: 600 !important;
+		letter-spacing: 0.02em;
 	}
 
 	.react-aria-ListBoxItem[data-abt-tag] > div {
@@ -112,6 +122,24 @@ function scanTags() {
 			stale.push(btn);
 		}
 	}
+	// Mobile rows are recycled as the list scrolls, so their text is never rewritten (React would
+	// later write into a node it no longer owns); only the colours are set, and redone when the
+	// span's class changes with a new tag.
+	for (const span of document.querySelectorAll<HTMLElement>(MOBILE_TAG)) {
+		if (span.getAttribute(ATTR) === "mobile") {
+			if (needsColors(span)) {
+				stale.push(span);
+			}
+		} else if (
+			!span.hasAttribute(ATTR) &&
+			// The tag itself, not the notes line around it, whose text can start with it too.
+			span.childElementCount === 0 &&
+			span.textContent?.trim().startsWith("#")
+		) {
+			span.setAttribute(ATTR, "mobile");
+			stale.push(span);
+		}
+	}
 	for (const item of document.querySelectorAll<HTMLElement>(".react-aria-ListBoxItem")) {
 		const textEl = item.querySelector<HTMLElement>("div");
 		if (!textEl) {
@@ -140,7 +168,10 @@ function restoreHash(el: HTMLElement) {
 
 function cleanup() {
 	for (const el of document.querySelectorAll<HTMLElement>(`[${ATTR}]`)) {
-		if (el.tagName === "BUTTON") {
+		if (el.getAttribute(ATTR) === "mobile") {
+			el.style.removeProperty("background-color");
+			el.style.removeProperty("color");
+		} else if (el.tagName === "BUTTON") {
 			restoreHash(el);
 			el.style.removeProperty("background-color");
 			el.style.removeProperty("color");
@@ -167,6 +198,7 @@ export const tagStyling = defineSetting({
 		key: STORAGE_KEY,
 		defaultValue: true,
 	},
+	platform: "all",
 	css: () => CSS,
 	init: () => {
 		const unwatch = watchDom(scanTags);
