@@ -170,7 +170,7 @@
 		};
 	});
 
-	const sectionEls: Record<string, HTMLElement> = {};
+	const sectionEls = $state<Record<string, HTMLElement>>({});
 
 	let toolbarEl = $state<HTMLElement>();
 	let navEl = $state<HTMLElement>();
