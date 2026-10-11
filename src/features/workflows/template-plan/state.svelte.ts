@@ -1,4 +1,4 @@
-import type { BreakdownSummary, PriorityCache } from "@lib/utilities/template-plan/priority-plan";
+import type { BreakdownSummary, PriorityCache } from "@lib/template-plan/priority-plan";
 
 // ── Overview tab ──────────────────────────────────────────────────
 export interface MonthTrend {

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { getValue, setValue } from "@lib/utilities/store";
 	import ColorRow from "./ColorRow.svelte";
-	import { editorState, type ThemeOverrides } from "./editor-state.svelte";
-	import { setRootProperty } from "./theme-apply";
+	import { editorState, type ThemeOverrides } from "../editor-state.svelte";
+	import { setRootProperty } from "../theme-apply";
 
 	type ColorKeys = Record<string, string>;
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Icon from "@lib/components/Icon.svelte";
 	import { loadCurrentBudgetId } from "@lib/utilities/actual-api";
-	import type { IconName } from "@lib/icons";
+	import type { IconName } from "@lib/utilities/icons";
 	import { Check, ChevronLeft, Globe, Plus } from "lucide-svelte";
 	import { onMount } from "svelte";
 	import {

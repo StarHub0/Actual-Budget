@@ -5,7 +5,7 @@
 	import { applyGlobalCSS } from "@lib/utilities/dom";
 	import { onMount } from "svelte";
 	import ColorRow from "./ColorRow.svelte";
-	import { BUILTIN_CSS, setRootProperty, TOKENS_STYLE_ID } from "./theme-apply";
+	import { BUILTIN_CSS, setRootProperty, TOKENS_STYLE_ID } from "../theme-apply";
 
 	type Tab = "palette" | "css";
 

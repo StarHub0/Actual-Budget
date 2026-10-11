@@ -3,7 +3,7 @@ import { injectMainWorldScript } from "@lib/utilities/inject-main-world";
 
 /*
  * The Income Breakdown dashboard widget lives in a legacy script in Actual's own page world
- * (src/lib/main-world/legacy/income-breakdown.ts). It starts and stops on this attribute.
+ * (main-world.ts). It starts and stops on this attribute.
  */
 const ON_ATTR = "data-abt-income-breakdown";
 const CSS_ID = "abt-income-breakdown-css";

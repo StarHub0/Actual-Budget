@@ -1,7 +1,7 @@
 import { applySettingChange } from "@features/runtime";
 import type { CheckboxSetting } from "@features/types";
 import { categoryTemplateInsights } from "@features/workflows/category-template-insights";
-import { icon } from "@lib/icons";
+import { icon } from "@lib/utilities/icons";
 import { applyGlobalCSS } from "@lib/utilities/dom";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";

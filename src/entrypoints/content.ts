@@ -53,7 +53,7 @@ export default defineContentScript({
 				{ bootstrapSettings },
 				{ startSettingsSync },
 			] = await Promise.all([
-				import("@lib/ActualSettings.svelte"),
+				import("@lib/components/ActualSettings.svelte"),
 				import("@features/index"),
 				import("@lib/utilities/dom"),
 				import("svelte"),

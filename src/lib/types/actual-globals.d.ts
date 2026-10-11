@@ -1,7 +1,7 @@
 /**
  * Global window augmentations for Actual Budget's internal APIs.
  * These are only available in the main world (actual-api-bridge-main.ts
- * and src/lib/main-world/legacy/).
+ * and income-breakdown/main-world.ts).
  *
  * Do NOT use these directly in content scripts — use the typed bridge
  * functions in @lib/utilities/actual-api instead.

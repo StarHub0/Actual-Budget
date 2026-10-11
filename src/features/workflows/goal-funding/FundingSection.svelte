@@ -2,7 +2,7 @@
 	import { notify, send } from "@lib/utilities/actual-api";
 	import { fmtMoney } from "@lib/utilities/currency";
 	import { sheetToMonth } from "@lib/utilities/months";
-	import { formatMonthLabel } from "@lib/utilities/template-plan/actual-data";
+	import { formatMonthLabel } from "@lib/template-plan/actual-data";
 	import { loadGoalState, type GoalState } from "./goal-state";
 
 	const { sheet, categoryId, initial }: { sheet: string; categoryId: string; initial: GoalState } =

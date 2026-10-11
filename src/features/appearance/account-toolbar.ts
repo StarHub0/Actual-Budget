@@ -1,5 +1,5 @@
 import { defineSetting } from "@features/types";
-import { type IconName, iconMask } from "@lib/icons";
+import { type IconName, iconMask } from "@lib/utilities/icons";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { findAccountToolbar } from "@lib/utilities/native-ui";
 

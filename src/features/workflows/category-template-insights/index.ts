@@ -6,7 +6,7 @@ import {
 } from "@lib/utilities/budget-cells";
 import { rowCategoryId } from "@lib/utilities/budget-cells";
 import { loadCurrency } from "@lib/utilities/currency";
-import { getCurrentSheet } from "@lib/utilities/template-plan/actual-data";
+import { getCurrentSheet } from "@lib/template-plan/actual-data";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { positionPopover } from "@lib/utilities/popover";

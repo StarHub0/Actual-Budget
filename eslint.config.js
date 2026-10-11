@@ -60,7 +60,11 @@ export default ts.config(
 		},
 	},
 	{
-		files: ["src/lib/main-world/legacy/**", "src/entrypoints/actual-api-bridge-main.ts"],
+		files: [
+			"src/features/workflows/income-breakdown/main-world.ts",
+			"src/features/workflows/income-breakdown/dashboard-widget-utils.ts",
+			"src/entrypoints/actual-api-bridge-main.ts",
+		],
 		rules: {
 			// Untyped interop with Actual's own internal window globals ($q, $query,
 			// __actionsForMenu, ...) — @ts-nocheck is deliberate here, not debt.

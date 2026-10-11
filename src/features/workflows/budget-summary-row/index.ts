@@ -1,7 +1,7 @@
 import { markSheetsStale } from "@features/readability/category-progress/cells";
 import { defineSetting } from "@features/types";
 import { isCalendarOpen } from "@features/workflows/spending-calendar";
-import { iconMask } from "@lib/icons";
+import { iconMask } from "@lib/utilities/icons";
 import {
 	type BudgetTableChange,
 	collectChanges,

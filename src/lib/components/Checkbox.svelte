@@ -8,7 +8,7 @@
 	import PreviewToggle from "./PreviewToggle.svelte";
 	import Switch from "./Switch.svelte";
 	import WritesMark from "./WritesMark.svelte";
-	import type { IconName } from "../icons";
+	import type { IconName } from "../utilities/icons";
 
 	const {
 		labelText,

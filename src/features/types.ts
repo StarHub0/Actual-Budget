@@ -1,5 +1,5 @@
 import type { Component } from "svelte";
-import type { IconName } from "@lib/icons";
+import type { IconName } from "@lib/utilities/icons";
 
 export interface SettingContext {
 	key: string;

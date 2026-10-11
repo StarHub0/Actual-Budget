@@ -1,6 +1,6 @@
 <!-- ThemeEditorHeader.svelte -->
 <script lang="ts">
-	import { editorState } from "./editor-state.svelte";
+	import { editorState } from "../editor-state.svelte";
 
 	let { onReset, onExport }: { onReset: () => void; onExport: () => string } = $props();
 

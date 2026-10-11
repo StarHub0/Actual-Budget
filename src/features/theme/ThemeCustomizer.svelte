@@ -19,10 +19,10 @@
 		NATIVE_THEME_KEY,
 		type RemoteTheme,
 	} from "./theme-apply";
-	import ThemeColorEditor from "./ThemeColorEditor.svelte";
-	import ThemeCreator from "./ThemeCreator.svelte";
-	import ThemeCreatorHeader from "./ThemeCreatorHeader.svelte";
-	import ThemeEditorHeader from "./ThemeEditorHeader.svelte";
+	import ThemeColorEditor from "./editor/ThemeColorEditor.svelte";
+	import ThemeCreator from "./editor/ThemeCreator.svelte";
+	import ThemeCreatorHeader from "./editor/ThemeCreatorHeader.svelte";
+	import ThemeEditorHeader from "./editor/ThemeEditorHeader.svelte";
 	import {
 		deleteUserTheme,
 		generateThemeId,

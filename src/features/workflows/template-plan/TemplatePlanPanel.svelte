@@ -2,7 +2,7 @@
 	import { sidepanel } from "@features/core/side-panel";
 	import Tabs from "@lib/components/Tabs.svelte";
 	import { fmtMoney } from "@lib/utilities/currency";
-	import { monthLabelForHeader } from "@lib/utilities/template-plan/actual-data";
+	import { monthLabelForHeader } from "@lib/template-plan/actual-data";
 	import { setValue } from "@lib/utilities/store";
 	import BreakdownTab from "./BreakdownTab.svelte";
 	import { TAB_STORAGE_KEY } from "./constants";

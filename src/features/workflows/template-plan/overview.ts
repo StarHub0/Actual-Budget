@@ -1,6 +1,6 @@
 import type { Schedule } from "@lib/types/actual-schema";
 import { addMonths, isoDate } from "@lib/utilities/months";
-import type { Category } from "@lib/utilities/template-plan/priority-plan";
+import type { Category } from "@lib/template-plan/priority-plan";
 import type { MonthTrend, OverviewCategoryRow, OverviewSchedule } from "./state.svelte";
 
 type Cells = Map<string, number>;

@@ -133,7 +133,7 @@ ${withComponent ? `\tcomponent: ${pascalName},\n` : ""}\tcontext: {
 	return `${componentImport}import { defineSetting } from "@features/types";
 
 export const ${camelName} = defineSetting({
-	// TODO: pick a real icon from src/lib/icons.ts
+	// TODO: pick a real icon from src/lib/utilities/icons.ts
 	type: "${type}",
 	label: "${label}",
 	description: "",

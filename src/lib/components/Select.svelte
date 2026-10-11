@@ -6,7 +6,7 @@
 	import Icon from "./Icon.svelte";
 	import PreviewToggle from "./PreviewToggle.svelte";
 	import WritesMark from "./WritesMark.svelte";
-	import type { IconName } from "../icons";
+	import type { IconName } from "../utilities/icons";
 
 	const { labelText, options, setting, icon } = $props<{
 		labelText: string;

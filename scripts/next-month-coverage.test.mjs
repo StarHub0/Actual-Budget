@@ -4,7 +4,7 @@ import { stripTypeScriptTypes } from "node:module";
 import { test } from "node:test";
 import { SourceTextModule, SyntheticModule } from "node:vm";
 
-const sourceRoot = new URL("../src/lib/utilities/template-plan/", import.meta.url);
+const sourceRoot = new URL("../src/lib/template-plan/", import.meta.url);
 
 // Exercise the production preview with a fake Actual bridge and real template filtering.
 async function preview(rows) {

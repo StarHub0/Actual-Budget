@@ -1,6 +1,6 @@
 import { isPanelPersistedOpen, sidepanel, wasPanelPersistedOpen } from "@features/core/side-panel";
 import { defineSetting } from "@features/types";
-import { icon } from "@lib/icons";
+import { icon } from "@lib/utilities/icons";
 import type { Schedule } from "@lib/types/actual-schema";
 import { loadCurrentBudgetId, notify, query, send } from "@lib/utilities/actual-api";
 import {
@@ -27,9 +27,9 @@ import {
 	startSnapshotAllVisible,
 	waitForQuiescence,
 	type SnapshotDescriptor,
-} from "@lib/utilities/template-plan/actual-data";
-import { previewMonthTemplateTotal } from "@lib/utilities/template-plan/next-month-coverage";
-import { createPriorityPlanner } from "@lib/utilities/template-plan/priority-plan";
+} from "@lib/template-plan/actual-data";
+import { previewMonthTemplateTotal } from "@lib/template-plan/next-month-coverage";
+import { createPriorityPlanner } from "@lib/template-plan/priority-plan";
 import {
 	BREAKDOWN_STORAGE_KEY,
 	PRIO_COLLAPSE_STORAGE_KEY,

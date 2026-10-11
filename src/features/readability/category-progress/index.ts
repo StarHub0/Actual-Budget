@@ -1,7 +1,7 @@
 import { defineSetting } from "@features/types";
 import CategoryProgressPreview from "../previews/CategoryProgress.svelte";
 import { goalFunding } from "@features/workflows/goal-funding";
-import { icon } from "@lib/icons";
+import { icon } from "@lib/utilities/icons";
 import { readCell, watchBudgetTable } from "@lib/utilities/budget-cells";
 import { loadCurrency } from "@lib/utilities/currency";
 import { addMonths, monthToSheet, sheetToMonth } from "@lib/utilities/months";

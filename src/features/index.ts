@@ -41,7 +41,7 @@ import { showDailyAvailable } from "./readability/show-daily-available";
 import { tagStyling } from "./readability/tag-styling";
 import { headerBorder } from "./readability/top-nav-border";
 import { themeSelector } from "./theme/theme";
-import { themeLoader } from "./theme/themeLoader";
+import { themeLoader } from "./theme/theme-loader";
 import type { CoreSetting, Setting } from "./types";
 import { budgetCategoryFilter } from "./workflows/budget-category-filter";
 import { budgetMonthHeader } from "./workflows/budget-month-header";

@@ -5,8 +5,8 @@
 	import Section from "@lib/components/panel/Section.svelte";
 	import { fmtMoney } from "@lib/utilities/currency";
 	import { setValue } from "@lib/utilities/store";
-	import { priorityKey, priorityLabel } from "@lib/utilities/template-plan/constants";
-	import { statusFor, type SummaryTier } from "@lib/utilities/template-plan/priority-plan";
+	import { priorityKey, priorityLabel } from "@lib/template-plan/constants";
+	import { statusFor, type SummaryTier } from "@lib/template-plan/priority-plan";
 	import { PRIO_COLLAPSE_STORAGE_KEY } from "./constants";
 	import { statusBadge, statusTone } from "./status";
 	import { templatePlanState } from "./state.svelte";

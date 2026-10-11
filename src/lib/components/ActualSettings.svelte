@@ -7,13 +7,13 @@
 		sectionItems,
 		settingRequires,
 		type PageSetting,
-	} from "../features";
-	import { pushStoredSettings } from "../features/settings-sync";
-	import Icon from "./components/Icon.svelte";
-	import SettingRow from "./components/SettingRow.svelte";
-	import { watchDom } from "./utilities/dom-watcher";
-	import { isoDate } from "./utilities/months";
-	import { DESKTOP_QUERY } from "./utilities/pages";
+	} from "../../features";
+	import { pushStoredSettings } from "../../features/settings-sync";
+	import Icon from "./Icon.svelte";
+	import SettingRow from "./SettingRow.svelte";
+	import { watchDom } from "../utilities/dom-watcher";
+	import { isoDate } from "../utilities/months";
+	import { DESKTOP_QUERY } from "../utilities/pages";
 
 	const REPO_URL = "https://github.com/aelxxs/actual-budget-tweaks";
 	const version = browser.runtime.getManifest().version;
