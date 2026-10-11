@@ -14,17 +14,18 @@
 Every feature is one call to `defineSetting()` (see `src/features/types.ts`), exported as a named const and listed in `src/features/index.ts`. Scaffold one:
 
 ```
-pnpm new-feature <category> <kebab-name> "<Label>" <checkbox|select|custom> [--component]
+pnpm new-feature <category> <kebab-name> "<Label>" <checkbox|select|custom> [--section "<Title>"] [--component]
 ```
 
-- `category` is `layout` / `readability` / `appearance` / `workflows` — whichever settings-panel section it belongs under.
+- `category` is `layout` / `readability` / `appearance` / `workflows` / `mobile` — the folder under `src/features/` it goes in.
+- `--section` is the settings-page section it's listed under (a `title` in `scriptSections`). It defaults to Mobile for mobile features and Experimental otherwise.
 - `--component` generates a folder + companion `.svelte` file, for a feature that needs its own component rather than a plain checkbox/select row.
 
 This creates the setting file and registers it in `src/features/index.ts` for you. From there, fill in `description`/`icon`, and implement `init`/`css`.
 
 ### Desktop and mobile
 
-Below 512px, Actual renders a separate mobile app with its own markup, so a setting declares where it runs with `platform`: `"desktop"` (the default), `"mobile"` or `"all"`. The runtime starts and stops each one as the window crosses that width, and scopes its `css` to match (`desktopOnly()` / `mobileOnly()` in `src/lib/utilities/pages.ts`). Mobile-only tweaks live in `src/features/mobile/` and are listed in the Mobile section of `src/features/index.ts`; `new-feature` doesn't scaffold them yet, so add them by hand.
+Below 512px, Actual renders a separate mobile app with its own markup, so a setting declares where it runs with `platform`: `"desktop"` (the default), `"mobile"` or `"all"`. The runtime starts and stops each one as the window crosses that width, and scopes its `css` to match (`desktopOnly()` / `mobileOnly()` in `src/lib/utilities/pages.ts`). Mobile-only tweaks live in `src/features/mobile/` and are listed in the Mobile section; `pnpm new-feature mobile …` sets that up, `platform` included.
 
 ## Conventions
 

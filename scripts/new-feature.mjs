@@ -15,15 +15,15 @@ const root = resolve(__dirname, "..");
 const featuresDir = resolve(root, "src/features");
 const entryFile = resolve(featuresDir, "index.ts");
 
-// Maps the CLI "category" argument to both the folder under src/features/
-// and the registry array it belongs to in src/features/index.ts. Core, theme,
-// and experimental settings aren't included here — they're singletons or
-// have a different shape, not a typical target for a new contributed feature.
+// Maps the CLI "category" argument to its folder under src/features/ and the settings-page
+// section (a `title` in scriptSections, src/features/index.ts) it's listed in unless --section
+// says otherwise. New desktop features start in Experimental until they find their place.
 const CATEGORIES = {
-	layout: { dir: "layout", constName: "layoutAndDensity" },
-	readability: { dir: "readability", constName: "readability" },
-	appearance: { dir: "appearance", constName: "appearance" },
-	workflows: { dir: "workflows", constName: "workflows" },
+	layout: { dir: "layout", section: "Experimental" },
+	readability: { dir: "readability", section: "Experimental" },
+	appearance: { dir: "appearance", section: "Experimental" },
+	workflows: { dir: "workflows", section: "Experimental" },
+	mobile: { dir: "mobile", section: "Mobile" },
 };
 
 function usageAndExit(message) {
@@ -32,12 +32,13 @@ function usageAndExit(message) {
 	}
 	console.error(
 		[
-			'Usage: pnpm new-feature <category> <kebab-name> "<Label>" <type> [--component]',
+			'Usage: pnpm new-feature <category> <kebab-name> "<Label>" <type> [--section "<Title>"] [--component]',
 			"",
 			`  category    one of: ${Object.keys(CATEGORIES).join(", ")}`,
 			"  kebab-name  e.g. budget-warnings — becomes the file name and storage key",
 			"  Label       display label shown in the settings panel",
 			"  type        checkbox | select | custom",
+			"  --section   the settings-page section to list it under (default: Mobile for mobile, else Experimental)",
 			"  --component generate a folder with a companion .svelte file, instead of one flat .ts file",
 			"",
 			'Example: pnpm new-feature readability budget-warnings "Budget Warnings" checkbox',
@@ -48,7 +49,11 @@ function usageAndExit(message) {
 
 const args = process.argv.slice(2);
 const withComponent = args.includes("--component");
-const [category, kebabName, label, type] = args.filter((a) => a !== "--component");
+const sectionAt = args.indexOf("--section");
+const sectionArg = sectionAt === -1 ? undefined : args[sectionAt + 1];
+const [category, kebabName, label, type] = args.filter(
+	(a, i) => a !== "--component" && (sectionAt === -1 || (i !== sectionAt && i !== sectionAt + 1)),
+);
 
 if (!category || !kebabName || !label || !type) {
 	usageAndExit("missing arguments");
@@ -71,7 +76,12 @@ function toPascalCase(kebab) {
 	return camel[0].toUpperCase() + camel.slice(1);
 }
 
-const { dir, constName } = CATEGORIES[category];
+const { dir } = CATEGORIES[category];
+const section = sectionArg ?? CATEGORIES[category].section;
+const isMobile = dir === "mobile";
+const groupLine = isMobile
+	? `\tgroup: "Mobile",\n\tplatform: "mobile",\n`
+	: `\tgroup: "General",\n`;
 const camelName = toCamelCase(kebabName);
 const pascalName = toPascalCase(kebabName);
 const importPath = `./${dir}/${kebabName}`;
@@ -113,8 +123,7 @@ export const ${camelName} = defineSetting({
 	type: "custom",
 	label: "${label}",
 	description: "",
-	group: "General",
-${withComponent ? `\tcomponent: ${pascalName},\n` : ""}\tcontext: {
+${groupLine}${withComponent ? `\tcomponent: ${pascalName},\n` : ""}\tcontext: {
 		key: "${kebabName}",
 		defaultValue: null,
 	},
@@ -137,8 +146,7 @@ export const ${camelName} = defineSetting({
 	type: "${type}",
 	label: "${label}",
 	description: "",
-	group: "General",
-	icon: "palette",
+${groupLine}	icon: "palette",
 ${optionsField}\tcontext: {
 		key: "${kebabName}",
 		defaultValue: ${contextDefault},
@@ -186,25 +194,52 @@ function registerInIndex(ts) {
 		ts.ScriptKind.TS,
 	);
 
-	// Find the target registry array's closing bracket.
-	let arrayNode;
+	// The items array of the section's last group, in scriptSections.
+	const titleOf = (obj) =>
+		obj.properties.find(
+			(p) => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === "title",
+		)?.initializer;
+	const propOf = (obj, name) =>
+		obj.properties.find(
+			(p) => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === name,
+		)?.initializer;
+	let sections;
 	source.forEachChild((node) => {
-		if (arrayNode || !ts.isVariableStatement(node)) {
+		if (!ts.isVariableStatement(node)) {
 			return;
 		}
 		for (const decl of node.declarationList.declarations) {
 			if (
 				ts.isIdentifier(decl.name) &&
-				decl.name.text === constName &&
+				decl.name.text === "scriptSections" &&
 				decl.initializer &&
 				ts.isArrayLiteralExpression(decl.initializer)
 			) {
-				arrayNode = decl.initializer;
+				sections = decl.initializer.elements.filter(ts.isObjectLiteralExpression);
 			}
 		}
 	});
-	if (!arrayNode) {
-		throw new Error(`Could not find "const ${constName} = [...]" in src/features/index.ts`);
+	if (!sections) {
+		throw new Error(
+			'Could not find "export const scriptSections = [...]" in src/features/index.ts',
+		);
+	}
+	const target = sections.find((s) => {
+		const title = titleOf(s);
+		return title && ts.isStringLiteral(title) && title.text === section;
+	});
+	if (!target) {
+		const titles = sections.map((s) => titleOf(s)?.text).filter(Boolean);
+		throw new Error(`No section titled "${section}"; one of: ${titles.join(", ")}`);
+	}
+	const groups = propOf(target, "groups");
+	const lastGroup =
+		groups && ts.isArrayLiteralExpression(groups)
+			? groups.elements.filter(ts.isObjectLiteralExpression).at(-1)
+			: undefined;
+	const arrayNode = lastGroup && propOf(lastGroup, "items");
+	if (!arrayNode || !ts.isArrayLiteralExpression(arrayNode)) {
+		throw new Error(`Section "${section}" has no group items to add to`);
 	}
 
 	// Find where the new import line should go: right before the first
@@ -261,6 +296,9 @@ function registerInIndex(ts) {
 async function main() {
 	const ts = await loadTypeScript();
 
+	// First, so an unknown --section stops before any file is written.
+	registerInIndex(ts);
+
 	mkdirSync(dirname(targetPath), { recursive: true });
 	writeFileSync(targetPath, settingFileContent());
 	console.log(`Created ${targetPath.replace(root + "/", "")}`);
@@ -271,8 +309,7 @@ async function main() {
 		console.log(`Created ${componentPath.replace(root + "/", "")}`);
 	}
 
-	registerInIndex(ts);
-	console.log(`Registered "${camelName}" in src/features/index.ts under "${constName}"`);
+	console.log(`Registered "${camelName}" in src/features/index.ts under "${section}"`);
 
 	console.log(
 		[
