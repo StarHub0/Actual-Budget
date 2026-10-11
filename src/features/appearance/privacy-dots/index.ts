@@ -10,9 +10,7 @@ const REDACTED_COPY = `.abt-privacy-enabled
 	div:has(> div:first-child + div[aria-hidden="true"]:last-child)
 	> div[aria-hidden="true"]`;
 
-const ABT_AMOUNTS = `.abt-privacy-enabled .abt-privacy-number,
-	.abt-ib-privacy .abt-ib-private,
-	.abt-ib-privacy .abt-ib-label-amount`;
+const ABT_AMOUNTS = `.abt-privacy-enabled .abt-privacy-number`;
 
 // Inputs can't draw an ::after mark, so they keep their width and hide each character instead.
 const FIXED_AMOUNTS = ABT_AMOUNTS.replace(".abt-privacy-number", ".abt-privacy-number:not(input)");

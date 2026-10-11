@@ -302,6 +302,18 @@ export function navigate(path: string | number, options?: Record<string, unknown
 	);
 }
 
+/** Has Actual refetch the TanStack queries under `queryKey`, after a write it didn't make itself. */
+export function invalidateQueries(queryKey: string[]): void {
+	document.dispatchEvent(
+		new CustomEvent("abt:api:invalidate", { detail: JSON.stringify({ queryKey }) }),
+	);
+}
+
+/** Tags the items of Actual's open menus with `data-abt-menu-key`, their untranslated names. */
+export function markMenuKeys(): void {
+	document.dispatchEvent(new CustomEvent("abt:api:mark-menu-keys"));
+}
+
 let budgetReadyPromise: Promise<void> | null = null;
 
 /**

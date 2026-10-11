@@ -44,3 +44,9 @@ export function mountToPanelBody<T extends Record<string, unknown>>(
 	}) as HTMLDivElement;
 	return mountToNodeWithReturn(component, props, node);
 }
+
+/** Floats a fixed-position overlay on <body>, out of reach of its parents' clipping and transforms. */
+export function portal(node: HTMLElement) {
+	document.body.appendChild(node);
+	return { destroy: () => node.remove() };
+}

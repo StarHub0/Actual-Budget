@@ -45,10 +45,8 @@ export default defineConfig({
 		web_accessible_resources: [
 			{
 				resources: [
-					"income-breakdown-main.js",
 					"actual-api-bridge-main.js",
 					"css/base.css",
-					"css/income-breakdown.css",
 					"content-scripts/content.css",
 					"icon.svg",
 				],

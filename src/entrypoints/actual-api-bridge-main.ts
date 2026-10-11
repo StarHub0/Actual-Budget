@@ -321,6 +321,30 @@ export default defineUnlistedScript(async () => {
 		}
 	})();
 
+	// Actual's lists live in TanStack Query; a write it didn't make itself needs them refetched.
+	document.addEventListener("abt:api:invalidate", (e) => {
+		const { queryKey } = parseDetail(e);
+		window.__TANSTACK_QUERY_CLIENT__?.invalidateQueries?.({ queryKey });
+	});
+
+	// Tags each open menu's items with its React key (Actual's own item names), which content
+	// scripts can't read; the labels are translated, the keys aren't.
+	document.addEventListener("abt:api:mark-menu-keys", () => {
+		for (const button of document.querySelectorAll(
+			"[data-popover] button:not([data-abt-menu-key])",
+		)) {
+			const key = Object.keys(button).find((k) => k.startsWith("__reactFiber$"));
+			let fiber = key ? button[key] : null;
+			for (let i = 0; i < 12 && fiber; i++) {
+				if (typeof fiber.key === "string") {
+					button.dataset.abtMenuKey = fiber.key.replace(/^\.?\$/, "");
+					break;
+				}
+				fiber = fiber.return;
+			}
+		}
+	});
+
 	document.addEventListener("abt:api:navigate", (e) => {
 		const { path, options } = parseDetail(e);
 		if (path && typeof window.__navigate === "function") {
