@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, X } from "lucide-svelte";
+	import { Plus, X } from "@lucide/svelte";
 	import { onMount, tick } from "svelte";
 	import type { AccountGroup } from "../lib/groups";
 	import {

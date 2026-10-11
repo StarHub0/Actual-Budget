@@ -35,7 +35,7 @@
 		SlidersHorizontal,
 		Tag,
 		Users,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { autofocus } from "../actions/autofocus";
 	import { portal } from "../actions/portal";
 	import type { SidebarAccount } from "../lib/data";

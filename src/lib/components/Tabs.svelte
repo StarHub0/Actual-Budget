@@ -1,5 +1,5 @@
 <script lang="ts" generics="T extends string">
-	import type { Icon } from "lucide-svelte";
+	import type { LucideIcon } from "@lucide/svelte";
 	import type { Snippet } from "svelte";
 
 	let {
@@ -8,7 +8,7 @@
 		onChange,
 		trailing,
 	}: {
-		tabs: { value: T; label: string; icon?: typeof Icon }[];
+		tabs: { value: T; label: string; icon?: LucideIcon }[];
 		value: T;
 		onChange?: (value: T) => void;
 		/** Actions at the row's end, such as a close button. */

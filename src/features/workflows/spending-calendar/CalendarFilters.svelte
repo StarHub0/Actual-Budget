@@ -12,7 +12,7 @@
 		PiggyBank,
 		TrendingUp,
 		Wallet,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import FilterTree from "./FilterTree.svelte";
 	import {

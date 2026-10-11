@@ -14,7 +14,7 @@
 
 <script lang="ts" generics="T extends TreeItem">
 	import Tick from "@lib/components/Tick.svelte";
-	import { Search } from "lucide-svelte";
+	import { Search } from "@lucide/svelte";
 	import type { Snippet } from "svelte";
 
 	const {

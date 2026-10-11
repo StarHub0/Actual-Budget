@@ -9,7 +9,7 @@ import {
 	Tag,
 	Users,
 	Wrench,
-} from "lucide-svelte";
+} from "@lucide/svelte";
 
 export const navItems = [
 	{ label: "Budget", page: Page.Budget, icon: LayoutGrid },

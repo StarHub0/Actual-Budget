@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CircleCheck, Lock } from "lucide-svelte";
+	import { CircleCheck, Lock } from "@lucide/svelte";
 
 	/** A few rows of Actual's transaction table, for the transaction tweaks' previews. */
 	const {

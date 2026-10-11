@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Eye } from "lucide-svelte";
+	import { Eye } from "@lucide/svelte";
 	import { previewState } from "./preview.svelte";
 
 	const { settingKey }: { settingKey: string } = $props();

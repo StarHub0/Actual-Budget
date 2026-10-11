@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CircleAlert, Clock, Check } from "lucide-svelte";
+	import { CircleAlert, Clock, Check } from "@lucide/svelte";
 	import PreviewPair from "./PreviewPair.svelte";
 
 	const ROWS = [

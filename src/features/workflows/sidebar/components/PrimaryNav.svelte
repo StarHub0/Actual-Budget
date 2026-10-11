@@ -8,7 +8,7 @@
 	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { Page, matchesPage, pagePath } from "@lib/utilities/pages";
 	import { getValue, setValue } from "@lib/utilities/store";
-	import { CalendarDays, ChevronDown } from "lucide-svelte";
+	import { CalendarDays, ChevronDown } from "@lucide/svelte";
 	import { navItems, settingsItem, settingsMenu } from "../lib/nav";
 
 	// Only shown if the user has the Spending Calendar feature enabled — reads

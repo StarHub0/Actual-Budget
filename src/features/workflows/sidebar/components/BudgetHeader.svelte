@@ -11,7 +11,7 @@
 		LogOut,
 		Pencil,
 		SlidersHorizontal,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import { autofocus } from "../actions/autofocus";
 	import { tooltip } from "../actions/tooltip.svelte";

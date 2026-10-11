@@ -6,7 +6,7 @@
 	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { getValue, setValue, watchValue } from "@lib/utilities/store";
 	import { sidebarGroupTotals } from "@features/appearance/sidebar-group-totals";
-	import { ChevronDown, List, ListTree, Plus } from "lucide-svelte";
+	import { ChevronDown, List, ListTree, Plus } from "@lucide/svelte";
 	import { overlayScrollbar } from "../actions/overlay-scrollbar";
 	import { portal } from "../actions/portal";
 	import { scrollFade } from "../actions/scroll-fade";

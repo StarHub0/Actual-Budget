@@ -10,7 +10,7 @@
 	import { navigate } from "@lib/utilities/actual-api";
 	import { fmtMoney } from "@lib/utilities/currency";
 	import { watchDom } from "@lib/utilities/dom-watcher";
-	import { Smile } from "lucide-svelte";
+	import { Smile } from "@lucide/svelte";
 	import { mount, unmount } from "svelte";
 	import { autofocus } from "../actions/autofocus";
 	import { tooltip } from "../actions/tooltip.svelte";

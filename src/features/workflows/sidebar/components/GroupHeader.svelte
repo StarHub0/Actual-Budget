@@ -1,6 +1,6 @@
 <script lang="ts">
 	import RollingNumber from "@lib/components/RollingNumber.svelte";
-	import { ChevronDown } from "lucide-svelte";
+	import { ChevronDown } from "@lucide/svelte";
 	import { autofocus } from "../actions/autofocus";
 	import type { AccountGroup } from "../lib/groups";
 

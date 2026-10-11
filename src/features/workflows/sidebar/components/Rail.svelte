@@ -10,7 +10,7 @@
 	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { Page, matchesPage, pagePath } from "@lib/utilities/pages";
 	import { getValue } from "@lib/utilities/store";
-	import { CalendarDays, PanelLeftClose, PanelLeftOpen, Plus, Search } from "lucide-svelte";
+	import { CalendarDays, PanelLeftClose, PanelLeftOpen, Plus, Search } from "@lucide/svelte";
 	import { portal } from "../actions/portal";
 	import { scrollFade } from "../actions/scroll-fade";
 	import { tooltip } from "../actions/tooltip.svelte";

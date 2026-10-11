@@ -15,7 +15,7 @@
 		User,
 		Volleyball,
 		X,
-	} from "lucide-svelte";
+	} from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import Tabs from "./Tabs.svelte";
 	import emojiData from "unicode-emoji-json/data-by-group.json";

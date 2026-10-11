@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Minus } from "lucide-svelte";
+	import { Check, Minus } from "@lucide/svelte";
 
 	const {
 		checked,

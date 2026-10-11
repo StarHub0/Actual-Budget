@@ -19,7 +19,7 @@
 </script>
 
 <script lang="ts">
-	import { X } from "lucide-svelte";
+	import { X } from "@lucide/svelte";
 	import SettingRow from "./SettingRow.svelte";
 	import Tabs from "./Tabs.svelte";
 

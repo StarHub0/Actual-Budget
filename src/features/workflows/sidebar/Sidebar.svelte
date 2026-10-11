@@ -16,7 +16,7 @@
 	import { loadCurrency } from "@lib/utilities/currency";
 	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { getValue, setValue, watchValue } from "@lib/utilities/store";
-	import { FolderTree, LayoutGrid, Search, SlidersHorizontal } from "lucide-svelte";
+	import { FolderTree, LayoutGrid, Search, SlidersHorizontal } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import ShortcutsBar from "../../appearance/sidebar-shortcuts/ShortcutsBar.svelte";
 	import { portal } from "./actions/portal";

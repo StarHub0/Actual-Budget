@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { icon } from "@lib/utilities/icons";
 	import { getFaviconUrl } from "@lib/utilities/favicon";
-	import { X } from "lucide-svelte";
+	import { X } from "@lucide/svelte";
 	import type { Snippet } from "svelte";
 	import { flip } from "svelte/animate";
 	import { scale } from "svelte/transition";

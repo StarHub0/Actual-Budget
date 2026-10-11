@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ExternalLink, X } from "lucide-svelte";
+	import { ExternalLink, X } from "@lucide/svelte";
 	import { tick } from "svelte";
 	import {
 		scriptSections,
