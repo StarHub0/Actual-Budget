@@ -354,13 +354,12 @@
 	// switching budgets kept showing the previous budget's categories, now
 	// empty since none of the new budget's accounts are assigned to them.
 	async function refreshBudgetContext() {
-		const [, name, id] = await Promise.all([
+		await Promise.all([
 			loadCurrency(true),
-			loadCurrentBudgetName(),
-			loadCurrentBudgetId(),
+			loadCurrentBudgetName().then((name) => (budgetName = name)),
+			// Shortcuts and groups wait on the id alone, so it isn't held back by the rest.
+			loadCurrentBudgetId().then((id) => (budgetId = id)),
 		]);
-		budgetName = name;
-		budgetId = id;
 	}
 
 	// Real, direct RPC (see data.ts) — safe to update the local list optimistically.

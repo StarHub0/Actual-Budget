@@ -72,6 +72,14 @@
 	let dropTarget = $state<{ idx: number; side: "before" | "after" } | null>(null);
 	let barEl: HTMLDivElement | undefined = $state();
 	let focusedId = $state<string | null>(null);
+	// Tiles arrive after the bar on load; only ones added later scale in.
+	let animateIn = $state(false);
+	$effect(() => {
+		if (items.length && !animateIn) {
+			// After the first tiles' intros have read their (zero) duration.
+			requestAnimationFrame(() => (animateIn = true));
+		}
+	});
 
 	function onDragStart(idx: number, e: DragEvent) {
 		dragIdx = idx;
@@ -232,7 +240,7 @@
 			ondragstart={(e: DragEvent) => onDragStart(idx, e)}
 			ondragend={onDragEnd}
 			animate:flip={{ duration: 180 }}
-			in:scale={{ start: 0.8, duration: 180 }}
+			in:scale={{ start: 0.8, duration: animateIn ? 180 : 0 }}
 		>
 			<span class="item__content">{@render content(shortcut)}</span>
 			{#if mode === "edit"}
