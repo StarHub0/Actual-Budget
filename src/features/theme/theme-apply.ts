@@ -165,16 +165,16 @@ export const BUILTIN_CSS = `:root {
 	--color-mobileAccountShadow: var(--ctp-crust);
 	--color-mobileAccountText: var(--ctp-blue);
 	--color-mobileConfigServerViewTheme: var(--ctp-mauve);
-	--color-mobileHeaderBackground: var(--ctp-base);
+	--color-mobileHeaderBackground: var(--ctp-crust);
 	--color-mobileHeaderText: var(--ctp-lavender);
 	--color-mobileHeaderTextHover: rgba(205, 214, 244, 0.07);
 	--color-mobileHeaderTextSubdued: var(--ctp-subtext0);
 	--color-mobileNavBackground: var(--ctp-mantle);
 	--color-mobileNavItem: var(--ctp-text);
 	--color-mobileNavItemSelected: var(--ctp-lavender);
-	--color-mobilePageBackground: var(--ctp-base);
+	--color-mobilePageBackground: var(--ctp-crust);
 	--color-mobileTransactionSelected: var(--ctp-lavender);
-	--color-mobileViewTheme: var(--ctp-base);
+	--color-mobileViewTheme: var(--ctp-crust);
 
 	--color-modalBackground: var(--ctp-mantle);
 	--color-modalBorder: var(--ctp-surface0);
