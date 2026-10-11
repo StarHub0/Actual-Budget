@@ -307,6 +307,9 @@
 	}
 </script>
 
+<!-- Before the dialog's own window listener, which the key then never reaches. -->
+<svelte:document onkeydown={onKeydown} />
+
 {#snippet entryIcon(iconKey: string)}
 	{#if ICONS[iconKey]}
 		<Icon name={ICONS[iconKey]} size={16} />
@@ -315,8 +318,7 @@
 	{/if}
 {/snippet}
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="layout" onkeydown={onKeydown}>
+<div class="layout">
 	<!-- The sidebar's own bar, at its real width, edited in place. -->
 	<section class="stage" aria-label="Sidebar preview">
 		<span class="stage__label">Your sidebar</span>

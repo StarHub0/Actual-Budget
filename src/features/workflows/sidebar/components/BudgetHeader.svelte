@@ -48,7 +48,8 @@
 	let filesLoaded = $state(false);
 
 	let icon = $state<BudgetIcon | undefined>(undefined);
-	let iconBtnEl = $state<HTMLButtonElement | HTMLSpanElement | undefined>(undefined);
+	let iconBtnEl = $state<HTMLButtonElement | undefined>(undefined);
+	let rootEl = $state<HTMLElement | undefined>(undefined);
 	let iconPickerOpen = $state(false);
 	let iconAnchorRect = $state<DOMRect | undefined>(undefined);
 
@@ -195,6 +196,13 @@
 		await closeToFileList();
 	}
 
+	// Clicks inside the widget, the rename input included, leave it open.
+	function onWindowClick(e: MouseEvent) {
+		if (!rootEl?.contains(e.target as Node)) {
+			closeMenu();
+		}
+	}
+
 	function onWindowKeydown(e: KeyboardEvent) {
 		if (e.key === "Escape" && open && !editing) {
 			closeMenu();
@@ -202,7 +210,7 @@
 	}
 </script>
 
-<svelte:window onclick={closeMenu} onkeydown={onWindowKeydown} />
+<svelte:window onclick={onWindowClick} onkeydown={onWindowKeydown} />
 
 {#snippet fileStatus()}
 	{#if currentFile}
@@ -246,14 +254,12 @@
 	</button>
 {/snippet}
 
-<!-- Stops any click inside the widget (including the rename input) from
-     bubbling to the window listener above, which would otherwise close the
-     dropdown / exit rename-mode on every internal click. Not an interactive
-     element itself, just an event-bubbling guard. -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="budget" onclick={(e) => e.stopPropagation()}>
+<div class="budget" bind:this={rootEl}>
 	{#if !open}
+		<!-- Beside the menu button rather than in it: a button can't hold another. -->
+		{#if showBudgetIcon}
+			<span class="budget-select-icon">{@render iconButton()}</span>
+		{/if}
 		<button
 			type="button"
 			class="budget-select"
@@ -262,34 +268,8 @@
 				openMenu();
 			}}
 		>
-			<!-- Not a real <button> — it lives inside the .budget-select button
-			     itself (nested buttons aren't valid HTML), so it's a span made
-			     keyboard-operable instead. -->
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			{#if showBudgetIcon}
-				<span
-					class="budget-icon-btn budget-icon-btn--lg"
-					class:has-icon={!!icon}
-					bind:this={iconBtnEl}
-					role="button"
-					tabindex="0"
-					aria-label="Change budget icon"
-					use:tooltip={"Change budget icon"}
-					onclick={(e) => {
-						e.stopPropagation();
-						openIconPicker();
-					}}
-					onkeydown={(e) => {
-						if (e.key !== "Enter" && e.key !== " ") {
-							return;
-						}
-						e.preventDefault();
-						e.stopPropagation();
-						openIconPicker();
-					}}
-				>
-					{@render iconContent()}
-				</span>
+				<span class="budget-icon-space" aria-hidden="true"></span>
 			{/if}
 
 			<span class="budget-select-text">
@@ -349,7 +329,7 @@
 				{/if}
 			</button>
 		</div>
-		<div class="budget-menu" onclick={(e) => e.stopPropagation()}>
+		<div class="budget-menu">
 			{#each files as file, i (file.id ?? file.cloudFileId ?? i)}
 				{@const isActive = !!file.id && file.id === currentId}
 				{@const Icon = stateIcon(file.state)}
@@ -421,9 +401,24 @@
 			background 0.12s ease,
 			border-color 0.12s ease;
 	}
-	.budget-select:hover {
+	.budget-select:hover,
+	.budget-select-icon:hover + .budget-select {
 		background: var(--sb-surface);
 		border-color: var(--abt-ink-2);
+	}
+	/* Over the space kept for it in the menu button, centred on the button's content. */
+	.budget-select-icon {
+		position: absolute;
+		z-index: 1;
+		top: calc(50% - 0.5px);
+		left: 0.75rem;
+		display: flex;
+		transform: translateY(-50%);
+	}
+	.budget-icon-space {
+		flex-shrink: 0;
+		width: 32px;
+		height: 32px;
 	}
 	.budget-select-text {
 		display: flex;

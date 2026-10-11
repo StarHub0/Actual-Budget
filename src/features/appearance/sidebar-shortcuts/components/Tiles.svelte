@@ -71,6 +71,7 @@
 	let dragIdx = $state<number | null>(null);
 	let dropTarget = $state<{ idx: number; side: "before" | "after" } | null>(null);
 	let barEl: HTMLDivElement | undefined = $state();
+	let focusedId = $state<string | null>(null);
 
 	function onDragStart(idx: number, e: DragEvent) {
 		dragIdx = idx;
@@ -192,7 +193,8 @@
 	class="bar"
 	class:is-edit={mode === "edit"}
 	style:padding
-	role="list"
+	role={mode === "edit" ? "listbox" : "group"}
+	aria-label="Shortcuts"
 	bind:this={barEl}
 	ondragover={onBarDragOver}
 	ondrop={onBarDrop}
@@ -200,7 +202,7 @@
 	{#each items as shortcut, idx (shortcut.id)}
 		{@const isWidget = shortcut.type === "widget"}
 		{@const isData = shortcut.url === "upcoming-schedules"}
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -- edit-mode tiles are focusable list items driven by Delete and Alt+arrows -->
+		<!-- In edit mode, a listbox of options you rearrange (Delete, Alt+arrows); otherwise plain buttons. -->
 		<svelte:element
 			this={mode === "bar" && !isWidget ? "button" : "div"}
 			class="item"
@@ -211,7 +213,8 @@
 			class:is-dragging={dragIdx === idx}
 			class:is-drop-before={dropTarget?.idx === idx && dropTarget?.side === "before"}
 			class:is-drop-after={dropTarget?.idx === idx && dropTarget?.side === "after"}
-			role="listitem"
+			role={mode === "edit" ? "option" : undefined}
+			aria-selected={mode === "edit" ? focusedId === shortcut.id : undefined}
 			data-id={shortcut.id}
 			style={colorVars(idx, mode === "edit" || !isWidget || isData)}
 			title={shortcut.label}
@@ -224,6 +227,8 @@
 				? (e: MouseEvent) => onActivate?.(shortcut, e.currentTarget as HTMLElement)
 				: undefined}
 			onkeydown={mode === "edit" ? (e: KeyboardEvent) => onEditKey(idx, e) : undefined}
+			onfocus={() => (focusedId = shortcut.id)}
+			onblur={() => (focusedId = null)}
 			ondragstart={(e: DragEvent) => onDragStart(idx, e)}
 			ondragend={onDragEnd}
 			animate:flip={{ duration: 180 }}

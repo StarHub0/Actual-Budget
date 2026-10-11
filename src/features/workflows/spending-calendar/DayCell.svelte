@@ -36,8 +36,8 @@
 	}
 </script>
 
-<!-- Roving tabindex: every in-month day is focusable for arrow navigation. -->
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+<!-- Roving tabindex: in-month days take arrow-key focus. Each day is a button, disabled when
+     there's nothing to open. -->
 <div
 	class="cal-cell"
 	class:is-today={day.isToday}
@@ -48,9 +48,10 @@
 	style={heat > 0 ? `--heat-raw: ${heat.toFixed(3)}` : undefined}
 	data-corner={corner}
 	data-iso={day.isCurrentMonth ? day.iso : undefined}
-	role={clickable ? "button" : undefined}
+	role="button"
 	aria-pressed={clickable ? selected : undefined}
-	tabindex={day.isCurrentMonth ? (tabbable ? 0 : -1) : undefined}
+	aria-disabled={!clickable}
+	tabindex={day.isCurrentMonth && tabbable ? 0 : -1}
 	onfocus={() => {
 		if (day.isCurrentMonth) {
 			onfocus();
