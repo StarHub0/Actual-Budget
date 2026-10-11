@@ -37,6 +37,7 @@
 		onDrop: (e: DragEvent) => void;
 	} = $props();
 
+	// svelte-ignore state_referenced_locally
 	let editValue = $state(group.label);
 
 	function startEdit() {

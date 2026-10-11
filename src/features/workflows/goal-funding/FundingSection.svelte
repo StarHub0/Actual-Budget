@@ -8,7 +8,9 @@
 	const { sheet, categoryId, initial }: { sheet: string; categoryId: string; initial: GoalState } =
 		$props();
 
+	// svelte-ignore state_referenced_locally
 	const month = sheetToMonth(sheet);
+	// svelte-ignore state_referenced_locally
 	let info = $state<GoalState | null>(initial);
 	let assigning = $state(false);
 	let assigned = $state<number | null>(null);

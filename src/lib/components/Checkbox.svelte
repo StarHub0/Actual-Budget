@@ -15,6 +15,7 @@
 		setting,
 		icon,
 	}: { labelText: string; setting: CheckboxSetting<any>; icon?: IconName } = $props();
+	// svelte-ignore state_referenced_locally
 	const ctx = setting.context;
 	let value = $state(false);
 	// The row's label points at the switch, not the first control inside it (the preview button).

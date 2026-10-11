@@ -15,6 +15,7 @@
 		onClose: () => void;
 	}>();
 
+	// svelte-ignore state_referenced_locally
 	let hasIconActual = $state(hasIcon);
 
 	onMount(async () => {

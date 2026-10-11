@@ -23,6 +23,7 @@
 
 	const PREVIEW_ROWS = 4;
 
+	// svelte-ignore state_referenced_locally
 	let selected = $state(ctx.defaultValue);
 
 	onMount(async () => {

@@ -63,6 +63,7 @@
 
 	// Inline rename (triggered from AccountList's right-click context menu),
 	// matching GroupHeader's editing pattern.
+	// svelte-ignore state_referenced_locally
 	let editValue = $state(account.name);
 
 	function onRenameKeydown(e: KeyboardEvent) {

@@ -13,6 +13,7 @@
 
 	const PREVIEW_ROWS = 4;
 
+	// svelte-ignore state_referenced_locally
 	let selected = $state<SidebarLayout>(toLayout(ctx.defaultValue));
 
 	onMount(async () => {

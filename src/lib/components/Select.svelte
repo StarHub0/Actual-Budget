@@ -14,6 +14,7 @@
 		setting: SelectSetting<any>;
 		icon?: IconName;
 	}>();
+	// svelte-ignore state_referenced_locally
 	const ctx = setting.context;
 
 	// local reactive state for select value

@@ -22,6 +22,7 @@
 		onDone: () => void;
 	} = $props();
 
+	// svelte-ignore state_referenced_locally
 	let txs = $state(transactions.map((t) => ({ ...t })));
 	let saving = $state<Record<string, boolean>>({});
 	let errors = $state<Record<string, boolean>>({});
@@ -30,6 +31,7 @@
 		new Map(groups.flatMap((g) => g.categories.map((c) => [c.id, c.name] as const))),
 	);
 	// Rows stay in this list once categorized, so the one being worked on doesn't jump away.
+	// svelte-ignore state_referenced_locally
 	const toCategorize = $state(
 		transactions.filter((t) => t.needsCategory && !t.category).map((t) => t.id),
 	);

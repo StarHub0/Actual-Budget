@@ -39,6 +39,7 @@
 
 	let { ctx }: { ctx: { key: string; defaultValue: string } } = $props();
 
+	// svelte-ignore state_referenced_locally
 	let activeThemeKey = $state(ctx.defaultValue);
 	let applyingTheme = $state<string | null>(null);
 	let remoteThemes = $state<RemoteTheme[]>([]);

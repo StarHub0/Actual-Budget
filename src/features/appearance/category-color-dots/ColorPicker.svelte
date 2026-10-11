@@ -13,6 +13,7 @@
 		onClose: () => void;
 	}>();
 
+	// svelte-ignore state_referenced_locally
 	let custom = $state(currentColor);
 </script>
 
