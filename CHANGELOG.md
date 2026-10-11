@@ -1,6 +1,33 @@
 # Changelog
 
 
+## v0.1.95
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.94...v0.1.95)
+
+### 🚀 Enhancements
+
+- Show account icons on Actual's mobile accounts list ([e125614](https://github.com/aelxxs/actual-budget-tweaks/commit/e125614))
+- Add a mobile accounts list with sidebar groups, icons and totals ([4607e33](https://github.com/aelxxs/actual-budget-tweaks/commit/4607e33))
+- Add mobile page transitions: fade, slide up or zoom ([305e6cf](https://github.com/aelxxs/actual-budget-tweaks/commit/305e6cf))
+
+### 🩹 Fixes
+
+- Ignore malformed bridge events instead of throwing ([ba9b577](https://github.com/aelxxs/actual-budget-tweaks/commit/ba9b577))
+- Keep the mobile account sync dot before the name ([0b52f58](https://github.com/aelxxs/actual-budget-tweaks/commit/0b52f58))
+- Register scaffolded features in their settings section, mobile included ([e11aaf9](https://github.com/aelxxs/actual-budget-tweaks/commit/e11aaf9))
+- Fill the space under iOS's keyboard with the sheet's colour ([2cf1e24](https://github.com/aelxxs/actual-budget-tweaks/commit/2cf1e24))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.94 ([d242704](https://github.com/aelxxs/actual-budget-tweaks/commit/d242704))
+- Describe the mobile tweaks on the website and in the contributing guide ([1e4c3f9](https://github.com/aelxxs/actual-budget-tweaks/commit/1e4c3f9))
+- Refresh the website's feature list ([e73b13d](https://github.com/aelxxs/actual-budget-tweaks/commit/e73b13d))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.94
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.93...v0.1.94)
