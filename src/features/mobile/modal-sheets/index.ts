@@ -144,6 +144,17 @@ export const mobileModalSheets = defineSetting({
 			transition: padding-bottom ${SHEET_MS}ms ${SHEET_EASE};
 		}
 
+		/* The overlay runs under iOS's translucent keyboard, past the sheet (sized to the visible
+		   viewport); painted in the sheet's colour, the keyboard sits on the sheet, not the page.
+		   ::before, so it paints under the sheet it overlaps. */
+		${OVERLAY}::before {
+			content: "";
+			position: absolute;
+			inset: calc(var(--visual-viewport-height, 100vh) - var(--abt-space-6)) 0 0;
+			background: var(--color-modalBackground);
+			pointer-events: none;
+		}
+
 		/* Rests on the keypad, in place of the gap Actual leaves for it under a centred modal. */
 		[${KEYPAD_ATTR}] > div {
 			padding-bottom: ${KEYPAD_HEIGHT} !important;
