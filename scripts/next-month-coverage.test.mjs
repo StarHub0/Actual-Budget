@@ -4,7 +4,16 @@ import { stripTypeScriptTypes } from "node:module";
 import { test } from "node:test";
 import { SourceTextModule, SyntheticModule } from "node:vm";
 
-const sourceRoot = new URL("../src/lib/template-plan/", import.meta.url);
+const srcRoot = new URL("../src/", import.meta.url);
+const sourceRoot = new URL("lib/template-plan/", srcRoot);
+
+// Resolves the bundler's aliases and relative imports from the module that asks for them.
+function resolve(name, referrer) {
+	if (name.startsWith("@lib/") || name.startsWith("@features/")) {
+		return new URL(`${name.replace(/^@(lib|features)\//, "$1/")}.ts`, srcRoot);
+	}
+	return new URL(`${name}.ts`, referrer ? new URL(referrer.identifier) : sourceRoot);
+}
 
 // Exercise the production preview with a fake Actual bridge and real template filtering.
 async function preview(rows) {
@@ -39,7 +48,7 @@ async function preview(rows) {
 			},
 		},
 	};
-	async function load(name) {
+	async function load(name, referrer) {
 		if (mocks[name]) {
 			return new SyntheticModule(Object.keys(mocks[name]), function () {
 				for (const [key, value] of Object.entries(mocks[name])) {
@@ -47,8 +56,9 @@ async function preview(rows) {
 				}
 			});
 		}
-		const source = await readFile(new URL(`${name}.ts`, sourceRoot), "utf8");
-		const module = new SourceTextModule(stripTypeScriptTypes(source));
+		const url = resolve(name, referrer);
+		const source = await readFile(url, "utf8");
+		const module = new SourceTextModule(stripTypeScriptTypes(source), { identifier: url.href });
 		await module.link(load);
 		return module;
 	}

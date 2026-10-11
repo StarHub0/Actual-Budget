@@ -49,6 +49,7 @@ async function setup({ deferRestore = false } = {}) {
 		clearInterval: (fn) => intervals.delete(fn),
 		setTimeout,
 		clearTimeout,
+		AbortController,
 	});
 	const overrides = {
 		defineSetting: (setting) => setting,
@@ -58,6 +59,7 @@ async function setup({ deferRestore = false } = {}) {
 		matchesPage: () => true,
 		isBudgetPage: () => true,
 		createPriorityPlanner: () => ({}),
+		INSIGHTS_TABS: ["overview", "breakdown", "priority"],
 		createDebouncedObserver: () => {
 			const observer = {
 				observe: () => observers.add(observer),
@@ -78,13 +80,19 @@ async function setup({ deferRestore = false } = {}) {
 			dismiss: () => (panelOpen = false),
 			isOpen: () => panelOpen,
 		},
-		mountToNodeWithReturn: () => {
+		mountToPanelBody: () => {
 			mounted++;
 			const body = node();
 			nodes.add(body);
-			return { node: body, instance: {} };
+			return {
+				node: body,
+				instance: {},
+				destroy: () => {
+					mounted--;
+					nodes.delete(body);
+				},
+			};
 		},
-		unmount: () => mounted--,
 	};
 	const imports = new Map();
 	for (const statement of ast.statements) {
