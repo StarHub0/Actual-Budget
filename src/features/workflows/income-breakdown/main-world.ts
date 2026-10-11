@@ -1538,7 +1538,10 @@ const log = createLogger("income-breakdown");
 			renderSankey(chart, sankeyData);
 		} catch (err) {
 			log.error("Error:", err);
-			chart.innerHTML = `<div class="abt-ib-empty">Error loading data: ${err.message}</div>`;
+			const message = document.createElement("div");
+			message.className = "abt-ib-empty";
+			message.textContent = `Error loading data: ${err.message}`;
+			chart.replaceChildren(message);
 		}
 	}
 
