@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { refreshWhileVisible } from "./refresh";
 
 	const {
 		symbol = "",
@@ -66,11 +67,7 @@
 		return (n < 0 ? "-" : "") + "$" + abs.toFixed(0);
 	}
 
-	onMount(() => {
-		fetchData();
-		const interval = setInterval(fetchData, 60000);
-		return () => clearInterval(interval);
-	});
+	onMount(() => refreshWhileVisible(fetchData, 60000));
 </script>
 
 <div class="rsu" title="{symbol} RSU · {rsuCount} shares">

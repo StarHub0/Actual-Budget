@@ -1,6 +1,7 @@
 <script lang="ts">
 	import RollingNumber from "@lib/components/RollingNumber.svelte";
 	import { onMount } from "svelte";
+	import { refreshWhileVisible } from "./refresh";
 	import { createLogger } from "@lib/utilities/logger";
 
 	const log = createLogger("stock");
@@ -53,11 +54,7 @@
 		}
 	}
 
-	onMount(() => {
-		fetchQuote();
-		const interval = setInterval(fetchQuote, 60000);
-		return () => clearInterval(interval);
-	});
+	onMount(() => refreshWhileVisible(fetchQuote, 60000));
 
 	let tooltip = $derived(
 		price != null && change != null
