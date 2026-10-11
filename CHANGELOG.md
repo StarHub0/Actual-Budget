@@ -1,6 +1,38 @@
 # Changelog
 
 
+## v0.1.94
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.93...v0.1.94)
+
+### 🚀 Enhancements
+
+- List on-budget transfers in the calendar when only one side is shown ([d2500f1](https://github.com/aelxxs/actual-budget-tweaks/commit/d2500f1))
+- Add a balance sparkline and spending split to the calendar's day view ([76a7674](https://github.com/aelxxs/actual-budget-tweaks/commit/76a7674))
+- Add mobile tweaks for the tab bar, header, cards, banners, sheets, toasts and transactions ([f461425](https://github.com/aelxxs/actual-budget-tweaks/commit/f461425))
+- Style tags in the mobile transaction list ([d5a8856](https://github.com/aelxxs/actual-budget-tweaks/commit/d5a8856))
+
+### 🩹 Fixes
+
+- Hide amounts' decimals when Actual's Hide decimal places is on ([0564010](https://github.com/aelxxs/actual-budget-tweaks/commit/0564010))
+- Show sidebar shortcuts as soon as the budget is known, without the add animation ([9c3742c](https://github.com/aelxxs/actual-budget-tweaks/commit/9c3742c))
+
+### 💅 Refactors
+
+- Let settings target Actual's desktop view, mobile view or both ([a4f3d39](https://github.com/aelxxs/actual-budget-tweaks/commit/a4f3d39))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.93 ([07dea92](https://github.com/aelxxs/actual-budget-tweaks/commit/07dea92))
+
+### 🎨 Styles
+
+- Give the mobile page and header the desktop page's colour ([7807983](https://github.com/aelxxs/actual-budget-tweaks/commit/7807983))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.93
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.92...v0.1.93)
