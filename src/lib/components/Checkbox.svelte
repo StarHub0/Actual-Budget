@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import type { CheckboxSetting } from "../../features/types";
 	import { applySettingChange } from "../../features/runtime";
+	import { isTrackingBudget, onBudgetType } from "../utilities/budget-type";
 	import { getValue, watchValue } from "../utilities/store";
 	import Icon from "./Icon.svelte";
 	import PreviewToggle from "./PreviewToggle.svelte";
@@ -24,6 +25,10 @@
 		value = Boolean(saved);
 	});
 
+	let tracking = $state(isTrackingBudget());
+	$effect(() => onBudgetType((type) => (tracking = type === "tracking")));
+	const standsDown = $derived(!!setting.envelopeOnly && tracking);
+
 	// Follows changes made elsewhere, like a sync from another browser.
 	$effect(() => watchValue(ctx.key, (v) => (value = Boolean(v ?? ctx.defaultValue))));
 
@@ -43,6 +48,11 @@
 		>
 		{#if setting.description}
 			<span class="abt-setting__desc">{setting.description}</span>
+		{/if}
+		{#if standsDown}
+			<span class="abt-setting__desc"
+				>Envelope budgets only: off while this budget uses tracking.</span
+			>
 		{/if}
 	</span>
 	{#if setting.preview}

@@ -168,6 +168,7 @@ function cleanupCards() {
 
 export const budgetCardStyling = defineSetting({
 	type: "checkbox",
+	envelopeOnly: true,
 	label: "Budget Card Styling",
 	description: "Add a spending flow bar to the current month's budget card.",
 	group: "Budget",

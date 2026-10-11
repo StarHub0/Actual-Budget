@@ -623,6 +623,7 @@ function tick(): void {
 
 export const templatePlan = defineSetting({
 	type: "checkbox",
+	envelopeOnly: true,
 	label: "Budget Insights",
 	description: "Month summary, template breakdowns, and priority planning in a side panel.",
 	icon: "layout",

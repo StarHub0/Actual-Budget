@@ -1,6 +1,7 @@
 import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
-import { getCurrentPath } from "@lib/utilities/route-watcher";
+import { refreshBudgetType } from "@lib/utilities/budget-type";
+import { getCurrentPath, watchRoute } from "@lib/utilities/route-watcher";
 
 // Settings' sub-pages first, so /settings/payees reads as Payees.
 const COLUMN_PAGES = [
@@ -23,6 +24,8 @@ const DASHBOARD_PATH =
 export const nativeHooks = {
 	type: "core" as const,
 	init: () => {
+		// Switching type in Settings saves without a reload, so it's re-read on each page change.
+		watchRoute(() => void refreshBudgetType());
 		// The titlebar renders before the budget loads, but the content grid holding it is only
 		// told apart once a page has rendered; found from Help (Titlebar > cluster > wrapper > button).
 		watchElement(HELP, () => {

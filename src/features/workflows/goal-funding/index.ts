@@ -114,6 +114,7 @@ function syncMounted(): void {
 
 export const goalFunding = defineSetting({
 	type: "checkbox",
+	envelopeOnly: true,
 	label: "Goal Funding",
 	description:
 		"Click a category's balance to see its goal progress and assign money to an underfunded goal.",

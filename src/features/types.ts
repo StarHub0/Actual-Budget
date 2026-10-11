@@ -33,6 +33,8 @@ export interface BaseSetting<C extends SettingContext> {
 	preview?: Component;
 	/** Also runs in Actual's mobile view. Off by default: most features anchor on desktop markup. */
 	mobile?: boolean;
+	/** Built on To Budget and its envelope cells, so it stands down on tracking budgets. */
+	envelopeOnly?: boolean;
 	/** Runs when the setting is activated; return a cleanup for teardown on deactivate. Omit if `css` alone covers the feature. */
 	init?: (ctx: C & { value: unknown }) => Cleanup | Promise<Cleanup>;
 }

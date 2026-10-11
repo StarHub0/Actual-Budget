@@ -1,3 +1,4 @@
+import { isTrackingBudget, onBudgetType } from "@lib/utilities/budget-type";
 import { applyGlobalCSS } from "@lib/utilities/dom";
 import { createLogger } from "@lib/utilities/logger";
 import { getValue, setValue } from "@lib/utilities/store";
@@ -29,6 +30,20 @@ function scopedCss(setting: Setting, css: string): string {
 	return "mobile" in setting && setting.mobile ? css : desktopOnly(css);
 }
 
+/** An envelope-only feature on a tracking budget: kept enabled, but with no CSS and not started. */
+function standsDown(setting: Setting): boolean {
+	return "envelopeOnly" in setting && !!setting.envelopeOnly && isTrackingBudget();
+}
+
+function applyCss(entry: Active): void {
+	const { setting } = entry;
+	if (setting.type === "core" || setting.type === "custom" || !setting.css) return;
+	applyGlobalCSS(
+		standsDown(setting) ? "" : scopedCss(setting, setting.css(entry.ctx)),
+		entry.ctx.key,
+	);
+}
+
 async function start(entry: Active): Promise<void> {
 	if (entry.setting.type === "core" || entry.setting.type === "custom") return;
 	const cleanup = await entry.setting.init?.(entry.ctx);
@@ -50,9 +65,9 @@ async function activate(setting: Setting, value: unknown) {
 
 	try {
 		// The media query keeps desktop-only CSS off mobile without a re-render on resize.
-		if (setting.css) applyGlobalCSS(scopedCss(setting, setting.css(ctx)), key);
+		applyCss(entry);
 		active.set(key, entry);
-		if (setting.mobile || desktop.matches) await start(entry);
+		if ((setting.mobile || desktop.matches) && !standsDown(setting)) await start(entry);
 		log.info(`enabled "${key}"`);
 	} catch (err) {
 		log.error(`failed to enable "${key}"`, err);
@@ -80,9 +95,23 @@ async function deactivate(key: string, opts?: DeactivateOptions) {
 function onViewportChange(): void {
 	for (const [key, entry] of active) {
 		if (entry.setting.type === "core" || entry.setting.type === "custom") continue;
-		if (entry.setting.mobile) continue;
+		if (entry.setting.mobile || standsDown(entry.setting)) continue;
 		const run = desktop.matches ? !entry.stop && start(entry) : entry.stop && stop(entry);
 		if (run) run.catch((err) => log.error(`viewport change failed for "${key}"`, err));
+	}
+}
+
+/** Stands envelope-only features down on a tracking budget, and back up on an envelope one. */
+function onBudgetTypeChange(): void {
+	for (const [key, entry] of active) {
+		const { setting } = entry;
+		if (setting.type === "core" || setting.type === "custom" || !setting.envelopeOnly) continue;
+		applyCss(entry);
+		const down = standsDown(setting);
+		const run = down
+			? entry.stop && stop(entry)
+			: !entry.stop && (setting.mobile || desktop.matches) && start(entry);
+		if (run) run.catch((err) => log.error(`budget type change failed for "${key}"`, err));
 	}
 }
 
@@ -133,6 +162,7 @@ async function bootstrapOne(setting: Setting): Promise<void> {
 export async function bootstrapSettings(settings: Setting[]) {
 	log.info(`bootstrapping ${settings.length} settings`);
 	desktop.addEventListener("change", onViewportChange);
+	onBudgetType(onBudgetTypeChange);
 	await Promise.all(settings.map(bootstrapOne));
 	log.info("bootstrap complete");
 }
