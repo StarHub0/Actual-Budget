@@ -418,6 +418,18 @@ export function createMonthLoader() {
 			upcomingDates.clear();
 			payeeNames = new Map();
 		},
+		/** Drops one of the lists kept between months, so the next load fetches it again. */
+		forget: (scope: "accounts" | "categories" | "payees") => {
+			if (scope === "accounts") {
+				accountNames = new Map();
+			} else if (scope === "categories") {
+				categoryNames.clear();
+				incomeCategoryIds.clear();
+				groupList = [];
+			} else {
+				payeeNames = new Map();
+			}
+		},
 		categoryGroups: () => groupList,
 	};
 }

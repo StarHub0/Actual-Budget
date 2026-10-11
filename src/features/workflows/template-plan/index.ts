@@ -2,7 +2,7 @@ import { isPanelPersistedOpen, sidepanel, wasPanelPersistedOpen } from "@feature
 import { defineSetting } from "@features/types";
 import { icon } from "@lib/utilities/icons";
 import type { Schedule } from "@lib/types/actual-schema";
-import { loadCurrentBudgetId, notify, query, send } from "@lib/utilities/actual-api";
+import { loadCurrentBudgetId, notify, onListChange, query, send } from "@lib/utilities/actual-api";
 import {
 	type BudgetTableChange,
 	collectChanges,
@@ -672,12 +672,15 @@ export const templatePlan = defineSetting({
 		const stopClickListener = installClickListener();
 		const stopKeyboard = installKeyboard();
 		const unwatch = watchDom(tick);
+		// Renames and moves made while the budget page stays open.
+		const stopCategories = onListChange("categories", invalidateCategoriesCache);
 
 		return () => {
 			controller.abort();
 			session = null;
 			templatePlanState.enabled = false;
 			unwatch();
+			stopCategories();
 			stopClickListener();
 			stopKeyboard();
 			stopWatchingCells();

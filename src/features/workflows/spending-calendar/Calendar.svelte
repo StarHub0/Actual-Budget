@@ -2,6 +2,7 @@
 	import { sidepanel } from "@features/core/side-panel";
 	import { SIDEBAR_ATTR } from "@features/core/side-panel/api";
 	import MonthPicker from "@lib/components/MonthPicker.svelte";
+	import { onListChange } from "@lib/utilities/actual-api";
 	import { loadCategoryColors } from "@lib/utilities/category-colors";
 	import { loadCurrency } from "@lib/utilities/currency";
 	import {
@@ -344,8 +345,16 @@
 			}
 			editorOpen = open;
 		});
+		// Renames and new or closed accounts and categories, while the calendar is open.
+		const stopLists = (["accounts", "categories", "payees"] as const).map((scope) =>
+			onListChange(scope, () => {
+				loader.forget(scope);
+				loadMonth({ refilter: true });
+			}),
+		);
 		return () => {
 			unwatch();
+			stopLists.forEach((stop) => stop());
 			window.removeEventListener("keydown", onKey);
 			closeDayPanel();
 		};

@@ -60,6 +60,7 @@ async function setup({ deferRestore = false } = {}) {
 		isBudgetPage: () => true,
 		createPriorityPlanner: () => ({}),
 		INSIGHTS_TABS: ["overview", "breakdown", "priority"],
+		onListChange: () => () => {},
 		createDebouncedObserver: () => {
 			const observer = {
 				observe: () => observers.add(observer),

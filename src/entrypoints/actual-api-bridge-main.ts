@@ -305,11 +305,27 @@ export default defineUnlistedScript(async () => {
 		store.subscribe(report);
 	}
 
+	// Reports each of Actual's lists (accounts, categories, payees...) it refetches, which it does
+	// after any change to them, from its own UI, a bank sync or another device.
+	function watchLists() {
+		window.__TANSTACK_QUERY_CLIENT__?.getQueryCache?.().subscribe((event) => {
+			const [scope, kind] = event.query?.queryKey ?? [];
+			if (event.type !== "updated" || event.action?.type !== "success" || kind !== "lists") {
+				return;
+			}
+			document.dispatchEvent(
+				new CustomEvent("abt:api:lists", { detail: JSON.stringify({ scope }) }),
+			);
+		});
+	}
+
 	(function attachStore(retries = 50) {
 		const store = findStore();
 		if (store) {
 			watchImports(store);
 			watchPrivacy(store);
+			// Actual creates its query client before rendering, so it's there once the store is.
+			watchLists();
 			return;
 		}
 		if (retries > 0) {

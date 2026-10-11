@@ -6,15 +6,16 @@
 		watchAccountIcons,
 	} from "@features/appearance/account-icon-picker";
 	import { sidebarSearch } from "@features/appearance/sidebar-search";
-	import { sidebarShortcuts } from "@features/appearance/sidebar-shortcuts";
 	import {
 		openSidebarSettings,
 		setLiveSidebarBudget,
 		type SidebarSettingsTab,
 	} from "@features/appearance/sidebar-settings-menu/settings";
-	import { loadCurrentBudgetId } from "@lib/utilities/actual-api";
+	import { sidebarShortcuts } from "@features/appearance/sidebar-shortcuts";
+	import { loadCurrentBudgetId, onListChange } from "@lib/utilities/actual-api";
 	import { loadCurrency } from "@lib/utilities/currency";
 	import { watchDom } from "@lib/utilities/dom-watcher";
+	import { createLogger } from "@lib/utilities/logger";
 	import { getValue, setValue, watchValue } from "@lib/utilities/store";
 	import { FolderTree, LayoutGrid, Search, SlidersHorizontal } from "@lucide/svelte";
 	import { onMount } from "svelte";
@@ -31,25 +32,24 @@
 	import { invalidateAccountDetail } from "./lib/account-detail";
 	import { loadCurrentBudgetName } from "./lib/budgets";
 	import { clearAutoCollapse, SIDEBAR_COLLAPSED_KEY, undoAutoCollapse } from "./lib/collapse";
-	import { LAYOUT_KEY, toLayout, type SidebarLayout } from "./lib/layout";
 	import type { SidebarAccount } from "./lib/data";
 	import {
-		NATIVE_ROOT_ATTR,
 		closeAccount,
 		loadSidebarAccounts,
+		NATIVE_ROOT_ATTR,
 		readNativeAccountBalanceTexts,
-		readNativeTotalsText,
 		readNativeSyncingAccountIds,
+		readNativeTotalsText,
 		readNativeUncategorizedButtonText,
 		refreshBalances,
 		refreshSyncStatuses,
 		refreshUncategorizedCounts,
 		renameAccount,
 	} from "./lib/data";
+	import { LAYOUT_KEY, toLayout, type SidebarLayout } from "./lib/layout";
 	import { isMac } from "./lib/search";
 	import "./styles/layout.css";
 	import "./styles/shared.css";
-	import { createLogger } from "@lib/utilities/logger";
 
 	const log = createLogger("sidebar");
 
@@ -389,34 +389,21 @@
 		}
 	}
 
+	let reloadSeq = 0;
 	async function reloadAccounts() {
-		accounts = await loadSidebarAccounts(accounts);
+		const seq = ++reloadSeq;
+		const loaded = await loadSidebarAccounts(accounts);
+		// A later reload may have finished first; its list is newer.
+		if (seq !== reloadSeq) {
+			return;
+		}
+		accounts = loaded;
 		await refreshUncategorizedCounts(accounts);
 	}
 
-	// Closing routes through Actual's real native modal (balance transfer /
-	// category prompts are its job, not ours) — see data.ts's closeAccount().
-	// We can't know synchronously whether the user confirmed or cancelled, but
-	// the modal element is a real DOM node (`[data-testid="close-account-modal"]`)
-	// that mounts and unmounts for real, so once it's gone we just refetch —
-	// harmless no-op if nothing actually changed.
-	async function handleCloseAccount(accountId: string) {
-		await closeAccount(accountId);
-
-		let modalSeen = false;
-		const stop = watchDom(() => {
-			const open = !!document.querySelector('[data-testid="close-account-modal"]');
-			if (open) {
-				modalSeen = true;
-				return;
-			}
-			if (!modalSeen) {
-				return;
-			}
-			stop();
-			reloadAccounts();
-		});
-	}
+	// Any change to the accounts table: Actual's own UI, a bank sync, another device, or closing
+	// one through Actual's modal from here.
+	$effect(() => onListChange("accounts", () => void reloadAccounts()));
 
 	onMount(async () => {
 		// Panels don't survive a reload, so a fold one made is undone here.
@@ -545,7 +532,7 @@
 						split
 						onToggleGroupMode={toggleGroupMode}
 						onRenameAccount={handleRenameAccount}
-						onCloseAccount={handleCloseAccount}
+						onCloseAccount={closeAccount}
 					/>
 				{/if}
 				<Footer {accounts} />
@@ -590,7 +577,7 @@
 					{budgetId}
 					onToggleGroupMode={toggleGroupMode}
 					onRenameAccount={handleRenameAccount}
-					onCloseAccount={handleCloseAccount}
+					onCloseAccount={closeAccount}
 				/>
 			{/if}
 			<Footer {accounts} onCollapse={collapseSidebar} />

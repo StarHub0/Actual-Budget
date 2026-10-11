@@ -309,6 +309,21 @@ export function invalidateQueries(queryKey: string[]): void {
 	);
 }
 
+/**
+ * Calls back whenever Actual refetches one of its lists ("accounts", "categories", "payees",
+ * "account-groups"), which it does after any change to it. Returns an unsubscribe.
+ */
+export function onListChange(scope: string, callback: () => void): () => void {
+	const listener = (e: Event) => {
+		const detail = JSON.parse((e as CustomEvent<string>).detail) as { scope?: string };
+		if (detail.scope === scope) {
+			callback();
+		}
+	};
+	document.addEventListener("abt:api:lists", listener);
+	return () => document.removeEventListener("abt:api:lists", listener);
+}
+
 /** Tags the items of Actual's open menus with `data-abt-menu-key`, their untranslated names. */
 export function markMenuKeys(): void {
 	document.dispatchEvent(new CustomEvent("abt:api:mark-menu-keys"));
