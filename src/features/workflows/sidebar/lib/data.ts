@@ -70,7 +70,7 @@ export async function loadSidebarAccounts(
 
 	const prevUncategorized = new Map(previous.map((a) => [a.id, a.uncategorized]));
 	const live = accounts.filter((a) => !a.tombstone);
-	const withRows = readNativeAccountRows();
+	const withRows = readNativeBalanceCells();
 	const balances = await Promise.all(live.map((a) => loadBalance(a.id, withRows.has(a.id))));
 
 	return live.map((a, i) => ({
@@ -142,126 +142,26 @@ export async function refreshSyncStatuses(accounts: SidebarAccount[]): Promise<s
 	return changed;
 }
 
-const PENDING_DOT_VAR = "var(--color-sidebarItemBackgroundPending)";
-
 /** Set on the hidden native sidebar's root by index.ts; scopes reads away from the rest of the page. */
 export const NATIVE_ROOT_ATTR = "data-abt-native-sidebar-root";
 const BALANCE_CELL_PREFIX = "__global!balance-";
-/** The redesigned sidebar's SyncDot title while an account syncs (ABT is English-only). */
-const REDESIGN_SYNCING_TITLE = "Syncing";
-
-interface NativeAccountRow {
-	row: HTMLElement;
-	balance: HTMLElement;
-}
 
 /**
- * Native account rows keyed by account id, for both the classic sidebar (one `<a>`
- * per account) and the redesign (react-aria tree rows). Both render the balance
- * through the same spreadsheet cell, whose name carries the id.
+ * Native account balance cells keyed by account id, for both the classic sidebar (one `<a>`
+ * per account) and the redesign (react-aria tree rows); the cell's name carries the id.
  */
-function readNativeAccountRows(): Map<string, NativeAccountRow> {
+function readNativeBalanceCells(): Map<string, HTMLElement> {
 	const root = document.querySelector(`[${NATIVE_ROOT_ATTR}]`) ?? document;
-	const rows = new Map<string, NativeAccountRow>();
-	for (const balance of root.querySelectorAll<HTMLElement>(
+	const cells = new Map<string, HTMLElement>();
+	for (const cell of root.querySelectorAll<HTMLElement>(
 		`[data-cellname^="${BALANCE_CELL_PREFIX}"]`,
 	)) {
-		const id = balance.dataset.cellname?.slice(BALANCE_CELL_PREFIX.length);
-		const row = balance.closest<HTMLElement>('a[href^="/accounts/"], [role="row"]');
-		if (id && row) {
-			rows.set(id, { row, balance });
+		const id = cell.dataset.cellname?.slice(BALANCE_CELL_PREFIX.length);
+		if (id && cell.closest('a[href^="/accounts/"], [role="row"]')) {
+			cells.set(id, cell);
 		}
 	}
-	return rows;
-}
-
-// Maps Actual's emotion-generated classes (css-xxxx) to their literal
-// background-color, read off the CSSOM rule (not resolved) so var(...)
-// comes back as a reference string. Scoped to <style data-emotion> sheets
-// to keep the scan cheap.
-function collectDotStateColors(): Map<string, string> {
-	const colors = new Map<string, string>();
-	for (const sheet of document.styleSheets) {
-		const owner = sheet.ownerNode;
-		if (!(owner instanceof HTMLStyleElement) || !owner.hasAttribute("data-emotion")) {
-			continue;
-		}
-
-		let rules: CSSRuleList;
-		try {
-			rules = sheet.cssRules;
-		} catch {
-			continue; // inaccessible (e.g. cross-origin) — skip
-		}
-
-		for (const rule of rules) {
-			if (!(rule instanceof CSSStyleRule)) {
-				continue;
-			}
-			// Only a bare single-class selector — the dot's own state class —
-			// never a descendant selector like `.linkClass .dot` (that's the
-			// *active-link override* rule, not the dot's own declared state).
-			const match = rule.selectorText.trim().match(/^\.([\w-]+)$/);
-			if (!match) {
-				continue;
-			}
-			const bg = rule.style.backgroundColor;
-			if (bg) {
-				colors.set(match[1], bg);
-			}
-		}
-	}
-	return colors;
-}
-
-// Emotion class names hash their styles, so a class's color never changes: cache
-// the map and rescan stylesheets only when an unseen class shows up.
-let dotStateColors = new Map<string, string>();
-/** Class sets with no color rule even after a rescan, so they don't trigger rescans forever. */
-const unresolvedDotClasses = new Set<string>();
-
-// Classic sidebar: each row's `.dot` gets a per-state emotion class rather than
-// an inline style, and its *computed* color can't be
-// trusted either — when the account is the active route, a higher-priority
-// rule overrides the rendered color without touching `.dot`'s classList. So
-// this reads the declared rule for whichever class is actually in the
-// classList, which stays correct regardless of selection.
-function isClassicDotPending(row: HTMLElement, pass: { rescanned: boolean }): boolean {
-	const dot = row.querySelector<HTMLElement>(".dot");
-	if (!dot) {
-		return false;
-	}
-	const classes = [...dot.classList].filter((cls) => cls !== "dot");
-	const lookup = () =>
-		classes.map((cls) => dotStateColors.get(cls)).find((color) => color !== undefined);
-
-	let ownColor = lookup();
-	const signature = classes.join(" ");
-	if (ownColor === undefined && !pass.rescanned && !unresolvedDotClasses.has(signature)) {
-		pass.rescanned = true;
-		dotStateColors = collectDotStateColors();
-		ownColor = lookup();
-		if (ownColor === undefined) {
-			unresolvedDotClasses.add(signature);
-		}
-	}
-	return ownColor === PENDING_DOT_VAR;
-}
-
-// Reads which accounts the hidden native sidebar shows as syncing.
-export function readNativeSyncingAccountIds(): Set<string> {
-	const pass = { rescanned: false };
-	const ids = new Set<string>();
-	for (const [id, { row }] of readNativeAccountRows()) {
-		if (row.querySelector(`[title="${REDESIGN_SYNCING_TITLE}"]`)) {
-			ids.add(id);
-			continue;
-		}
-		if (isClassicDotPending(row, pass)) {
-			ids.add(id);
-		}
-	}
-	return ids;
+	return cells;
 }
 
 /** The native sidebar's totals (all, on and off budget, groups), which still show when groups collapse. */
@@ -280,9 +180,9 @@ export function readNativeTotalsText(): string {
 // Balance cell is spreadsheet-bound and re-renders on its own on sync/tx changes.
 export function readNativeAccountBalanceTexts(): Map<string, string> {
 	const texts = new Map<string, string>();
-	for (const [id, { balance }] of readNativeAccountRows()) {
-		if (balance.textContent) {
-			texts.set(id, balance.textContent);
+	for (const [id, cell] of readNativeBalanceCells()) {
+		if (cell.textContent) {
+			texts.set(id, cell.textContent);
 		}
 	}
 	return texts;

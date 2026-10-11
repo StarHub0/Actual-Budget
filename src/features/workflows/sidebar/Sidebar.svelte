@@ -12,7 +12,7 @@
 		type SidebarSettingsTab,
 	} from "@features/appearance/sidebar-settings-menu/settings";
 	import { sidebarShortcuts } from "@features/appearance/sidebar-shortcuts";
-	import { loadCurrentBudgetId, onListChange } from "@lib/utilities/actual-api";
+	import { loadCurrentBudgetId, onListChange, onSyncingAccounts } from "@lib/utilities/actual-api";
 	import { loadCurrency } from "@lib/utilities/currency";
 	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { createLogger } from "@lib/utilities/logger";
@@ -38,7 +38,6 @@
 		loadSidebarAccounts,
 		NATIVE_ROOT_ATTR,
 		readNativeAccountBalanceTexts,
-		readNativeSyncingAccountIds,
 		readNativeTotalsText,
 		readNativeUncategorizedButtonText,
 		refreshBalances,
@@ -232,46 +231,30 @@
 		return () => browser.storage.onChanged.removeListener(onStorageChange);
 	});
 
-	// A bank sync happens server-side over time (synced → syncing → synced/
-	// error) with no push/event this bridge can subscribe to, and `bank_sync_status`
-	// is a persisted DB column that a fast sync may never actually pass through
-	// "pending" on its way from "ok" back to "ok" — polling that field alone
-	// can miss it. The real per-account "syncing" signal only exists as
-	// Redux's ephemeral `accountsSyncing` list, which this bridge has no
-	// direct access to — but Actual's own native sidebar (hidden, not
-	// unmounted — see experimental/sidebar/index.ts) renders that exact state
-	// as each row's `.dot` color, so reading it back from the DOM is exact and
-	// event-driven off the same shared body-level watchDom observer, instead
-	// of guessing from a global banner or sampling on a timer.
+	// Which accounts are syncing comes from Actual's store; how each sync ended (ok, or which
+	// error) is saved to the account, so it's read back once one finishes.
 	let syncingIds = new Set<string>();
 
-	$effect(() => {
-		return watchDom(() => {
-			const nowSyncing = readNativeSyncingAccountIds();
-
+	$effect(() =>
+		onSyncingAccounts((nowSyncing) => {
 			for (const account of accounts) {
 				if (nowSyncing.has(account.id) && account.status !== "syncing") {
 					account.status = "syncing";
 				}
 			}
-
-			// The dot only distinguishes pending vs. not — re-check the accounts
-			// that just stopped to learn their real end state (ok vs. which error),
-			// and pick up any transactions the sync just brought in.
-			const justFinished = [...syncingIds].filter((id) => !nowSyncing.has(id));
-			if (justFinished.length) {
-				const finished = accounts.filter((a) => justFinished.includes(a.id));
+			const finished = accounts.filter((a) => syncingIds.has(a.id) && !nowSyncing.has(a.id));
+			if (finished.length) {
 				refreshSyncStatuses(finished).then((changed) => {
 					for (const id of changed) {
 						invalidateAccountDetail(id);
 					}
 				});
+				// A sync brings in transactions, some without categories.
 				refreshUncategorizedCounts(finished);
 			}
-
 			syncingIds = nowSyncing;
-		});
-	});
+		}),
+	);
 
 	// This bridge has no push event for "a transaction was (un)categorized"
 	// either — same shape as the syncing-status effect above, but keyed off

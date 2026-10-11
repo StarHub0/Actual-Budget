@@ -324,6 +324,17 @@ export function onListChange(scope: string, callback: () => void): () => void {
 	return () => document.removeEventListener("abt:api:lists", listener);
 }
 
+/** Calls back with the accounts bank-syncing right now, each time that set changes. */
+export function onSyncingAccounts(callback: (ids: Set<string>) => void): () => void {
+	const listener = (e: Event) => {
+		const { ids } = JSON.parse((e as CustomEvent<string>).detail) as { ids: string[] };
+		callback(new Set(ids));
+	};
+	document.addEventListener("abt:api:syncing", listener);
+	document.dispatchEvent(new CustomEvent("abt:api:syncing-request"));
+	return () => document.removeEventListener("abt:api:syncing", listener);
+}
+
 /** Tags the items of Actual's open menus with `data-abt-menu-key`, their untranslated names. */
 export function markMenuKeys(): void {
 	document.dispatchEvent(new CustomEvent("abt:api:mark-menu-keys"));

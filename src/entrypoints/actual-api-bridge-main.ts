@@ -305,6 +305,30 @@ export default defineUnlistedScript(async () => {
 		store.subscribe(report);
 	}
 
+	// Reports which accounts are bank-syncing. Actual keeps that only in its store; the result
+	// is saved to the accounts table when each finishes.
+	function watchSyncing(store) {
+		let last = null;
+		const report = () => {
+			const ids = store.getState().account?.accountsSyncing ?? [];
+			const key = ids.join(",");
+			if (key === last) {
+				return;
+			}
+			last = key;
+			document.dispatchEvent(
+				new CustomEvent("abt:api:syncing", { detail: JSON.stringify({ ids }) }),
+			);
+		};
+		report();
+		store.subscribe(report);
+		// A listener that arrives later asks for the current set.
+		document.addEventListener("abt:api:syncing-request", () => {
+			last = null;
+			report();
+		});
+	}
+
 	// Reports each of Actual's lists (accounts, categories, payees...) it refetches, which it does
 	// after any change to them, from its own UI, a bank sync or another device.
 	function watchLists() {
@@ -324,6 +348,7 @@ export default defineUnlistedScript(async () => {
 		if (store) {
 			watchImports(store);
 			watchPrivacy(store);
+			watchSyncing(store);
 			// Actual creates its query client before rendering, so it's there once the store is.
 			watchLists();
 			return;
