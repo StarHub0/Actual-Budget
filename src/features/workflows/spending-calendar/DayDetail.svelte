@@ -2,6 +2,7 @@
 	import { ArrowLeftRight } from "@lucide/svelte";
 	import Row from "@lib/components/panel/Row.svelte";
 	import Section from "@lib/components/panel/Section.svelte";
+	import BalanceSpark from "./BalanceSpark.svelte";
 	import { getCategoryColor } from "@lib/utilities/category-colors";
 	import { fmtMoney } from "@lib/utilities/currency";
 	import { editSchedule } from "./schedules";
@@ -9,9 +10,14 @@
 
 	const {
 		transactions,
+		balances,
+		dayIndex,
 	}: {
 		date: Date;
 		transactions: DayTransaction[];
+		/** The month's closing balances, when the calendar shows them. */
+		balances?: { balance: number; future: boolean }[];
+		dayIndex: number;
 	} = $props();
 
 	function fmt(cents: number): string {
@@ -82,9 +88,24 @@
 {/snippet}
 
 <div>
+	{#if balances?.[dayIndex]}
+		<Section title="Balance">
+			{#snippet trailing()}<span class="abt-privacy-number">{fmt(balances[dayIndex].balance)}</span
+				>{/snippet}
+			<BalanceSpark points={balances} selected={dayIndex} />
+		</Section>
+	{/if}
+
 	{#if categoryBreakdown.length > 0}
 		<Section title="Spending">
 			{#snippet trailing()}{fmt(-totalSpent)}{/snippet}
+			{#if categoryBreakdown.length > 1}
+				<div class="dd__split" aria-hidden="true">
+					{#each categoryBreakdown as cat (cat.id || cat.name)}
+						<span style:flex-grow={cat.amount} style:background={catColor(cat.id)}></span>
+					{/each}
+				</div>
+			{/if}
 			{#each categoryBreakdown as cat (cat.id || cat.name)}
 				{@const pct = totalSpent > 0 ? Math.round((cat.amount / totalSpent) * 100) : 0}
 				<Row name={cat.name} meta={`${pct}%`} value={fmt(-cat.amount)}>
@@ -142,6 +163,20 @@
 </div>
 
 <style>
+	.dd__split {
+		display: flex;
+		gap: 2px;
+		height: 8px;
+		margin-bottom: var(--abt-space-2);
+		overflow: hidden;
+		border-radius: var(--abt-radius-sm);
+	}
+
+	.dd__split span {
+		flex-basis: 0;
+		min-width: 2px;
+	}
+
 	.dd__cat-dot {
 		width: 8px;
 		height: 8px;

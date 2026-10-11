@@ -284,6 +284,7 @@
 
 		const date = new Date(year, month, day.date);
 		selectedIso = day.iso;
+		const monthDays = days.filter((d) => d.isCurrentMonth);
 
 		headerContainer = document.createElement("div");
 		headerInstance = mount(DayHeader, {
@@ -300,6 +301,10 @@
 			props: {
 				date,
 				transactions: day.transactions,
+				balances: monthDays.every((d) => d.balance !== undefined)
+					? monthDays.map((d) => ({ balance: d.balance!, future: d.isFuture }))
+					: undefined,
+				dayIndex: day.date - 1,
 			},
 		});
 
