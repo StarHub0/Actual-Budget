@@ -1,6 +1,50 @@
 # Changelog
 
 
+## v0.1.93
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.92...v0.1.93)
+
+### 🚀 Enhancements
+
+- Stand envelope-only features down on tracking budgets ([61e96a0](https://github.com/aelxxs/actual-budget-tweaks/commit/61e96a0))
+- Month cards for tracking budgets ([36ff3e4](https://github.com/aelxxs/actual-budget-tweaks/commit/36ff3e4))
+- Follow Actual's account, category and payee changes as they happen ([1bdc9b4](https://github.com/aelxxs/actual-budget-tweaks/commit/1bdc9b4))
+
+### 🩹 Fixes
+
+- Keep account icons when an account moves to another group ([01d1ee8](https://github.com/aelxxs/actual-budget-tweaks/commit/01d1ee8))
+- Bring the template plan tests up to date ([753c102](https://github.com/aelxxs/actual-budget-tweaks/commit/753c102))
+- Pause stock and RSU refreshes while the tab is hidden ([d788006](https://github.com/aelxxs/actual-budget-tweaks/commit/d788006))
+- Show Income Breakdown's load error as text, not HTML ([81db538](https://github.com/aelxxs/actual-budget-tweaks/commit/81db538))
+- Give interactive elements real roles instead of hiding a11y warnings ([843b10f](https://github.com/aelxxs/actual-budget-tweaks/commit/843b10f))
+- Keep settings section refs reactive ([81b3532](https://github.com/aelxxs/actual-budget-tweaks/commit/81b3532))
+
+### 💅 Refactors
+
+- Route console warnings through the scoped logger ([b94f451](https://github.com/aelxxs/actual-budget-tweaks/commit/b94f451))
+- Group stray files with their features ([085fd3f](https://github.com/aelxxs/actual-budget-tweaks/commit/085fd3f))
+- Seed local state with writable $derived instead of ignoring the warning ([36ea544](https://github.com/aelxxs/actual-budget-tweaks/commit/36ea544))
+- Rebuild Income Breakdown as a content-script feature ([c363ffc](https://github.com/aelxxs/actual-budget-tweaks/commit/c363ffc))
+- Drop the account type Actual no longer sets ([2052f12](https://github.com/aelxxs/actual-budget-tweaks/commit/2052f12))
+- Take bank sync state from Actual's store, not its sidebar ([73c950c](https://github.com/aelxxs/actual-budget-tweaks/commit/73c950c))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.92 ([9136aff](https://github.com/aelxxs/actual-budget-tweaks/commit/9136aff))
+- Enforce braces on every if ([198b03a](https://github.com/aelxxs/actual-budget-tweaks/commit/198b03a))
+- Refresh the website's feature list ([b970d15](https://github.com/aelxxs/actual-budget-tweaks/commit/b970d15))
+- Move from deprecated lucide-svelte to @lucide/svelte ([b386aa5](https://github.com/aelxxs/actual-budget-tweaks/commit/b386aa5))
+- Update Svelte and lint tooling ([694b0a0](https://github.com/aelxxs/actual-budget-tweaks/commit/694b0a0))
+
+### 🎨 Styles
+
+- Brace every if ([9f8f1f2](https://github.com/aelxxs/actual-budget-tweaks/commit/9f8f1f2))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.92
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.91...v0.1.92)
