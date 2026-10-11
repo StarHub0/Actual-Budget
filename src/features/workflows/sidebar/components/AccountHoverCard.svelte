@@ -56,7 +56,7 @@
 			<span class="acard-status"><StatusIcon status={account.status} /></span>
 			<div class="acard-title">
 				<span class="acard-name">{account.name}</span>
-				<span class="acard-sub">{d.institution} · {d.type}</span>
+				<span class="acard-sub">{d.institution}</span>
 			</div>
 		</div>
 

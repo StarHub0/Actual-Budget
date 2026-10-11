@@ -17,8 +17,6 @@ export interface UpcomingItem {
 export interface AccountDetail {
 	/** Real linked-bank display name (`bankName`), or a manual-account label. */
 	institution: string;
-	/** Real `account.type`, formatted for display. */
-	type: string;
 	/** 30 real daily balance points (signed cents), oldest to newest, ending at the account's actual current balance. */
 	points: number[];
 	deltaAbs: number;
@@ -31,16 +29,6 @@ export interface AccountDetail {
 	upcoming: UpcomingItem[];
 	syncText: string;
 }
-
-const TYPE_LABEL: Record<Account["type"], string> = {
-	checking: "Checking",
-	savings: "Savings",
-	credit: "Credit Card",
-	investment: "Investment",
-	mortgage: "Mortgage",
-	debt: "Loan",
-	other: "Account",
-};
 
 function relTime(iso: string | null | undefined): string {
 	if (!iso) {
@@ -108,7 +96,7 @@ async function computeAccountDetail(
 ): Promise<AccountDetail> {
 	const [, accounts, recentTxs, clearedCell, unclearedCell, schedules] = await Promise.all([
 		loadDatePrefs(),
-		query<Pick<Account, "id" | "type" | "bankName" | "last_sync">[]>("accounts", {
+		query<Pick<Account, "id" | "bankName" | "last_sync">[]>("accounts", {
 			filter: { id: accountId },
 		}),
 		query<Pick<Transaction, "date" | "amount" | "is_child" | "cleared">[]>("transactions", {
@@ -125,7 +113,6 @@ async function computeAccountDetail(
 
 	const account = accounts[0];
 	const institution = account?.bankName || (status === "manual" ? "Manual entry" : "Bank-linked");
-	const type = account?.type ? TYPE_LABEL[account.type] : "Account";
 
 	// ---- 30-day trend: work backward from the real current balance using
 	// only real transaction amounts in the trailing window (excluding split
@@ -190,7 +177,6 @@ async function computeAccountDetail(
 
 	return {
 		institution,
-		type,
 		points,
 		deltaAbs,
 		deltaPct,

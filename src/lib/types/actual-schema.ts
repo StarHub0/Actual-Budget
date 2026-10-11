@@ -25,13 +25,9 @@ export type AmountInCents = number;
 
 // ── Entities ──────────────────────────────────────────────────────
 
-export type AccountType =
-	"checking" | "savings" | "credit" | "investment" | "mortgage" | "debt" | "other";
-
 export interface Account {
 	id: UUID;
 	name: string;
-	type: AccountType;
 	offbudget: boolean;
 	closed: boolean;
 	tombstone?: boolean;

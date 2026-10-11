@@ -8,7 +8,6 @@ export type SyncStatus = "synced" | "syncing" | "error" | "manual";
 export interface SidebarAccount {
 	id: string;
 	name: string;
-	type: Account["type"];
 	offbudget: boolean;
 	closed: boolean;
 	balance: number;
@@ -63,7 +62,7 @@ export async function loadSidebarAccounts(
 	previous: SidebarAccount[] = [],
 ): Promise<SidebarAccount[]> {
 	const accounts = await query<
-		(Pick<Account, "id" | "name" | "type" | "offbudget" | "closed" | "tombstone"> & {
+		(Pick<Account, "id" | "name" | "offbudget" | "closed" | "tombstone"> & {
 			sync_status?: string | null;
 			bank_sync_status?: string | null;
 		})[]
@@ -77,7 +76,6 @@ export async function loadSidebarAccounts(
 	return live.map((a, i) => ({
 		id: a.id,
 		name: a.name,
-		type: a.type,
 		offbudget: a.offbudget,
 		closed: a.closed,
 		balance: balances[i] ?? 0,

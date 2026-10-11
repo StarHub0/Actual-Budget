@@ -123,7 +123,7 @@ export function createMonthLoader() {
 	let payeeTransferAcct = new Map<string, string | null>();
 	let accountNames = new Map<string, string>();
 	let accountOffbudget = new Map<string, boolean>();
-	let accountList: Pick<Account, "id" | "name" | "type" | "offbudget" | "closed">[] = [];
+	let accountList: Pick<Account, "id" | "name" | "offbudget" | "closed">[] = [];
 	let categoryList: Pick<Category, "id" | "name" | "group" | "is_income">[] = [];
 	let groupList: Pick<CategoryGroup, "id" | "name" | "is_income">[] = [];
 	const categoryNames = new Map<string, string>();

@@ -4,15 +4,7 @@
 	import Tabs from "@lib/components/Tabs.svelte";
 	import type { Category, CategoryGroup } from "@lib/types/actual-schema";
 	import { onOutsideClick, positionPopover } from "@lib/utilities/popover";
-	import {
-		CreditCard,
-		HandCoins,
-		House,
-		Landmark,
-		PiggyBank,
-		TrendingUp,
-		Wallet,
-	} from "@lucide/svelte";
+	import { Wallet } from "@lucide/svelte";
 	import { onMount } from "svelte";
 	import FilterTree from "./FilterTree.svelte";
 	import {
@@ -45,14 +37,6 @@
 		{ value: "spending", label: "Spending" },
 		{ value: "income", label: "Income" },
 	];
-	const TYPE_ICONS = {
-		checking: Landmark,
-		savings: PiggyBank,
-		credit: CreditCard,
-		investment: TrendingUp,
-		mortgage: House,
-		debt: HandCoins,
-	};
 
 	let button = $state<HTMLElement | null>(null);
 	let menu = $state<HTMLElement | null>(null);
@@ -87,7 +71,6 @@
 
 {#snippet accountIcon(account: FilterAccount)}
 	{@const icon = layout.icons[account.id]}
-	{@const TypeIcon = TYPE_ICONS[account.type as keyof typeof TYPE_ICONS] ?? Wallet}
 	{#if icon}
 		<img
 			class="cf__img"
@@ -95,7 +78,7 @@
 			alt=""
 		/>
 	{:else}
-		<TypeIcon size={14} strokeWidth={1.75} />
+		<Wallet size={14} strokeWidth={1.75} />
 	{/if}
 {/snippet}
 

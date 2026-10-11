@@ -14,7 +14,7 @@ import { loadCurrentBudgetId } from "@lib/utilities/actual-api";
 import { getValue } from "@lib/utilities/store";
 import type { TreeSection } from "./FilterTree.svelte";
 
-export type FilterAccount = Pick<Account, "id" | "name" | "type" | "offbudget" | "closed">;
+export type FilterAccount = Pick<Account, "id" | "name" | "offbudget" | "closed">;
 
 /** ABT's sidebar icons, groups and order, so the account list reads like the sidebar. */
 export interface AccountLayout {
