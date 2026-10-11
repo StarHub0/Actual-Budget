@@ -1,4 +1,5 @@
 import { defineSetting } from "@features/types";
+import { onListChange, query } from "@lib/utilities/actual-api";
 import { createElement } from "@lib/utilities/dom";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { getValue, setValue, watchValue } from "@lib/utilities/store";
@@ -8,6 +9,9 @@ const STORAGE_KEY_PREFIX = "abt-account-icons";
 const ACCOUNT_TITLE_SELECTOR = '[data-testid="account-name"]';
 const ACCOUNT_ICON_IMG_CLASS = "abt-account-icon-img";
 const ICON_SIZE = 28;
+// Mobile's accounts page: each row's name, drawn with its icon through a CSS variable.
+const MOBILE_ROW_NAME = '[data-testid="account-list-item"] [data-testid="account-name"]';
+const MOBILE_ICON_ATTR = "data-abt-m-account-icon";
 const EMOJI_ASSET_BASE_URL = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
 
 export interface AccountIconData {
@@ -170,12 +174,68 @@ function syncTitle(): void {
 	}
 }
 
+/*
+ * Mobile rows carry no account id, so names are matched against Actual's accounts. The icon is
+ * a ::before, never markup: React owns the name's text.
+ */
+let accountIds = new Map<string, string>();
+// Names already looked up and not found, so a missing one is asked for once, not every frame.
+const askedFor = new Set<string>();
+let loadingIds = false;
+
+async function loadAccountIds(): Promise<void> {
+	loadingIds = true;
+	try {
+		const accounts = await query<{ id: string; name: string }[]>("accounts", {
+			select: ["id", "name"],
+		});
+		accountIds = new Map(accounts.map((a) => [a.name, a.id]));
+	} finally {
+		loadingIds = false;
+	}
+	syncMobileRows();
+}
+
+function syncMobileRows(): void {
+	const rows = document.querySelectorAll<HTMLElement>(MOBILE_ROW_NAME);
+	// A lookup made before the budget opened comes back empty; rows naming unknown accounts
+	// trigger another.
+	const unknown = [...rows]
+		.map((el) => el.textContent?.trim() ?? "")
+		.filter((name) => name && !accountIds.has(name) && !askedFor.has(name));
+	if (unknown.length && !loadingIds) {
+		unknown.forEach((name) => askedFor.add(name));
+		void loadAccountIds().catch(() => undefined);
+	}
+	for (const el of rows) {
+		const id = accountIds.get(el.textContent?.trim() ?? "");
+		const iconData = id ? iconCache?.[id] : undefined;
+		const url = iconData
+			? iconData.type === "emoji"
+				? getEmojiAssetUrl(iconData.value)
+				: iconData.value
+			: null;
+		const value = url ? `url("${url.replace(/"/g, "%22")}")` : "";
+		if (el.style.getPropertyValue("--abt-account-icon") === value) {
+			continue;
+		}
+		if (value) {
+			el.style.setProperty("--abt-account-icon", value);
+			el.setAttribute(MOBILE_ICON_ATTR, "");
+		} else {
+			el.style.removeProperty("--abt-account-icon");
+			el.removeAttribute(MOBILE_ICON_ATTR);
+		}
+	}
+}
+
 export const accountIconPicker = defineSetting({
 	type: "checkbox",
 	label: "Account Icon Picker",
 	description: "Set a custom favicon or emoji icon per account.",
 	group: "Sidebar",
 	icon: "image",
+	platform: "all",
 	context: {
 		key: "account-icon-picker",
 		defaultValue: true,
@@ -187,19 +247,48 @@ export const accountIconPicker = defineSetting({
 			align-items: center;
 			white-space: nowrap;
 		}
+
+		[${MOBILE_ICON_ATTR}]::before {
+			content: "";
+			display: inline-block;
+			width: 22px;
+			height: 22px;
+			margin-right: var(--abt-space-3);
+			vertical-align: -5px;
+			background: var(--abt-account-icon) center / contain no-repeat;
+			border-radius: var(--abt-radius-sm);
+		}
 	`,
 	init: () => {
 		enabled = true;
 		document.documentElement.setAttribute(ROOT_TOGGLE_ATTR, "on");
 		void loadIconCache()
-			.then(syncTitle)
+			.then(() => {
+				syncTitle();
+				syncMobileRows();
+			})
 			.catch(() => undefined);
-		const unwatch = watchDom(syncTitle);
+		const unwatch = watchDom(() => {
+			syncTitle();
+			syncMobileRows();
+		});
+		void loadAccountIds().catch(() => undefined);
+		const unwatchAccounts = onListChange("accounts", () => {
+			askedFor.clear();
+			void loadAccountIds().catch(() => undefined);
+		});
+		const unwatchIcons = watchAccountIcons(syncMobileRows);
 
 		return () => {
 			enabled = false;
 			unwatch();
+			unwatchAccounts();
+			unwatchIcons();
 			titleEls().forEach(clearTitle);
+			for (const el of document.querySelectorAll<HTMLElement>(`[${MOBILE_ICON_ATTR}]`)) {
+				el.style.removeProperty("--abt-account-icon");
+				el.removeAttribute(MOBILE_ICON_ATTR);
+			}
 			document.documentElement.removeAttribute(ROOT_TOGGLE_ATTR);
 		};
 	},
