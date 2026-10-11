@@ -48,14 +48,20 @@ function parse(filePath) {
 function resolveImport(fromDir, importPath) {
 	const base = resolve(fromDir, importPath);
 	for (const candidate of [`${base}.ts`, join(base, "index.ts")]) {
-		if (existsSync(candidate)) return candidate;
+		if (existsSync(candidate)) {
+			return candidate;
+		}
 	}
 	throw new Error(`Could not resolve import "${importPath}" from ${fromDir}`);
 }
 
 function stringLiteralValue(node) {
-	if (!node) return undefined;
-	if (ts.isStringLiteralLike(node)) return node.text;
+	if (!node) {
+		return undefined;
+	}
+	if (ts.isStringLiteralLike(node)) {
+		return node.text;
+	}
 	return undefined;
 }
 
@@ -72,19 +78,29 @@ function extractSettingMeta(filePath, name) {
 	let found;
 
 	source.forEachChild((node) => {
-		if (found) return;
-		if (!ts.isVariableStatement(node)) return;
+		if (found) {
+			return;
+		}
+		if (!ts.isVariableStatement(node)) {
+			return;
+		}
 		for (const decl of node.declarationList.declarations) {
-			if (!ts.isIdentifier(decl.name) || decl.name.text !== name || !decl.initializer) continue;
+			if (!ts.isIdentifier(decl.name) || decl.name.text !== name || !decl.initializer) {
+				continue;
+			}
 			let objectLiteral = decl.initializer;
 			if (ts.isCallExpression(objectLiteral) && objectLiteral.arguments.length > 0) {
 				objectLiteral = objectLiteral.arguments[0];
 			}
-			if (ts.isObjectLiteralExpression(objectLiteral)) found = objectLiteral;
+			if (ts.isObjectLiteralExpression(objectLiteral)) {
+				found = objectLiteral;
+			}
 		}
 	});
 
-	if (!found) return null;
+	if (!found) {
+		return null;
+	}
 
 	return {
 		label: stringLiteralValue(findProperty(found, "label")) ?? "",
@@ -98,12 +114,19 @@ function extractSettingMeta(filePath, name) {
 function buildImportMap(source, fileDir) {
 	const map = new Map();
 	source.forEachChild((node) => {
-		if (!ts.isImportDeclaration(node)) return;
-		if (!node.importClause?.namedBindings || !ts.isNamedImports(node.importClause.namedBindings))
+		if (!ts.isImportDeclaration(node)) {
 			return;
-		if (!ts.isStringLiteral(node.moduleSpecifier)) return;
+		}
+		if (!node.importClause?.namedBindings || !ts.isNamedImports(node.importClause.namedBindings)) {
+			return;
+		}
+		if (!ts.isStringLiteral(node.moduleSpecifier)) {
+			return;
+		}
 		const importPath = node.moduleSpecifier.text;
-		if (!importPath.startsWith(".")) return; // skip type-only/aliased imports like "./types"
+		if (!importPath.startsWith(".")) {
+			return;
+		} // skip type-only/aliased imports like "./types"
 
 		let resolved;
 		try {
@@ -128,9 +151,13 @@ function main() {
 	const topLevelArrays = new Map();
 	let scriptSectionsNode;
 	entrySource.forEachChild((node) => {
-		if (!ts.isVariableStatement(node)) return;
+		if (!ts.isVariableStatement(node)) {
+			return;
+		}
 		for (const decl of node.declarationList.declarations) {
-			if (!ts.isIdentifier(decl.name) || !decl.initializer) continue;
+			if (!ts.isIdentifier(decl.name) || !decl.initializer) {
+				continue;
+			}
 			if (decl.name.text === "scriptSections") {
 				scriptSectionsNode = decl.initializer;
 			} else if (ts.isArrayLiteralExpression(decl.initializer)) {
@@ -144,9 +171,15 @@ function main() {
 	}
 
 	function resolveItemsArray(itemsNode) {
-		if (!itemsNode) return null;
-		if (ts.isArrayLiteralExpression(itemsNode)) return itemsNode;
-		if (ts.isIdentifier(itemsNode)) return topLevelArrays.get(itemsNode.text) ?? null;
+		if (!itemsNode) {
+			return null;
+		}
+		if (ts.isArrayLiteralExpression(itemsNode)) {
+			return itemsNode;
+		}
+		if (ts.isIdentifier(itemsNode)) {
+			return topLevelArrays.get(itemsNode.text) ?? null;
+		}
 		return null;
 	}
 
@@ -165,11 +198,17 @@ function main() {
 				const label = stringLiteralValue(findProperty(groupLiteral, "label")) ?? null;
 				const itemsArray = resolveItemsArray(findProperty(groupLiteral, "items"));
 				for (const el of itemsArray?.elements ?? []) {
-					if (!ts.isIdentifier(el)) continue;
+					if (!ts.isIdentifier(el)) {
+						continue;
+					}
 					const filePath = importMap.get(el.text);
-					if (!filePath) continue;
+					if (!filePath) {
+						continue;
+					}
 					const meta = extractSettingMeta(filePath, el.text);
-					if (meta && meta.label) items.push({ ...meta, group: label });
+					if (meta && meta.label) {
+						items.push({ ...meta, group: label });
+					}
 				}
 			}
 

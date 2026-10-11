@@ -16,7 +16,9 @@ export function openDialog<P extends { onClose: () => void }>(
 	let instance: ReturnType<typeof mount> | null = null;
 
 	const close = () => {
-		if (!instance) return;
+		if (!instance) {
+			return;
+		}
 		unmount(instance);
 		instance = null;
 		container.remove();

@@ -15,7 +15,9 @@ const CSS = `
 function markRows() {
 	for (const row of document.querySelectorAll<HTMLElement>('[data-testid="row"]')) {
 		const catCell = row.querySelector('[data-testid="category"]');
-		if (!catCell) continue;
+		if (!catCell) {
+			continue;
+		}
 		const text = catCell.textContent?.trim() || "";
 		row.classList.toggle("abt-uncategorized", text === "Categorize" || text === "");
 	}

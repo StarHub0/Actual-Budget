@@ -177,7 +177,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	// Format date from "2026-03-30" to "03/30/26"
 	function formatDate(dateStr) {
-		if (!dateStr || dateStr.length < 10) return dateStr || "";
+		if (!dateStr || dateStr.length < 10) {
+			return dateStr || "";
+		}
 		const [y, m, d] = dateStr.split("-");
 		return `${m}/${d}/${y.slice(2)}`;
 	}
@@ -200,7 +202,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	function parseMeta(meta) {
-		if (!meta) return {};
+		if (!meta) {
+			return {};
+		}
 		if (typeof meta === "string") {
 			try {
 				return JSON.parse(meta) || {};
@@ -237,20 +241,28 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	async function fetchDashboardWidgets() {
-		if (dashboardWidgetsCache) return dashboardWidgetsCache;
+		if (dashboardWidgetsCache) {
+			return dashboardWidgetsCache;
+		}
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const result = await query(q("dashboard").select("*"));
 		dashboardWidgetsCache = result.data || [];
 		return dashboardWidgetsCache;
 	}
 
 	async function fetchDashboardPages() {
-		if (dashboardPagesCache) return dashboardPagesCache;
+		if (dashboardPagesCache) {
+			return dashboardPagesCache;
+		}
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const result = await query(q("dashboard_pages").select("*"));
 		dashboardPagesCache = result.data || [];
 		return dashboardPagesCache;
@@ -263,7 +275,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	async function getCurrentDashboardId() {
 		const fromUrl = getDashboardIdFromUrl();
-		if (fromUrl) return fromUrl;
+		if (fromUrl) {
+			return fromUrl;
+		}
 		const pages = await fetchDashboardPages();
 		return pages[0]?.id || null;
 	}
@@ -280,7 +294,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	async function refreshPrivacyMode() {
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return;
+		if (!q || !query) {
+			return;
+		}
 		try {
 			const result = await query(q("preferences").filter({ id: "isPrivacyEnabled" }).select("*"));
 			isPrivacyMode = String(result.data?.[0]?.value) === "true";
@@ -302,7 +318,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			widget.classList.toggle("abt-ib-editing", editing);
 			widget.closest(".react-grid-item")?.classList.toggle("abt-ib-host-editing", editing);
 		});
-		if (editing) closeTransactionPopover();
+		if (editing) {
+			closeTransactionPopover();
+		}
 	}
 
 	async function sendDashboardMutation(name, args) {
@@ -319,7 +337,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	async function updateDashboardWidgetMeta(widgetRecord, updates) {
-		if (!widgetRecord?.id) return;
+		if (!widgetRecord?.id) {
+			return;
+		}
 		const nextMeta = { ...parseMeta(widgetRecord.meta), ...updates };
 		widgetRecord.meta = nextMeta;
 		await sendDashboardMutation("dashboard-update-widget", {
@@ -330,7 +350,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	async function addCustomDashboardWidget(widgetDefinition) {
 		const dashboardId = await getCurrentDashboardId();
-		if (!dashboardId) return;
+		if (!dashboardId) {
+			return;
+		}
 		await sendDashboardMutation(
 			"dashboard-add-widget",
 			widgetDefinition.buildWidgetPayload(dashboardId),
@@ -352,40 +374,56 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	// ── Data fetching ─────────────────────────────────────────────────────
 	async function fetchCategories() {
-		if (categoriesCache) return categoriesCache;
+		if (categoriesCache) {
+			return categoriesCache;
+		}
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const result = await query(q("categories").select("*"));
 		categoriesCache = result.data || [];
 		return categoriesCache;
 	}
 
 	async function fetchCategoryGroups() {
-		if (categoryGroupsCache) return categoryGroupsCache;
+		if (categoryGroupsCache) {
+			return categoryGroupsCache;
+		}
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const result = await query(q("category_groups").select("*"));
 		categoryGroupsCache = result.data || [];
 		return categoryGroupsCache;
 	}
 
 	async function fetchPayees() {
-		if (payeesCache) return payeesCache;
+		if (payeesCache) {
+			return payeesCache;
+		}
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const result = await query(q("payees").select("*"));
 		payeesCache = result.data || [];
 		return payeesCache;
 	}
 
 	async function fetchAccounts() {
-		if (accountsCache) return accountsCache;
+		if (accountsCache) {
+			return accountsCache;
+		}
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const result = await query(q("accounts").select("*"));
 		accountsCache = result.data || [];
 		return accountsCache;
@@ -394,7 +432,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	async function fetchTransactions(startDate, endDate) {
 		const q = window.$q,
 			query = window.$query;
-		if (!q || !query) return [];
+		if (!q || !query) {
+			return [];
+		}
 		const qb = q("transactions")
 			.filter({ date: { $gte: startDate } })
 			.filter({ date: { $lte: endDate } })
@@ -426,19 +466,31 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		const expenses = new Map();
 
 		for (const tx of transactions) {
-			if (!tx.category) continue;
+			if (!tx.category) {
+				continue;
+			}
 			const cat = catMap.get(tx.category);
-			if (!cat) continue;
+			if (!cat) {
+				continue;
+			}
 			if (cat.is_income) {
 				const payeeId = tx.payee;
-				if (!payeeId) continue;
+				if (!payeeId) {
+					continue;
+				}
 				const payee = payeeMap.get(payeeId);
-				if (!payee) continue;
+				if (!payee) {
+					continue;
+				}
 				incomes.set(payeeId, (incomes.get(payeeId) || 0) + tx.amount);
 			} else {
 				const groupId = cat.group;
-				if (!groupId) continue;
-				if (!expenses.has(groupId)) expenses.set(groupId, new Map());
+				if (!groupId) {
+					continue;
+				}
+				if (!expenses.has(groupId)) {
+					expenses.set(groupId, new Map());
+				}
 				const subMap = expenses.get(groupId);
 				subMap.set(tx.category, (subMap.get(tx.category) || 0) + tx.amount);
 			}
@@ -469,7 +521,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		let totalExpense = 0;
 
 		incomes.forEach((amount, payeeId) => {
-			if (amount <= 0) return;
+			if (amount <= 0) {
+				return;
+			}
 			const payee = payeeMap.get(payeeId);
 			const name = payee ? payee.name : "Unknown";
 			if (showIncome) {
@@ -504,13 +558,17 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 					return;
 				}
 				const absAmount = Math.abs(amount);
-				if (absAmount <= 0) return;
+				if (absAmount <= 0) {
+					return;
+				}
 				subEntries.push({ catId, catName, absAmount });
 				masterTotal += absAmount;
 				totalExpense += absAmount;
 			});
 
-			if (masterTotal <= 0) return;
+			if (masterTotal <= 0) {
+				return;
+			}
 			categorySeriesData.push({
 				groupId,
 				groupName,
@@ -569,7 +627,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	// ── Transaction popover ────────────────────────────────────────────────
 	function getTransactionsForNode(nodeId) {
-		if (!lastTransactions || !lastCalculatedData) return [];
+		if (!lastTransactions || !lastCalculatedData) {
+			return [];
+		}
 		const { catMap } = lastCalculatedData;
 
 		if (nodeId.startsWith("payee-")) {
@@ -585,7 +645,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		if (nodeId.startsWith("group-")) {
 			const groupId = nodeId.replace("group-", "");
 			return lastTransactions.filter((tx) => {
-				if (!tx.category) return false;
+				if (!tx.category) {
+					return false;
+				}
 				const cat = catMap.get(tx.category);
 				return cat && cat.group === groupId && !cat.is_income;
 			});
@@ -626,7 +688,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			const { catMap } = lastCalculatedData;
 			const catIds = [];
 			catMap.forEach((cat, id) => {
-				if (cat.group === groupId && !cat.is_income) catIds.push(id);
+				if (cat.group === groupId && !cat.is_income) {
+					catIds.push(id);
+				}
 			});
 			if (catIds.length === 1) {
 				conditions.push({ field: "category", op: "is", value: catIds[0], type: "id" });
@@ -653,7 +717,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	function showTransactionPopover(nodeId, nodeName, anchorX, anchorY, container) {
-		if (isDashboardEditing()) return;
+		if (isDashboardEditing()) {
+			return;
+		}
 		// Toggle: clicking the same node that's already open dismisses it
 		const existing = document.getElementById("abt-ib-popover");
 		if (existing && existing.dataset.nodeId === nodeId) {
@@ -663,7 +729,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		closeTransactionPopover();
 
 		const txs = getTransactionsForNode(nodeId);
-		if (txs.length === 0) return;
+		if (txs.length === 0) {
+			return;
+		}
 
 		const { catMap, payeeMap, accountMap } = lastCalculatedData;
 
@@ -756,9 +824,13 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		const popH = popover.offsetHeight;
 		// Prefer above the click; fall back to below
 		let top = viewportY - popH - 8;
-		if (top < 8) top = viewportY + 12;
+		if (top < 8) {
+			top = viewportY + 12;
+		}
 		// Clamp to viewport bottom
-		if (top + popH > window.innerHeight - 8) top = window.innerHeight - popH - 8;
+		if (top + popH > window.innerHeight - 8) {
+			top = window.innerHeight - popH - 8;
+		}
 		let left = viewportX - popW / 2;
 		left = Math.max(8, Math.min(left, window.innerWidth - popW - 8));
 
@@ -777,8 +849,12 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 				document.removeEventListener("mousedown", onOutsideClick, true);
 				return;
 			}
-			if (popover.contains(e.target)) return;
-			if (e.target.closest(".abt-ib-node") || e.target.closest(".abt-ib-link")) return;
+			if (popover.contains(e.target)) {
+				return;
+			}
+			if (e.target.closest(".abt-ib-node") || e.target.closest(".abt-ib-link")) {
+				return;
+			}
 			closeTransactionPopover();
 			document.removeEventListener("mousedown", onOutsideClick, true);
 		}
@@ -788,7 +864,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	function closeTransactionPopover() {
 		const existing = document.getElementById("abt-ib-popover");
-		if (existing) existing.remove();
+		if (existing) {
+			existing.remove();
+		}
 	}
 
 	// ── Rendering ─────────────────────────────────────────────────────────
@@ -796,7 +874,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		const rect = container.getBoundingClientRect();
 		const rawWidth = Math.floor(rect.width || container.clientWidth || 0);
 		const width = rawWidth - 16;
-		if (width <= 0) return null;
+		if (width <= 0) {
+			return null;
+		}
 
 		const rawHeight = Math.floor(container.clientHeight || rect.height || 400);
 		return {
@@ -806,9 +886,13 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	function retryRenderWhenReady(chart) {
-		if (chart.dataset.abtIbRenderRetry === "1") return;
+		if (chart.dataset.abtIbRenderRetry === "1") {
+			return;
+		}
 		const attempts = Number(chart.dataset.abtIbRenderRetryCount || 0);
-		if (attempts >= 10) return;
+		if (attempts >= 10) {
+			return;
+		}
 		chart.dataset.abtIbRenderRetryCount = String(attempts + 1);
 		chart.dataset.abtIbRenderRetry = "1";
 		setTimeout(() => {
@@ -820,13 +904,19 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	function renderSankey(container, sankeyData) {
 		const { nodes, links, totalIncome } = sankeyData;
 		const dimensions = getChartDimensions(container);
-		if (!dimensions) return;
+		if (!dimensions) {
+			return;
+		}
 		const { width, height } = dimensions;
 
 		const chartOnly = container.querySelector("svg");
 		const tooltipEl = container.querySelector(".abt-ib-tooltip");
-		if (chartOnly) chartOnly.remove();
-		if (tooltipEl) tooltipEl.remove();
+		if (chartOnly) {
+			chartOnly.remove();
+		}
+		if (tooltipEl) {
+			tooltipEl.remove();
+		}
 		// Remove loading/empty msgs
 		const msgs = container.querySelectorAll(".abt-ib-loading, .abt-ib-empty");
 		msgs.forEach((m) => m.remove());
@@ -896,10 +986,18 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		];
 
 		function getNodeColor(node) {
-			if (node.id === "budget") return "#cdd6f4";
-			if (node.id === "net-gain") return "#a6e3a1";
-			if (node.id === "net-loss") return "#f38ba8";
-			if (node.id === "positive-cats") return "#a6e3a1";
+			if (node.id === "budget") {
+				return "#cdd6f4";
+			}
+			if (node.id === "net-gain") {
+				return "#a6e3a1";
+			}
+			if (node.id === "net-loss") {
+				return "#f38ba8";
+			}
+			if (node.id === "positive-cats") {
+				return "#a6e3a1";
+			}
 			return fallbackColors[node.index % fallbackColors.length];
 		}
 
@@ -919,8 +1017,12 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		// Determine which node a link click should resolve to (the more specific end)
 		function clickableNodeForLink(d) {
 			// Prefer the non-"budget" end; for group→cat links prefer the cat
-			if (d.target.id !== "budget") return d.target;
-			if (d.source.id !== "budget") return d.source;
+			if (d.target.id !== "budget") {
+				return d.target;
+			}
+			if (d.source.id !== "budget") {
+				return d.source;
+			}
 			return d.target;
 		}
 
@@ -939,7 +1041,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			.attr("stroke-width", (d) => Math.max(1, d.width))
 			.attr("class", "abt-ib-link")
 			.on("mouseenter", function (event, d) {
-				if (isDashboardEditing()) return;
+				if (isDashboardEditing()) {
+					return;
+				}
 				d3.select(this).attr("stroke-opacity", 0.6);
 				const pct = totalIncome > 0 ? ((d.value / totalIncome) * 100).toFixed(1) : "0";
 				const node = clickableNodeForLink(d);
@@ -954,7 +1058,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 					);
 			})
 			.on("mousemove", function (event) {
-				if (isDashboardEditing()) return;
+				if (isDashboardEditing()) {
+					return;
+				}
 				tooltip.style("left", event.offsetX + 12 + "px").style("top", event.offsetY - 10 + "px");
 			})
 			.on("mouseleave", function () {
@@ -964,9 +1070,13 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			.on("click", function (event, d) {
 				event.stopPropagation();
 				tooltip.style("opacity", 0);
-				if (isDashboardEditing()) return;
+				if (isDashboardEditing()) {
+					return;
+				}
 				const node = clickableNodeForLink(d);
-				if (node.id === "budget" || node.id === "net-gain" || node.id === "net-loss") return;
+				if (node.id === "budget" || node.id === "net-gain" || node.id === "net-loss") {
+					return;
+				}
 				showTransactionPopover(node.id, node.name, event.offsetX, event.offsetY, container);
 			});
 
@@ -985,7 +1095,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			.attr("opacity", 0.9)
 			.attr("class", "abt-ib-node")
 			.on("mouseenter", function (event, d) {
-				if (isDashboardEditing()) return;
+				if (isDashboardEditing()) {
+					return;
+				}
 				linkSel.attr("stroke-opacity", (l) => (l.source === d || l.target === d ? 0.6 : 0.15));
 				const hint =
 					d.id !== "budget" && d.id !== "net-gain" && d.id !== "net-loss"
@@ -998,7 +1110,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 					);
 			})
 			.on("mousemove", function (event) {
-				if (isDashboardEditing()) return;
+				if (isDashboardEditing()) {
+					return;
+				}
 				tooltip.style("left", event.offsetX + 12 + "px").style("top", event.offsetY - 10 + "px");
 			})
 			.on("mouseleave", function () {
@@ -1008,8 +1122,12 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			.on("click", function (event, d) {
 				event.stopPropagation();
 				tooltip.style("opacity", 0);
-				if (isDashboardEditing()) return;
-				if (d.id === "budget" || d.id === "net-gain" || d.id === "net-loss") return;
+				if (isDashboardEditing()) {
+					return;
+				}
+				if (d.id === "budget" || d.id === "net-gain" || d.id === "net-loss") {
+					return;
+				}
 				showTransactionPopover(d.id, d.name, event.offsetX, event.offsetY, container);
 			});
 
@@ -1033,7 +1151,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	// ── Widget UI ─────────────────────────────────────────────────────────
 	function applyPreset(label) {
 		const preset = DATE_PRESETS.find((p) => p.label === label);
-		if (!preset) return;
+		if (!preset) {
+			return;
+		}
 		const { start, end } = preset.calc();
 		state.startDate = start;
 		state.endDate = end;
@@ -1092,7 +1212,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 	function updateSubtitle(widget) {
 		const sub = widget.querySelector(".abt-ib-subtitle");
-		if (sub) sub.textContent = `${state.startDate} – ${state.endDate}`;
+		if (sub) {
+			sub.textContent = `${state.startDate} – ${state.endDate}`;
+		}
 	}
 
 	function closeActiveMenu() {
@@ -1138,7 +1260,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 				document.removeEventListener("mousedown", onOutsideClick, true);
 				return;
 			}
-			if (activeMenu.contains(e.target)) return;
+			if (activeMenu.contains(e.target)) {
+				return;
+			}
 			closeActiveMenu();
 			document.removeEventListener("mousedown", onOutsideClick, true);
 		}
@@ -1160,7 +1284,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		menu.appendChild(
 			makeMenuButton("Remove", async () => {
 				closeActiveMenu();
-				if (!widgetRecord?.id) return;
+				if (!widgetRecord?.id) {
+					return;
+				}
 				await sendDashboardMutation("dashboard-remove-widget", widgetRecord.id);
 				widget.remove();
 			}),
@@ -1195,7 +1321,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 				menu.appendChild(
 					makeMenuButton(page.name || "Untitled dashboard", async () => {
 						closeActiveMenu();
-						if (!widgetRecord?.id) return;
+						if (!widgetRecord?.id) {
+							return;
+						}
 						await sendDashboardMutation("dashboard-copy-widget", {
 							id: widgetRecord.id,
 							targetDashboardPageId: page.id,
@@ -1211,7 +1339,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	function startRename(widget) {
 		const title = widget.querySelector(".abt-ib-title");
 		const widgetRecord = widget.__abtWidgetRecord;
-		if (!title || title.querySelector("input")) return;
+		if (!title || title.querySelector("input")) {
+			return;
+		}
 
 		const currentName = getWidgetName(widgetRecord);
 		const input = document.createElement("input");
@@ -1225,7 +1355,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 		let finished = false;
 		const finish = async (save) => {
-			if (finished) return;
+			if (finished) {
+				return;
+			}
 			finished = true;
 			const nextName = input.value.trim() || DEFAULT_WIDGET_NAME;
 			title.textContent = save ? nextName : currentName;
@@ -1312,15 +1444,18 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 				e.target.closest(".abt-ib-popover") ||
 				e.target.closest(".abt-ib-node") ||
 				e.target.closest(".abt-ib-link")
-			)
+			) {
 				return;
+			}
 			closeTransactionPopover();
 		});
 
 		widget.addEventListener(
 			"mousedown",
 			() => {
-				if (isDashboardEditing()) closeTransactionPopover();
+				if (isDashboardEditing()) {
+					closeTransactionPopover();
+				}
 			},
 			true,
 		);
@@ -1345,21 +1480,33 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		});
 		const start = widget.querySelector("#abt-ib-start");
 		const end = widget.querySelector("#abt-ib-end");
-		if (start) start.value = state.startDate;
-		if (end) end.value = state.endDate;
+		if (start) {
+			start.value = state.startDate;
+		}
+		if (end) {
+			end.value = state.endDate;
+		}
 		const income = widget.querySelector("#abt-ib-income");
 		const expense = widget.querySelector("#abt-ib-expense");
 		const subcats = widget.querySelector("#abt-ib-subcats");
 		const lossgain = widget.querySelector("#abt-ib-lossgain");
 		const grouppos = widget.querySelector("#abt-ib-grouppos");
-		if (income) income.checked = state.showIncome;
-		if (expense) expense.checked = state.showExpense;
+		if (income) {
+			income.checked = state.showIncome;
+		}
+		if (expense) {
+			expense.checked = state.showExpense;
+		}
 		if (subcats) {
 			subcats.checked = state.showSubCategories;
 			subcats.disabled = !state.showExpense;
 		}
-		if (lossgain) lossgain.checked = state.showLossGain;
-		if (grouppos) grouppos.checked = state.groupPositiveCategories;
+		if (lossgain) {
+			lossgain.checked = state.showLossGain;
+		}
+		if (grouppos) {
+			grouppos.checked = state.groupPositiveCategories;
+		}
 		updateSubtitle(widget);
 	}
 
@@ -1368,7 +1515,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	async function loadAndRender(chart) {
-		if (!chart) return;
+		if (!chart) {
+			return;
+		}
 		if (!getChartDimensions(chart)) {
 			retryRenderWhenReady(chart);
 			return;
@@ -1416,7 +1565,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 		const walker = document.createTreeWalker(gridItem, NodeFilter.SHOW_TEXT);
 		let node;
 		while ((node = walker.nextNode())) {
-			if (!node.textContent.includes(PLACEHOLDER_TEXT)) continue;
+			if (!node.textContent.includes(PLACEHOLDER_TEXT)) {
+				continue;
+			}
 			let target = node.parentElement;
 			while (
 				target?.parentElement &&
@@ -1443,9 +1594,15 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	async function injectWidgets() {
-		if (!running || !isReportsPage()) return;
-		if (isInjecting) return;
-		if (!window.$q || !window.$query) return;
+		if (!running || !isReportsPage()) {
+			return;
+		}
+		if (isInjecting) {
+			return;
+		}
+		if (!window.$q || !window.$query) {
+			return;
+		}
 
 		isInjecting = true;
 		try {
@@ -1453,7 +1610,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			enhanceAddWidgetMenu();
 
 			const gridItems = findPlaceholderWidgets();
-			if (gridItems.length === 0) return;
+			if (gridItems.length === 0) {
+				return;
+			}
 
 			const usedIds = new Set(
 				Array.from(document.querySelectorAll(`.${WIDGET_CLASS}`))
@@ -1466,7 +1625,9 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 
 			gridItems.forEach((gridItem, index) => {
 				const widgetRecord = widgetRecords[index];
-				if (!widgetRecord) return;
+				if (!widgetRecord) {
+					return;
+				}
 
 				// Mark so we don't match again
 				gridItem.dataset.abtOverlaid = "1";
@@ -1480,16 +1641,22 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 				// Fit chart to available space
 				const resizeChart = debounce(() => {
 					const chart = widget.querySelector(".abt-ib-chart-container");
-					if (!chart) return;
+					if (!chart) {
+						return;
+					}
 					const itemH = gridItem.offsetHeight;
 					const chartTop = chart.getBoundingClientRect().top - gridItem.getBoundingClientRect().top;
 					const available = itemH - chartTop - 4;
-					if (available > 80) chart.style.height = available + "px";
+					if (available > 80) {
+						chart.style.height = available + "px";
+					}
 				}, 100);
 
 				// Observe grid item resize
 				const existingObserver = resizeObservers.get(gridItem);
-				if (existingObserver) existingObserver.disconnect();
+				if (existingObserver) {
+					existingObserver.disconnect();
+				}
 				const resizeObserver = new ResizeObserver(() => {
 					resizeChart();
 					void loadAndRender(widget.querySelector(".abt-ib-chart-container"));
@@ -1534,11 +1701,15 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	// One scan a frame, however many mutations land in it.
 	let scanQueued = false;
 	const observer = new MutationObserver(() => {
-		if (scanQueued || !isReportsPage()) return;
+		if (scanQueued || !isReportsPage()) {
+			return;
+		}
 		scanQueued = true;
 		requestAnimationFrame(() => {
 			scanQueued = false;
-			if (!running || !isReportsPage()) return;
+			if (!running || !isReportsPage()) {
+				return;
+			}
 			syncWidgetModeClasses();
 			enhanceAddWidgetMenu();
 			void injectWidgets();
@@ -1562,13 +1733,17 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	// This script runs in the page's world, so it sees Actual's own navigations.
 	let historyPatched = false;
 	function patchHistory() {
-		if (historyPatched) return;
+		if (historyPatched) {
+			return;
+		}
 		historyPatched = true;
 		for (const method of ["pushState", "replaceState"]) {
 			const original = history[method].bind(history);
 			history[method] = (...args) => {
 				const result = original(...args);
-				if (running) checkAndInject();
+				if (running) {
+					checkAndInject();
+				}
 				return result;
 			};
 		}
@@ -1579,10 +1754,14 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	let running = false;
 
 	async function start() {
-		if (running) return;
+		if (running) {
+			return;
+		}
 		running = true;
 		await waitForBackendReady();
-		if (!running) return;
+		if (!running) {
+			return;
+		}
 		patchHistory();
 		window.addEventListener("popstate", checkAndInject);
 		observer.observe(document.body, { childList: true, subtree: true });
@@ -1591,26 +1770,35 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 	}
 
 	function stop() {
-		if (!running) return;
+		if (!running) {
+			return;
+		}
 		running = false;
 		observer.disconnect();
 		window.removeEventListener("popstate", checkAndInject);
 		closeActiveMenu();
 		closeTransactionPopover();
-		for (const resizeObserver of resizeObservers.values()) resizeObserver.disconnect();
+		for (const resizeObserver of resizeObservers.values()) {
+			resizeObserver.disconnect();
+		}
 		resizeObservers.clear();
 		document.querySelectorAll(`.${WIDGET_CLASS}`).forEach((widget) => widget.remove());
 		document.querySelectorAll(".abt-ib-host").forEach((host) => {
 			host.classList.remove("abt-ib-host", "abt-ib-host-editing");
 			delete host.dataset.abtOverlaid;
 		});
-		for (const placeholder of hiddenPlaceholders) placeholder.style.removeProperty("visibility");
+		for (const placeholder of hiddenPlaceholders) {
+			placeholder.style.removeProperty("visibility");
+		}
 		hiddenPlaceholders.clear();
 	}
 
 	function sync() {
-		if (document.documentElement.hasAttribute(ON_ATTR)) void start();
-		else stop();
+		if (document.documentElement.hasAttribute(ON_ATTR)) {
+			void start();
+		} else {
+			stop();
+		}
 	}
 
 	function init() {

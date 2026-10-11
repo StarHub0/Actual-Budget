@@ -26,9 +26,15 @@
 	);
 
 	function compactAge(d: number): string {
-		if (d < 1) return "today";
-		if (d < 30) return `${Math.floor(d)}d`;
-		if (d < 365) return `${Math.floor(d / 30)}mo`;
+		if (d < 1) {
+			return "today";
+		}
+		if (d < 30) {
+			return `${Math.floor(d)}d`;
+		}
+		if (d < 365) {
+			return `${Math.floor(d / 30)}mo`;
+		}
 		return `${Math.floor(d / 365)}y`;
 	}
 
@@ -45,7 +51,9 @@
 				{ filter: { account: accountId, cleared: false }, options: { splits: "none" } },
 			),
 		]).then(([accounts, count]) => {
-			if (stale) return;
+			if (stale) {
+				return;
+			}
 			const raw = accounts.find((a) => a.id === accountId)?.last_reconciled;
 			lastReconciled = raw ? Number(raw) : null;
 			uncleared = count ?? 0;

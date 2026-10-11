@@ -49,7 +49,9 @@
 				url: `https://api.exchangerate-api.com/v4/latest/${fromCurrency}`,
 				responseType: "json",
 			});
-			if (!res.ok) throw new Error("Failed to fetch");
+			if (!res.ok) {
+				throw new Error("Failed to fetch");
+			}
 			rates = res.data.rates;
 			lastUpdated = new Date().toLocaleTimeString();
 			convert();
@@ -78,7 +80,9 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape") onClose();
+		if (e.key === "Escape") {
+			onClose();
+		}
 	}
 
 	onMount(() => {

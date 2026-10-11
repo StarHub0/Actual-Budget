@@ -18,7 +18,9 @@ const CSS = `
 `;
 
 function styleLabels() {
-	if (!matchesPage(Page.Budget)) return;
+	if (!matchesPage(Page.Budget)) {
+		return;
+	}
 
 	for (const value of document.querySelectorAll<HTMLElement>(VALUE_SELECTOR)) {
 		const label = value.previousElementSibling;

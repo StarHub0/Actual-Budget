@@ -155,10 +155,18 @@ export function statusFor(
 	requestedCents: number | null | undefined,
 	allocatedCents: number,
 ): Status {
-	if (requestedCents == null) return allocatedCents > 0 ? "partial" : "none";
-	if (requestedCents <= 0) return "full";
-	if (allocatedCents >= requestedCents) return "full";
-	if (allocatedCents > 0) return "partial";
+	if (requestedCents == null) {
+		return allocatedCents > 0 ? "partial" : "none";
+	}
+	if (requestedCents <= 0) {
+		return "full";
+	}
+	if (allocatedCents >= requestedCents) {
+		return "full";
+	}
+	if (allocatedCents > 0) {
+		return "partial";
+	}
 	return "none";
 }
 
@@ -182,7 +190,9 @@ function addDemandRow(rowMap: Map<string, DemandRow>, row: DemandRow): DemandRow
 }
 
 function parsedTemplateDemandCents(entry: TemplateEntry): number | null {
-	if (!entry) return null;
+	if (!entry) {
+		return null;
+	}
 	if (entry.kind === "simple" && Number.isFinite(entry.amount)) {
 		return amountToCents(entry.amount!);
 	}
@@ -194,7 +204,9 @@ function breakdownTemplateDemandCents(
 	runningBudgetCents: number,
 	dryRunCents: number | undefined,
 ): number | null {
-	if (!entry) return null;
+	if (!entry) {
+		return null;
+	}
 	if (Number.isFinite(dryRunCents) && dryRunCents! > 0) {
 		return Math.max(0, Math.round(dryRunCents!));
 	}
@@ -221,7 +233,9 @@ function capDemandRowsToGoal<T extends { requestedCents: number | null }>(
 	rows: T[],
 	goalCents: number | null | undefined,
 ): T[] {
-	if (!goalCents || goalCents <= 0) return rows;
+	if (!goalCents || goalCents <= 0) {
+		return rows;
+	}
 	const targetCents = Math.max(0, Math.round(goalCents));
 	const knownTotal = rows.reduce((sum, row) => {
 		return row.requestedCents == null ? sum : sum + Math.max(0, row.requestedCents);
@@ -246,7 +260,9 @@ function capDemandRowsToGoal<T extends { requestedCents: number | null }>(
 				}
 				continue;
 			}
-			if (row.requestedCents > 0) withResiduals.push(row);
+			if (row.requestedCents > 0) {
+				withResiduals.push(row);
+			}
 		}
 		return withResiduals;
 	}
@@ -254,10 +270,16 @@ function capDemandRowsToGoal<T extends { requestedCents: number | null }>(
 	let remainingGoal = targetCents;
 	const capped: T[] = [];
 	for (const row of rows) {
-		if (remainingGoal <= 0) break;
-		if (row.requestedCents == null) continue;
+		if (remainingGoal <= 0) {
+			break;
+		}
+		if (row.requestedCents == null) {
+			continue;
+		}
 		const requested = Math.min(row.requestedCents, remainingGoal);
-		if (requested <= 0) continue;
+		if (requested <= 0) {
+			continue;
+		}
 		capped.push(Object.assign({}, row, { requestedCents: requested }));
 		remainingGoal -= requested;
 	}
@@ -277,8 +299,11 @@ function addBreakdownPriorityTier(tierMap: Map<string, PriorityTier>, item: Tier
 	}
 	const tier = tierMap.get(key)!;
 	tier.allocatedCents += item.allocatedCents;
-	if (item.requestedCents == null) tier.hasUnknownDemand = true;
-	else tier.requestedCents += item.requestedCents;
+	if (item.requestedCents == null) {
+		tier.hasUnknownDemand = true;
+	} else {
+		tier.requestedCents += item.requestedCents;
+	}
 
 	// A category can have multiple templates land in the same priority tier
 	// (e.g. two "simple" templates both at priority 3) — merge them into one
@@ -312,15 +337,21 @@ export function createPriorityPlanner({
 		sheet: string,
 		diff: Diff,
 	): Promise<BreakdownSummary | null> {
-		if (!sheet || !diff) return null;
+		if (!sheet || !diff) {
+			return null;
+		}
 		const monthKey = sheetToMonthKey(sheet);
 		const positiveRows: DiffRow[] = [];
 		for (const group of diff.groups || []) {
 			for (const row of group.rows || []) {
-				if (row.delta > 0) positiveRows.push(row);
+				if (row.delta > 0) {
+					positiveRows.push(row);
+				}
 			}
 		}
-		if (positiveRows.length === 0) return null;
+		if (positiveRows.length === 0) {
+			return null;
+		}
 
 		let templatesByCat: Map<string, TemplateEntry[]>;
 		try {
@@ -340,7 +371,9 @@ export function createPriorityPlanner({
 
 		await mapWithConcurrency(positiveRows, 6, async (row) => {
 			const templates = (templatesByCat.get(row.id) || []).filter(isBudgetTemplate);
-			if (templates.length === 0) return;
+			if (templates.length === 0) {
+				return;
+			}
 
 			const regularTemplates = templates.filter((t) => !isRemainderTemplate(t));
 			const remainderTemplates = templates.filter(isRemainderTemplate);
@@ -401,16 +434,22 @@ export function createPriorityPlanner({
 			let remainingDelta = row.delta;
 			let alreadyFundedCents = Math.max(0, row.before || 0);
 			for (const item of lineItems) {
-				if (remainingDelta <= 0) break;
+				if (remainingDelta <= 0) {
+					break;
+				}
 				let requested = item.requestedCents;
 				if (requested != null) {
 					const fundedBefore = Math.min(alreadyFundedCents, requested);
 					alreadyFundedCents -= fundedBefore;
 					requested = Math.max(0, requested - fundedBefore);
 				}
-				if (requested === 0) continue;
+				if (requested === 0) {
+					continue;
+				}
 				const allocated = requested == null ? remainingDelta : Math.min(requested, remainingDelta);
-				if (allocated <= 0) continue;
+				if (allocated <= 0) {
+					continue;
+				}
 				remainingDelta -= allocated;
 				mappedCents += allocated;
 				addBreakdownPriorityTier(tierMap, {
@@ -446,7 +485,9 @@ export function createPriorityPlanner({
 				: statusFor(tier.requestedCents, tier.allocatedCents);
 		}
 
-		if (tiers.length === 0) return null;
+		if (tiers.length === 0) {
+			return null;
+		}
 		return {
 			sheet,
 			month: sheetToMonthLabel(sheet),
@@ -464,7 +505,9 @@ export function createPriorityPlanner({
 		priorities: Priority[],
 		source: string,
 	): void {
-		if (requestedCents <= 0) return;
+		if (requestedCents <= 0) {
+			return;
+		}
 		addDemandRow(rowMap, {
 			catId: cat.id,
 			catName: cat.name,
@@ -499,7 +542,9 @@ export function createPriorityPlanner({
 				estimateCents: parsedTemplateDemandCents(entry),
 			}))
 			.sort((a, b) => comparePriority(a.entry.priority, b.entry.priority) || a.index - b.index);
-		if (regular.length === 0) return;
+		if (regular.length === 0) {
+			return;
+		}
 
 		const targetCents = Math.max(0, goalCents || 0);
 		let remainingTarget = targetCents;
@@ -529,10 +574,14 @@ export function createPriorityPlanner({
 			lastKnown = item;
 		}
 
-		if (targetCents <= 0) return;
+		if (targetCents <= 0) {
+			return;
+		}
 
 		const residualCents = Math.max(0, targetCents - knownTotalCents);
-		if (residualCents <= 0) return;
+		if (residualCents <= 0) {
+			return;
+		}
 
 		if (unknown.length > 0) {
 			let remainingResidual = residualCents;
@@ -584,16 +633,22 @@ export function createPriorityPlanner({
 		catId: string,
 		entries: TemplateEntry[],
 	): Promise<DryRunOutput | null> {
-		if (!month) return null;
+		if (!month) {
+			return null;
+		}
 		const engineEntries = entries.filter((t) => t.engineTemplate);
-		if (engineEntries.length === 0) return null;
+		if (engineEntries.length === 0) {
+			return null;
+		}
 		try {
 			const result = await send("budget/dry-run-category-template", {
 				month,
 				categoryId: catId,
 				templates: engineEntries.map((t) => t.engineTemplate),
 			});
-			if (!result || !Array.isArray(result.perTemplate)) return null;
+			if (!result || !Array.isArray(result.perTemplate)) {
+				return null;
+			}
 			return { result, engineEntries };
 		} catch {
 			return null;
@@ -634,9 +689,13 @@ export function createPriorityPlanner({
 
 		while (funds > 0 && active.length > 0) {
 			const available = active.filter((item) => item.cap == null || item.allocated < item.cap);
-			if (available.length === 0) break;
+			if (available.length === 0) {
+				break;
+			}
 			const totalWeight = available.reduce((sum, item) => sum + item.weight, 0);
-			if (totalWeight <= 0) break;
+			if (totalWeight <= 0) {
+				break;
+			}
 			const before = funds;
 			for (let i = 0; i < available.length && funds > 0; i++) {
 				const item = available[i];
@@ -651,7 +710,9 @@ export function createPriorityPlanner({
 				item.row.requestedCents += share;
 				funds -= share;
 			}
-			if (funds === before) break;
+			if (funds === before) {
+				break;
+			}
 		}
 
 		return funds;
@@ -700,7 +761,9 @@ export function createPriorityPlanner({
 		if (!force && sheet && priorityCacheIsFreshForSheet(sheet)) {
 			return priorityCache!;
 		}
-		if (!force && priorityPromise && priorityPromiseSheet === sheet) return priorityPromise;
+		if (!force && priorityPromise && priorityPromiseSheet === sheet) {
+			return priorityPromise;
+		}
 		priorityPromiseSheet = sheet;
 		priorityPromise = (async (): Promise<PriorityCache> => {
 			try {
@@ -717,9 +780,13 @@ export function createPriorityPlanner({
 				const eligibleCats: { cat: Category; templates: TemplateEntry[] }[] = [];
 				for (const [catId, tpls] of templatesByCat.entries()) {
 					const cat = catById.get(catId);
-					if (!cat || cat.hidden) continue;
+					if (!cat || cat.hidden) {
+						continue;
+					}
 					const budgetTpls = tpls.filter(isBudgetTemplate);
-					if (budgetTpls.length === 0) continue;
+					if (budgetTpls.length === 0) {
+						continue;
+					}
 					eligibleCats.push({ cat, templates: budgetTpls });
 				}
 
@@ -792,7 +859,9 @@ export function createPriorityPlanner({
 								}
 								return;
 							}
-							if (amount <= 0) return;
+							if (amount <= 0) {
+								return;
+							}
 							dryDemandRows.push({
 								entry,
 								index: i,

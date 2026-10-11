@@ -31,7 +31,9 @@ export function applyOrder<T extends { id: string }>(items: T[], order: string[]
 	return [...items].sort((a, b) => {
 		const ai = index.has(a.id) ? index.get(a.id)! : Infinity;
 		const bi = index.has(b.id) ? index.get(b.id)! : Infinity;
-		if (ai === bi) return 0;
+		if (ai === bi) {
+			return 0;
+		}
 		return ai - bi;
 	});
 }

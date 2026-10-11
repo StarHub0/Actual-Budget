@@ -9,7 +9,9 @@ const VALUE_CELLS = ["date", "payee", "notes", "category", "debit", "credit"]
 
 // The bridge reads Actual's own `added` flag for each row, which content scripts can't see.
 function markRows(): void {
-	if (matchesPage(Page.Accounts)) document.dispatchEvent(new CustomEvent("abt:api:mark-new-rows"));
+	if (matchesPage(Page.Accounts)) {
+		document.dispatchEvent(new CustomEvent("abt:api:mark-new-rows"));
+	}
 }
 
 export const newTransactionStyle = defineSetting({

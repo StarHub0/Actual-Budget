@@ -1,6 +1,8 @@
 // Minimal window.browser polyfill so WXT code works
 (function () {
-	if (window.browser?.runtime?.id) return;
+	if (window.browser?.runtime?.id) {
+		return;
+	}
 
 	const LOCAL_PREFIX = "local:";
 	const changeListeners = [];
@@ -48,10 +50,14 @@
 			// Yahoo's chart API never sends CORS headers, so it goes straight to the
 			// sidecar relay; a direct attempt would only fail and log a console error.
 			sendMessage: async (message) => {
-				if (message?.type !== "fetch") return undefined;
+				if (message?.type !== "fetch") {
+					return undefined;
+				}
 				try {
 					const res = await fetch(relayUrl(message.url) ?? message.url);
-					if (!res.ok) return { ok: false, status: res.status };
+					if (!res.ok) {
+						return { ok: false, status: res.status };
+					}
 					const text = await res.text();
 					const data = message.responseType === "json" ? JSON.parse(text) : text;
 					return { ok: true, data };
@@ -72,7 +78,9 @@
 					const out = {};
 					for (const k of list) {
 						const v = readLocalStorage(k);
-						if (v !== undefined) out[k] = v;
+						if (v !== undefined) {
+							out[k] = v;
+						}
 					}
 					return out;
 				},
@@ -93,7 +101,9 @@
 				remove: async (keys) => {
 					const changes = {};
 					for (const key of typeof keys === "string" ? [keys] : keys) {
-						if (localStorage.getItem(key) === null) continue;
+						if (localStorage.getItem(key) === null) {
+							continue;
+						}
 						changes[key] = { oldValue: readLocalStorage(key), newValue: undefined };
 						localStorage.removeItem(key);
 					}
@@ -110,7 +120,9 @@
 				clear: async () => {
 					const changes = {};
 					for (const key of Object.keys(localStorage)) {
-						if (!key.startsWith(LOCAL_PREFIX)) continue;
+						if (!key.startsWith(LOCAL_PREFIX)) {
+							continue;
+						}
 						changes[key] = { newValue: undefined };
 						localStorage.removeItem(key);
 					}
@@ -127,7 +139,9 @@
 				addListener: (cb) => changeListeners.push(cb),
 				removeListener: (cb) => {
 					const i = changeListeners.indexOf(cb);
-					if (i >= 0) changeListeners.splice(i, 1);
+					if (i >= 0) {
+						changeListeners.splice(i, 1);
+					}
 				},
 			},
 		},

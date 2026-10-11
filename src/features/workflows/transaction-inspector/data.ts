@@ -170,7 +170,9 @@ export async function inspect(id: string): Promise<Inspection | null> {
 		select: TX_SELECT,
 		options: { splits: "all" },
 	});
-	if (!row) return null;
+	if (!row) {
+		return null;
+	}
 
 	const tx: InspectedTransaction = {
 		id: row.id,
@@ -237,7 +239,9 @@ async function loadHistory(payee: string): Promise<PayeeHistory> {
 /** The median gap in days between distinct dates, newest first; null with fewer than three. */
 function typicalInterval(dates: string[]): number | null {
 	const days = [...new Set(dates)].map((d) => Date.parse(`${d}T00:00:00Z`) / 86_400_000);
-	if (days.length < 3) return null;
+	if (days.length < 3) {
+		return null;
+	}
 	const gaps = days
 		.slice(1)
 		.map((d, i) => days[i] - d)
@@ -274,19 +278,33 @@ function label(field: string): string {
 }
 
 function formatValue(field: string, value: unknown, names: Names): string {
-	if (Array.isArray(value)) return value.map((v) => formatValue(field, v, names)).join(", ");
-	if (value == null || value === "") return "nothing";
+	if (Array.isArray(value)) {
+		return value.map((v) => formatValue(field, v, names)).join(", ");
+	}
+	if (value == null || value === "") {
+		return "nothing";
+	}
 	if (field === "payee" || field === "category" || field === "account") {
 		return names[field].get(String(value)) ?? "a deleted " + field;
 	}
-	if (field === "date" && typeof value === "object") return formatRecurrence(value as Recurrence);
-	if (field === "date" && typeof value === "string") return formatDayMonth(value);
-	if (field.startsWith("amount") && typeof value === "number") return fmtMoney(value);
+	if (field === "date" && typeof value === "object") {
+		return formatRecurrence(value as Recurrence);
+	}
+	if (field === "date" && typeof value === "string") {
+		return formatDayMonth(value);
+	}
+	if (field.startsWith("amount") && typeof value === "number") {
+		return fmtMoney(value);
+	}
 	if (field.startsWith("amount") && typeof value === "object") {
 		const { num1, num2 } = value as { num1?: number; num2?: number };
-		if (num1 != null && num2 != null) return `${fmtMoney(num1)} and ${fmtMoney(num2)}`;
+		if (num1 != null && num2 != null) {
+			return `${fmtMoney(num1)} and ${fmtMoney(num2)}`;
+		}
 	}
-	if (typeof value === "boolean") return value ? "yes" : "no";
+	if (typeof value === "boolean") {
+		return value ? "yes" : "no";
+	}
 	return String(value);
 }
 
@@ -301,7 +319,9 @@ interface Recurrence {
 const UNITS = { daily: "day", weekly: "week", monthly: "month", yearly: "year" } as const;
 
 function ordinal(n: number): string {
-	if (n === -1) return "last day";
+	if (n === -1) {
+		return "last day";
+	}
 	const tens = n % 100;
 	const suffix = tens >= 11 && tens <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th");
 	return `${n}${suffix}`;
@@ -311,14 +331,23 @@ function formatRecurrence(r: Recurrence): string {
 	const unit = UNITS[r.frequency ?? "monthly"];
 	const every = (r.interval ?? 1) > 1 ? `every ${r.interval} ${unit}s` : `every ${unit}`;
 	const days = r.patterns?.filter((p) => p.type === "day").map((p) => ordinal(p.value));
-	if (r.frequency === "monthly" && days?.length) return `${every} on the ${days.join(" and ")}`;
-	if (!r.start) return every;
+	if (r.frequency === "monthly" && days?.length) {
+		return `${every} on the ${days.join(" and ")}`;
+	}
+	if (!r.start) {
+		return every;
+	}
 	const [y, m, d] = r.start.split("-").map(Number);
 	const start = new Date(y, m - 1, d);
-	if (r.frequency === "monthly") return `${every} on the ${ordinal(d)}`;
-	if (r.frequency === "weekly")
+	if (r.frequency === "monthly") {
+		return `${every} on the ${ordinal(d)}`;
+	}
+	if (r.frequency === "weekly") {
 		return `${every} on ${start.toLocaleDateString(undefined, { weekday: "long" })}`;
-	if (r.frequency === "yearly") return `${every} on ${formatDayMonth(r.start)}`;
+	}
+	if (r.frequency === "yearly") {
+		return `${every} on ${formatDayMonth(r.start)}`;
+	}
 	return every;
 }
 
@@ -335,19 +364,32 @@ function describeCondition(c: RawCondition, names: Names): Phrase {
 	}
 	const field = label(c.field).toLowerCase();
 	const op = OP_LABELS[c.op] ?? c.op;
-	if (c.op === "onBudget" || c.op === "offBudget") return { text: `${field} ${op}` };
+	if (c.op === "onBudget" || c.op === "offBudget") {
+		return { text: `${field} ${op}` };
+	}
 	return phrase(`${field} ${op}`, c.field, c.value, names);
 }
 
 function describeAction(a: RawRule["actions"][number], names: Names): Phrase | null {
-	if (a.op === "set")
+	if (a.op === "set") {
 		return phrase(`set ${label(a.field).toLowerCase()} to`, a.field, a.value, names);
+	}
 	// Shown as the rule's schedule instead.
-	if (a.op === "link-schedule") return null;
-	if (a.op === "prepend-notes") return { text: `add “${String(a.value)}” before the notes` };
-	if (a.op === "append-notes") return { text: `add “${String(a.value)}” after the notes` };
-	if (a.op === "set-split-amount") return { text: "split the transaction" };
-	if (a.op === "delete-transaction") return { text: "delete the transaction" };
+	if (a.op === "link-schedule") {
+		return null;
+	}
+	if (a.op === "prepend-notes") {
+		return { text: `add “${String(a.value)}” before the notes` };
+	}
+	if (a.op === "append-notes") {
+		return { text: `add “${String(a.value)}” after the notes` };
+	}
+	if (a.op === "set-split-amount") {
+		return { text: "split the transaction" };
+	}
+	if (a.op === "delete-transaction") {
+		return { text: "delete the transaction" };
+	}
 	return { text: a.op };
 }
 

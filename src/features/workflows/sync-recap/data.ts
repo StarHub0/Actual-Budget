@@ -34,7 +34,9 @@ interface Row {
 }
 
 export async function loadTransactions(ids: string[]): Promise<RecapTransaction[]> {
-	if (!ids.length) return [];
+	if (!ids.length) {
+		return [];
+	}
 	const rows = await query<Row[]>("transactions", {
 		filter: { id: { $oneof: ids } },
 		select: [

@@ -37,7 +37,9 @@ function standsDown(setting: Setting): boolean {
 
 function applyCss(entry: Active): void {
 	const { setting } = entry;
-	if (setting.type === "core" || setting.type === "custom" || !setting.css) return;
+	if (setting.type === "core" || setting.type === "custom" || !setting.css) {
+		return;
+	}
 	applyGlobalCSS(
 		standsDown(setting) ? "" : scopedCss(setting, setting.css(entry.ctx)),
 		entry.ctx.key,
@@ -45,7 +47,9 @@ function applyCss(entry: Active): void {
 }
 
 async function start(entry: Active): Promise<void> {
-	if (entry.setting.type === "core" || entry.setting.type === "custom") return;
+	if (entry.setting.type === "core" || entry.setting.type === "custom") {
+		return;
+	}
 	const cleanup = await entry.setting.init?.(entry.ctx);
 	entry.stop = typeof cleanup === "function" ? cleanup : () => {};
 }
@@ -57,7 +61,9 @@ async function stop(entry: Active): Promise<void> {
 }
 
 async function activate(setting: Setting, value: unknown) {
-	if (setting.type === "core" || setting.type === "custom") return;
+	if (setting.type === "core" || setting.type === "custom") {
+		return;
+	}
 
 	const ctx = { ...setting.context, value };
 	const key = ctx.key;
@@ -67,25 +73,35 @@ async function activate(setting: Setting, value: unknown) {
 		// The media query keeps desktop-only CSS off mobile without a re-render on resize.
 		applyCss(entry);
 		active.set(key, entry);
-		if ((setting.mobile || desktop.matches) && !standsDown(setting)) await start(entry);
+		if ((setting.mobile || desktop.matches) && !standsDown(setting)) {
+			await start(entry);
+		}
 		log.info(`enabled "${key}"`);
 	} catch (err) {
 		log.error(`failed to enable "${key}"`, err);
 		active.delete(key);
-		if (setting.css) applyGlobalCSS("", key);
+		if (setting.css) {
+			applyGlobalCSS("", key);
+		}
 	}
 }
 
 async function deactivate(key: string, opts?: DeactivateOptions) {
 	const entry = active.get(key);
 	active.delete(key);
-	if (!entry) return;
+	if (!entry) {
+		return;
+	}
 	try {
 		if (entry.setting.type !== "core" && entry.setting.type !== "custom") {
-			if (entry.setting.css && !opts?.preserveCss) applyGlobalCSS("", key);
+			if (entry.setting.css && !opts?.preserveCss) {
+				applyGlobalCSS("", key);
+			}
 		}
 		await stop(entry);
-		if (!opts?.preserveCss) log.info(`disabled "${key}"`);
+		if (!opts?.preserveCss) {
+			log.info(`disabled "${key}"`);
+		}
 	} catch (err) {
 		log.error(`cleanup threw for "${key}"`, err);
 	}
@@ -94,10 +110,16 @@ async function deactivate(key: string, opts?: DeactivateOptions) {
 /** Starts or stops desktop-only features as the window crosses Actual's mobile breakpoint. */
 function onViewportChange(): void {
 	for (const [key, entry] of active) {
-		if (entry.setting.type === "core" || entry.setting.type === "custom") continue;
-		if (entry.setting.mobile || standsDown(entry.setting)) continue;
+		if (entry.setting.type === "core" || entry.setting.type === "custom") {
+			continue;
+		}
+		if (entry.setting.mobile || standsDown(entry.setting)) {
+			continue;
+		}
 		const run = desktop.matches ? !entry.stop && start(entry) : entry.stop && stop(entry);
-		if (run) run.catch((err) => log.error(`viewport change failed for "${key}"`, err));
+		if (run) {
+			run.catch((err) => log.error(`viewport change failed for "${key}"`, err));
+		}
 	}
 }
 
@@ -105,19 +127,25 @@ function onViewportChange(): void {
 function onBudgetTypeChange(): void {
 	for (const [key, entry] of active) {
 		const { setting } = entry;
-		if (setting.type === "core" || setting.type === "custom" || !setting.envelopeOnly) continue;
+		if (setting.type === "core" || setting.type === "custom" || !setting.envelopeOnly) {
+			continue;
+		}
 		applyCss(entry);
 		const down = standsDown(setting);
 		const run = down
 			? entry.stop && stop(entry)
 			: !entry.stop && (setting.mobile || desktop.matches) && start(entry);
-		if (run) run.catch((err) => log.error(`budget type change failed for "${key}"`, err));
+		if (run) {
+			run.catch((err) => log.error(`budget type change failed for "${key}"`, err));
+		}
 	}
 }
 
 /** Called by settings-panel UI (Checkbox/Select) when the user changes a value. */
 export async function applySettingChange(setting: Setting, newValue: unknown) {
-	if (setting.type === "core" || setting.type === "custom") return;
+	if (setting.type === "core" || setting.type === "custom") {
+		return;
+	}
 
 	await setValue(setting.context.key, newValue);
 	await reapplySetting(setting, newValue);
@@ -125,10 +153,14 @@ export async function applySettingChange(setting: Setting, newValue: unknown) {
 
 /** Brings a running setting to a value that's already stored, e.g. one synced from Actual. */
 export async function reapplySetting(setting: Setting, value: unknown) {
-	if (setting.type === "core" || setting.type === "custom") return;
+	if (setting.type === "core" || setting.type === "custom") {
+		return;
+	}
 	const willReactivate = shouldRun(setting, value);
 	await deactivate(setting.context.key, { preserveCss: willReactivate });
-	if (willReactivate) await activate(setting, value);
+	if (willReactivate) {
+		await activate(setting, value);
+	}
 }
 
 async function bootstrapOne(setting: Setting): Promise<void> {
@@ -151,7 +183,9 @@ async function bootstrapOne(setting: Setting): Promise<void> {
 	}
 
 	const value = await getValue(setting.context.key, setting.context.defaultValue);
-	if (shouldRun(setting, value)) await activate(setting, value);
+	if (shouldRun(setting, value)) {
+		await activate(setting, value);
+	}
 }
 
 /**

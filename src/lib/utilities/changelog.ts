@@ -13,7 +13,9 @@ export function parseChangelogSection(
 ): ReleaseNoteSection[] | null {
 	const versionHeading = `## v${version}`;
 	const start = markdown.indexOf(versionHeading);
-	if (start === -1) return null;
+	if (start === -1) {
+		return null;
+	}
 
 	const rest = markdown.slice(start + versionHeading.length);
 	const nextHeadingIndex = rest.search(/\n##\s/);
@@ -25,7 +27,9 @@ export function parseChangelogSection(
 
 	for (const rawLine of block.split("\n")) {
 		const line = rawLine.trim();
-		if (!line || line.startsWith("[compare changes]")) continue;
+		if (!line || line.startsWith("[compare changes]")) {
+			continue;
+		}
 
 		if (line.startsWith("### ")) {
 			const heading = line.replace(/^###\s*/, "");
@@ -40,7 +44,9 @@ export function parseChangelogSection(
 			continue;
 		}
 
-		if (skipping) continue;
+		if (skipping) {
+			continue;
+		}
 
 		if (line.startsWith("- ")) {
 			const text = line
@@ -65,7 +71,9 @@ export async function fetchReleaseNotes(version: string): Promise<ReleaseNoteSec
 			url: CHANGELOG_URL,
 			responseType: "text",
 		});
-		if (!res?.ok) return null;
+		if (!res?.ok) {
+			return null;
+		}
 		return parseChangelogSection(res.data as string, version);
 	} catch {
 		return null;

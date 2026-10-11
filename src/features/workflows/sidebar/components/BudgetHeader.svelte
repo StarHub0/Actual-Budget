@@ -66,7 +66,9 @@
 			currentId = id;
 			files = loadedFiles;
 			filesLoaded = true;
-			if (id) icon = await loadBudgetIcon(id);
+			if (id) {
+				icon = await loadBudgetIcon(id);
+			}
 		} catch (err) {
 			console.error("[ABT live sidebar] failed to load budget header data", err);
 		} finally {
@@ -75,7 +77,9 @@
 	});
 
 	function openIconPicker(): void {
-		if (!iconBtnEl) return;
+		if (!iconBtnEl) {
+			return;
+		}
 		iconAnchorRect = iconBtnEl.getBoundingClientRect();
 		iconPickerOpen = true;
 	}
@@ -83,13 +87,17 @@
 	async function handleIconSelect(result: IconPickerResult): Promise<void> {
 		icon = result;
 		iconPickerOpen = false;
-		if (currentId) await setBudgetIcon(currentId, result);
+		if (currentId) {
+			await setBudgetIcon(currentId, result);
+		}
 	}
 
 	async function handleIconRemove(): Promise<void> {
 		icon = undefined;
 		iconPickerOpen = false;
-		if (currentId) await removeBudgetIcon(currentId);
+		if (currentId) {
+			await removeBudgetIcon(currentId);
+		}
 	}
 
 	const STATE_LABEL: Record<FileState, string> = {
@@ -114,8 +122,12 @@
 	};
 
 	function stateIcon(state: FileState) {
-		if (state === "synced") return CloudCheck;
-		if (state === "remote") return CloudDownload;
+		if (state === "synced") {
+			return CloudCheck;
+		}
+		if (state === "remote") {
+			return CloudDownload;
+		}
 		return CloudOff;
 	}
 
@@ -163,7 +175,9 @@
 	}
 
 	async function onSelectFile(file: BudgetFile) {
-		if (file.state === "broken") return;
+		if (file.state === "broken") {
+			return;
+		}
 		if (file.id && file.id === currentId) {
 			closeMenu();
 			return;
@@ -179,7 +193,9 @@
 	}
 
 	function onWindowKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape" && open && !editing) closeMenu();
+		if (e.key === "Escape" && open && !editing) {
+			closeMenu();
+		}
 	}
 </script>
 
@@ -261,7 +277,9 @@
 						openIconPicker();
 					}}
 					onkeydown={(e) => {
-						if (e.key !== "Enter" && e.key !== " ") return;
+						if (e.key !== "Enter" && e.key !== " ") {
+							return;
+						}
 						e.preventDefault();
 						e.stopPropagation();
 						openIconPicker();
@@ -314,8 +332,11 @@
 				aria-label={editing ? "Save budget name" : "Rename budget"}
 				onclick={(e) => {
 					e.stopPropagation();
-					if (editing) commitEdit();
-					else startEdit();
+					if (editing) {
+						commitEdit();
+					} else {
+						startEdit();
+					}
 				}}
 			>
 				{#if editing}

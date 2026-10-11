@@ -129,7 +129,9 @@ async function handleYahooChart(req, res, urlPath, search) {
 
 	const target = new URL(`https://query2.finance.yahoo.com/v8/finance/chart/${symbol}`);
 	for (const [key, value] of new URLSearchParams(search)) {
-		if (YAHOO_ALLOWED_PARAMS.has(key)) target.searchParams.set(key, value);
+		if (YAHOO_ALLOWED_PARAMS.has(key)) {
+			target.searchParams.set(key, value);
+		}
 	}
 
 	try {
@@ -156,7 +158,9 @@ function proxyToActual(req, res) {
 	const connectionTokens = String(req.headers.connection || "")
 		.split(",")
 		.map((t) => t.trim().toLowerCase());
-	for (const name of [...HOP_BY_HOP_HEADERS, ...connectionTokens]) delete outHeaders[name];
+	for (const name of [...HOP_BY_HOP_HEADERS, ...connectionTokens]) {
+		delete outHeaders[name];
+	}
 	// Actual trusts X-Forwarded-For from private peers (this container), and keys
 	// its login rate limit on it. Appending the real peer makes a client-supplied
 	// value unable to stand in for the true address.
@@ -205,7 +209,9 @@ function proxyToActual(req, res) {
 
 	upstreamReq.on("error", (err) => {
 		console.warn("[abt-sidecar] upstream error:", err.message);
-		if (!res.headersSent) res.writeHead(502);
+		if (!res.headersSent) {
+			res.writeHead(502);
+		}
 		res.end("Bad gateway");
 	});
 	req.pipe(upstreamReq);
@@ -213,7 +219,9 @@ function proxyToActual(req, res) {
 
 const server = http.createServer((req, res) => {
 	const [urlPath, search = ""] = req.url.split("?");
-	if (urlPath.startsWith("/abt/")) return serveStatic(req, res, urlPath);
+	if (urlPath.startsWith("/abt/")) {
+		return serveStatic(req, res, urlPath);
+	}
 	if (urlPath.startsWith(YAHOO_CHART_PREFIX) && req.method === "GET") {
 		return handleYahooChart(req, res, urlPath, search ? `?${search}` : "");
 	}

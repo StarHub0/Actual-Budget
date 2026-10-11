@@ -16,7 +16,9 @@
 
 	function isTierCollapsed(tier: SummaryTier): boolean {
 		const override = templatePlanState.prioCollapseOverrides[priorityKey(tier.priority)];
-		if (override != null) return override;
+		if (override != null) {
+			return override;
+		}
 		return tier.status === "full";
 	}
 
@@ -33,11 +35,21 @@
 
 	function rowMeta(row: SummaryTier["rows"][number], tier: SummaryTier): string | null {
 		const otherPriorities = row.priorities.filter((p) => p !== tier.priority && p != null);
-		if (otherPriorities.length > 0) return `also @ ${otherPriorities.join(", ")}`;
-		if (row.source === "goal-cell") return "goal-cell estimate";
-		if (row.source === "goal-residual") return "goal residual";
-		if (row.source === "parsed-amount") return "parsed estimate";
-		if (row.templateCount > 1) return `${row.templateCount} templates`;
+		if (otherPriorities.length > 0) {
+			return `also @ ${otherPriorities.join(", ")}`;
+		}
+		if (row.source === "goal-cell") {
+			return "goal-cell estimate";
+		}
+		if (row.source === "goal-residual") {
+			return "goal residual";
+		}
+		if (row.source === "parsed-amount") {
+			return "parsed estimate";
+		}
+		if (row.templateCount > 1) {
+			return `${row.templateCount} templates`;
+		}
 		return null;
 	}
 </script>

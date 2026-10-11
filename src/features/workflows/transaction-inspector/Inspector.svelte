@@ -28,13 +28,19 @@
 		failed = false;
 		inspect(id)
 			.then((result) => {
-				if (!stale) data = result;
+				if (!stale) {
+					data = result;
+				}
 			})
 			.catch(() => {
-				if (!stale) failed = true;
+				if (!stale) {
+					failed = true;
+				}
 			})
 			.finally(() => {
-				if (!stale) loading = false;
+				if (!stale) {
+					loading = false;
+				}
 			});
 		return () => {
 			stale = true;
@@ -44,7 +50,9 @@
 	const tx = $derived(data?.tx);
 	const history = $derived(data?.history);
 	const unusual = $derived.by(() => {
-		if (!tx || !history || history.count < 3 || history.average === 0) return null;
+		if (!tx || !history || history.count < 3 || history.average === 0) {
+			return null;
+		}
 		const ratio = tx.amount / history.average - 1;
 		return Math.abs(ratio) >= UNUSUAL ? Math.round(ratio * 100) : null;
 	});
@@ -54,22 +62,38 @@
 
 	/** "a, b and c" from phrases, keeping amounts apart for privacy mode. */
 	function joiner(i: number, count: number, word: string): string {
-		if (i === 0) return "";
+		if (i === 0) {
+			return "";
+		}
 		return i === count - 1 ? ` ${word} ` : ", ";
 	}
 
 	function every(days: number): string {
-		if (days <= 1) return "Daily";
-		if (days >= 6 && days <= 8) return "About weekly";
-		if (days >= 13 && days <= 16) return "About every two weeks";
-		if (days >= 27 && days <= 32) return "About monthly";
-		if (days >= 85 && days <= 95) return "About quarterly";
-		if (days >= 355 && days <= 375) return "About yearly";
+		if (days <= 1) {
+			return "Daily";
+		}
+		if (days >= 6 && days <= 8) {
+			return "About weekly";
+		}
+		if (days >= 13 && days <= 16) {
+			return "About every two weeks";
+		}
+		if (days >= 27 && days <= 32) {
+			return "About monthly";
+		}
+		if (days >= 85 && days <= 95) {
+			return "About quarterly";
+		}
+		if (days >= 355 && days <= 375) {
+			return "About yearly";
+		}
 		return `About every ${days} days`;
 	}
 
 	function createRule() {
-		if (!tx) return;
+		if (!tx) {
+			return;
+		}
 		const conditions = tx.payeeId
 			? [{ op: "is", field: "payee", value: tx.payeeId, type: "id" }]
 			: tx.importedPayee

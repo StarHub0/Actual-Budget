@@ -7,7 +7,9 @@ function isContextInvalidated(): boolean {
 }
 
 export async function getValue<T>(key: string, defaultValue: T): Promise<T> {
-	if (isContextInvalidated()) return defaultValue;
+	if (isContextInvalidated()) {
+		return defaultValue;
+	}
 	try {
 		const result = await browser.storage.local.get("local:" + key);
 		return (result["local:" + key] ?? defaultValue) as T;
@@ -18,7 +20,9 @@ export async function getValue<T>(key: string, defaultValue: T): Promise<T> {
 
 /** Distinguishes "never stored" from "stored a falsy/default-looking value" — getValue's fallback can't tell these apart. */
 export async function hasValue(key: string): Promise<boolean> {
-	if (isContextInvalidated()) return false;
+	if (isContextInvalidated()) {
+		return false;
+	}
 	try {
 		const result = await browser.storage.local.get("local:" + key);
 		return result["local:" + key] !== undefined;
@@ -35,7 +39,9 @@ export function onSetValue(hook: typeof onSet): void {
 }
 
 export function setValue(key: string, value: unknown) {
-	if (isContextInvalidated()) return Promise.resolve();
+	if (isContextInvalidated()) {
+		return Promise.resolve();
+	}
 	try {
 		const plain = JSON.parse(JSON.stringify(value));
 		onSet?.(key, plain);
@@ -49,7 +55,9 @@ export function setValue(key: string, value: unknown) {
 export function watchValue<T>(key: string, callback: (value: T | undefined) => void): () => void {
 	const storageKey = "local:" + key;
 	const listener = (changes: Record<string, { newValue?: unknown }>, area: string) => {
-		if (area === "local" && storageKey in changes) callback(changes[storageKey].newValue as T);
+		if (area === "local" && storageKey in changes) {
+			callback(changes[storageKey].newValue as T);
+		}
 	};
 	try {
 		browser.storage.onChanged.addListener(listener);
@@ -66,7 +74,9 @@ export function watchValue<T>(key: string, callback: (value: T | undefined) => v
 }
 
 export async function removeValue(key: string): Promise<void> {
-	if (isContextInvalidated()) return;
+	if (isContextInvalidated()) {
+		return;
+	}
 	try {
 		await browser.storage.local.remove("local:" + key);
 	} catch {
@@ -75,7 +85,9 @@ export async function removeValue(key: string): Promise<void> {
 }
 
 export function normalizeBaseUrl(input: string | null | undefined): string | null {
-	if (!input) return null;
+	if (!input) {
+		return null;
+	}
 	try {
 		const url = new URL(input);
 		return `${url.protocol}//${url.host}/`;

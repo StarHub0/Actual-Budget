@@ -78,9 +78,15 @@
 	}
 
 	function getThemeName(key: string): string {
-		if (key === NATIVE_THEME_KEY) return "Actual default";
-		if (themes[key]) return themes[key].name;
-		if (isUserTheme(key)) return userThemeState.themes[key]?.name ?? key;
+		if (key === NATIVE_THEME_KEY) {
+			return "Actual default";
+		}
+		if (themes[key]) {
+			return themes[key].name;
+		}
+		if (isUserTheme(key)) {
+			return userThemeState.themes[key]?.name ?? key;
+		}
 		if (isCommunityTheme(key)) {
 			const remote = remoteThemes.find((t) => t.repo === key);
 			return remote?.name ?? key.split("/").pop() ?? key;
@@ -97,7 +103,9 @@
 	const selectedKey = $derived(autoSwitch ? slotKey : activeThemeKey);
 
 	async function setMatchSystem(on: boolean) {
-		if (on === autoSwitch) return;
+		if (on === autoSwitch) {
+			return;
+		}
 		autoSwitch = on;
 		await setValue("theme-auto-switch", on);
 		if (on) {
@@ -117,7 +125,9 @@
 	}
 
 	function slotPreview(key: string): string[] {
-		if (key === NATIVE_THEME_KEY) return nativeColors.slice(0, 4);
+		if (key === NATIVE_THEME_KEY) {
+			return nativeColors.slice(0, 4);
+		}
 		if (isUserTheme(key)) {
 			const theme = userThemeState.themes[key];
 			return theme ? getPreviewColorsFromTheme(theme).slice(0, 4) : [];
@@ -178,7 +188,9 @@
 	}
 
 	async function selectTheme(key: string) {
-		if (applyingTheme) return;
+		if (applyingTheme) {
+			return;
+		}
 		applyingTheme = key;
 		try {
 			// setAutoTheme applies it only when the slot matches the system's current mode.
@@ -211,8 +223,11 @@
 	function toggleExpanded(key: string, e: MouseEvent | KeyboardEvent) {
 		e.stopPropagation();
 		const next = new Set(expandedCards);
-		if (next.has(key)) next.delete(key);
-		else next.add(key);
+		if (next.has(key)) {
+			next.delete(key);
+		} else {
+			next.add(key);
+		}
 		expandedCards = next;
 	}
 
@@ -346,7 +361,9 @@
 	}
 
 	async function selectUserTheme(id: string) {
-		if (userThemeState.themes[id]) await selectTheme(id);
+		if (userThemeState.themes[id]) {
+			await selectTheme(id);
+		}
 	}
 
 	async function handleDeleteFromCard(id: string, e: Event) {

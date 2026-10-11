@@ -18,15 +18,23 @@ export function summarizeMonth(days: DayData[], incomeCategoryIds: Set<string>):
 	let upcoming = 0;
 	let hasUpcoming = false;
 	for (const d of days) {
-		if (!d.isCurrentMonth) continue;
+		if (!d.isCurrentMonth) {
+			continue;
+		}
 		for (const t of d.transactions) {
-			if (t.missed) continue;
+			if (t.missed) {
+				continue;
+			}
 			if (t.upcoming) {
 				upcoming += t.amount;
 				hasUpcoming = true;
-			} else if (!t.categoryId) continue;
-			else if (incomeCategoryIds.has(t.categoryId)) income += t.amount;
-			else spent -= t.amount;
+			} else if (!t.categoryId) {
+				continue;
+			} else if (incomeCategoryIds.has(t.categoryId)) {
+				income += t.amount;
+			} else {
+				spent -= t.amount;
+			}
 		}
 	}
 	return { spent, income, net: income - spent, upcoming, hasUpcoming };
@@ -63,7 +71,9 @@ export function groupByPayee(txs: DayTransaction[]): GroupedTransaction[] {
 export function spendingByCategory(txs: DayTransaction[]): [string, number][] {
 	const acc: Record<string, number> = {};
 	for (const t of txs) {
-		if (!t.missed && t.amount < 0) acc[t.categoryId] = (acc[t.categoryId] || 0) - t.amount;
+		if (!t.missed && t.amount < 0) {
+			acc[t.categoryId] = (acc[t.categoryId] || 0) - t.amount;
+		}
 	}
 	return Object.entries(acc).sort((a, b) => b[1] - a[1]);
 }

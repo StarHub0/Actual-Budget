@@ -15,7 +15,9 @@ export const scheduleHighlight = {
 					row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 					return;
 				}
-				if (++tries < 60) setTimeout(step, 100);
+				if (++tries < 60) {
+					setTimeout(step, 100);
+				}
 			};
 			setTimeout(step, 120);
 		}
@@ -27,7 +29,9 @@ export const scheduleHighlight = {
 			}
 			const raw = new URLSearchParams(location.search).get("highlight");
 			const id = raw?.replace(/^"|"$/g, "") || null;
-			if (!id || id === lastHandled) return;
+			if (!id || id === lastHandled) {
+				return;
+			}
 			lastHandled = id;
 			openSchedule(id);
 		}

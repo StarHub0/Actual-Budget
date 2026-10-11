@@ -8,7 +8,9 @@
 
 	async function handleExport() {
 		const css = onExport();
-		if (!css) return;
+		if (!css) {
+			return;
+		}
 		try {
 			await navigator.clipboard.writeText(css);
 			exportLabel = "Copied!";

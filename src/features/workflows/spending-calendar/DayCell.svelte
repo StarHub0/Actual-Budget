@@ -29,7 +29,9 @@
 	const grouped = $derived(clickable ? groupByPayee(day.transactions) : []);
 
 	function moreTitle(hidden: GroupedTransaction[]): string | undefined {
-		if (document.body.classList.contains("abt-privacy-enabled")) return undefined;
+		if (document.body.classList.contains("abt-privacy-enabled")) {
+			return undefined;
+		}
 		return hidden.map((t) => (t.count > 1 ? `${t.payee} ×${t.count}` : t.payee)).join("\n");
 	}
 </script>
@@ -50,7 +52,9 @@
 	aria-pressed={clickable ? selected : undefined}
 	tabindex={day.isCurrentMonth ? (tabbable ? 0 : -1) : undefined}
 	onfocus={() => {
-		if (day.isCurrentMonth) onfocus();
+		if (day.isCurrentMonth) {
+			onfocus();
+		}
 	}}
 	onclick={onopen}
 	onkeydown={(e) => {

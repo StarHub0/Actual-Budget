@@ -4,7 +4,9 @@
 let portalRoot: HTMLElement | null = null;
 
 function getPortalRoot(): HTMLElement {
-	if (portalRoot?.isConnected) return portalRoot;
+	if (portalRoot?.isConnected) {
+		return portalRoot;
+	}
 	portalRoot = document.createElement("div");
 	portalRoot.className = "sidebar sb-portal-root";
 	document.body.appendChild(portalRoot);

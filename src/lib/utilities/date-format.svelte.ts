@@ -41,7 +41,9 @@ export function datePrefs(): DatePrefs {
 
 // "YYYY-MM-DD" parses as UTC midnight with new Date(), which is the previous day west of UTC.
 function toDate(value: Date | string): Date {
-	if (value instanceof Date) return value;
+	if (value instanceof Date) {
+		return value;
+	}
 	const [y, m, d] = value.split("-").map(Number);
 	return new Date(y, m - 1, d);
 }

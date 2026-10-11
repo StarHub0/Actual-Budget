@@ -6,10 +6,14 @@ export function createToolbarButton(options: {
 	icon: SVGSVGElement;
 	onClick: (e: MouseEvent) => void;
 }): HTMLButtonElement | null {
-	if (document.getElementById(options.id)) return null;
+	if (document.getElementById(options.id)) {
+		return null;
+	}
 
 	const group = findAccountToolbar();
-	if (!group) return null;
+	if (!group) {
+		return null;
+	}
 
 	const btn = document.createElement("button");
 	btn.id = options.id;

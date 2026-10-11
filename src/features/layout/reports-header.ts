@@ -20,15 +20,21 @@ const LABEL = `${TITLE} > div:first-of-type`;
 const TOP_VAR = "--abt-reports-header-top";
 
 function measureTop() {
-	if (!matchesPage(Page.Reports)) return;
+	if (!matchesPage(Page.Reports)) {
+		return;
+	}
 	const reports = document.querySelector<HTMLElement>(REPORTS);
 	const grid = reports?.closest<HTMLElement>("[data-abt-content-grid]");
-	if (!reports || !grid) return;
+	if (!reports || !grid) {
+		return;
+	}
 	// Unrounded and re-read as the page settles: Firefox left a sliver of the widgets showing above a rounded or early value.
 	const top =
 		reports.getBoundingClientRect().top - grid.getBoundingClientRect().top + grid.scrollTop;
 	const value = `${top}px`;
-	if (reports.style.getPropertyValue(TOP_VAR) !== value) reports.style.setProperty(TOP_VAR, value);
+	if (reports.style.getPropertyValue(TOP_VAR) !== value) {
+		reports.style.setProperty(TOP_VAR, value);
+	}
 }
 
 export const reportsHeader = defineSetting({

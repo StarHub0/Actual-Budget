@@ -33,10 +33,14 @@ export function clearOverlayPage(): void {
 const SETTINGS_PAGES: readonly Page[] = [Page.Payees, Page.Rules, Page.BankSync, Page.Tags];
 
 export function matchesPage(page: Page): boolean {
-	if (overlay?.el.isConnected && overlay.path === getCurrentPath()) return page === overlay.page;
+	if (overlay?.el.isConnected && overlay.path === getCurrentPath()) {
+		return page === overlay.page;
+	}
 	const path = getCurrentPath();
 	// On /settings/payees, Payees is the page, not Settings.
-	if (page === Page.Settings && SETTINGS_PAGES.some((p) => path.includes(`/${p}`))) return false;
+	if (page === Page.Settings && SETTINGS_PAGES.some((p) => path.includes(`/${p}`))) {
+		return false;
+	}
 	return path.includes(page);
 }
 
@@ -44,7 +48,9 @@ let nestedSettings = false;
 
 /** Newer Actual drops the sidebar's More menu and links its settings sub-pages under /settings/. */
 function usesNestedSettings(): boolean {
-	if (nestedSettings) return true;
+	if (nestedSettings) {
+		return true;
+	}
 	const nav = document.querySelector('[data-testid="sidebar-primary-buttons"]');
 	nestedSettings =
 		!!document.querySelector('a[href^="/settings/"]') ||

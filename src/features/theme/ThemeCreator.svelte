@@ -66,7 +66,9 @@
 			colors = { ...initialKeys };
 		} else {
 			const root = document.querySelector<HTMLElement>(":root");
-			if (!root) return;
+			if (!root) {
+				return;
+			}
 			const computed = getComputedStyle(root);
 			for (const v of ALL_VARS) {
 				const raw = computed.getPropertyValue(v.key).trim();
@@ -77,7 +79,9 @@
 
 	function rgbToHex(rgb: string): string | null {
 		const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-		if (!m) return null;
+		if (!m) {
+			return null;
+		}
 		return "#" + [m[1], m[2], m[3]].map((n) => parseInt(n).toString(16).padStart(2, "0")).join("");
 	}
 
@@ -159,7 +163,9 @@
 
 	function applyCss() {
 		const trimmed = cssInput.trim();
-		if (!trimmed) return;
+		if (!trimmed) {
+			return;
+		}
 		onCssApply(trimmed);
 	}
 </script>

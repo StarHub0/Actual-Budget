@@ -53,7 +53,9 @@
 
 	function begin(e: SubmitEvent) {
 		e.preventDefault();
-		if (parsed != null) start(parsed);
+		if (parsed != null) {
+			start(parsed);
+		}
 	}
 
 	function edit() {
@@ -62,7 +64,9 @@
 	}
 
 	function commitEdit() {
-		if (parsed != null) start(parsed);
+		if (parsed != null) {
+			start(parsed);
+		}
 		editing = false;
 	}
 
@@ -78,7 +82,9 @@
 
 	async function done() {
 		await finish();
-		if (reconcile.target == null) closePanel();
+		if (reconcile.target == null) {
+			closePanel();
+		}
 	}
 
 	function stop() {
@@ -98,9 +104,13 @@
 
 	// Ticking a transaction in the table re-renders its row, so the table's mutations drive the totals.
 	$effect(() => {
-		if (!started) return;
+		if (!started) {
+			return;
+		}
 		const table = document.querySelector('[data-testid="transaction-table"]');
-		if (!table) return;
+		if (!table) {
+			return;
+		}
 		let timer: ReturnType<typeof setTimeout> | undefined;
 		const observer = new MutationObserver(() => {
 			clearTimeout(timer);
@@ -242,8 +252,12 @@
 								use:select
 								onblur={commitEdit}
 								onkeydown={(e) => {
-									if (e.key === "Enter") commitEdit();
-									if (e.key === "Escape") editing = false;
+									if (e.key === "Enter") {
+										commitEdit();
+									}
+									if (e.key === "Escape") {
+										editing = false;
+									}
 								}}
 							/>
 						{:else}

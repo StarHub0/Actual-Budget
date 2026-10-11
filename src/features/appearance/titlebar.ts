@@ -230,7 +230,9 @@ export const modernTitlebar = defineSetting({
 			const next =
 				document.querySelector('[data-testid="help-menu-button"]')?.parentElement?.parentElement ??
 				null;
-			if (next === bar) return;
+			if (next === bar) {
+				return;
+			}
 			bar?.removeAttribute(BAR_ATTR);
 			bar = next;
 			bar?.setAttribute(BAR_ATTR, "");

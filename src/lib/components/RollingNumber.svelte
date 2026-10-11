@@ -47,7 +47,9 @@
 	// rolling turns back on once a frame has painted that value.
 	$effect.pre(() => {
 		const key = resetKey;
-		if (started && key === lastKey) return;
+		if (started && key === lastKey) {
+			return;
+		}
 		started = true;
 		lastKey = key;
 		instant = true;

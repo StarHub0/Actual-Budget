@@ -66,14 +66,18 @@
 		}
 		const url = getFaviconUrl(clean);
 		// Same src fires no new load event, so resetting would leave the logo unclickable.
-		if (url === logoUrl) return;
+		if (url === logoUrl) {
+			return;
+		}
 		logoUrl = url;
 		logoLoaded = false;
 		logoError = false;
 	}
 
 	function onDomainInput() {
-		if (debounceTimer) clearTimeout(debounceTimer);
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+		}
 		debounceTimer = setTimeout(() => fetchLogo(), 400);
 	}
 
@@ -107,12 +111,18 @@
 
 	const filteredEmoji = $derived.by(() => {
 		const q = emojiSearch.trim().toLowerCase();
-		if (!q) return null;
+		if (!q) {
+			return null;
+		}
 		const results: EmojiEntry[] = [];
 		for (const g of groups) {
 			for (const e of g.emojis) {
-				if (e.name.includes(q) || e.slug.includes(q)) results.push(e);
-				if (results.length >= 80) return results;
+				if (e.name.includes(q) || e.slug.includes(q)) {
+					results.push(e);
+				}
+				if (results.length >= 80) {
+					return results;
+				}
 			}
 		}
 		return results;
@@ -127,19 +137,23 @@
 	}
 
 	$effect(() => {
-		if (activeTab !== "emoji" || !gridWrap) return;
+		if (activeTab !== "emoji" || !gridWrap) {
+			return;
+		}
 		emojiObserver?.disconnect();
 		emojiObserver = new IntersectionObserver(
 			(entries) => {
 				for (const entry of entries) {
-					if (entry.isIntersecting)
+					if (entry.isIntersecting) {
 						activeGroup = (entry.target as HTMLElement).dataset.group ?? activeGroup;
+					}
 				}
 			},
 			{ root: gridWrap, threshold: 0, rootMargin: "0px 0px -80% 0px" },
 		);
-		for (const el of gridWrap.querySelectorAll<HTMLElement>("[data-group]"))
+		for (const el of gridWrap.querySelectorAll<HTMLElement>("[data-group]")) {
 			emojiObserver.observe(el);
+		}
 		return () => emojiObserver?.disconnect();
 	});
 
@@ -152,11 +166,15 @@
 		e.preventDefault();
 		isDragOver = false;
 		const file = e.dataTransfer?.files?.[0];
-		if (file) readFile(file);
+		if (file) {
+			readFile(file);
+		}
 	}
 
 	function readFile(file: File) {
-		if (!file.type.startsWith("image/")) return;
+		if (!file.type.startsWith("image/")) {
+			return;
+		}
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			uploadedDataUrl = e.target?.result as string;
@@ -167,26 +185,35 @@
 	// ── Positioning ──
 	onMount(async () => {
 		await new Promise((r) => requestAnimationFrame(r));
-		if (!popoverEl) return;
+		if (!popoverEl) {
+			return;
+		}
 		const pop = popoverEl.getBoundingClientRect();
 		const margin = 8;
 		let top = anchorRect.top;
 		let left = anchorRect.right + margin;
 
-		if (left + pop.width > window.innerWidth - margin) left = anchorRect.left - pop.width - margin;
-		if (top + pop.height > window.innerHeight - margin)
+		if (left + pop.width > window.innerWidth - margin) {
+			left = anchorRect.left - pop.width - margin;
+		}
+		if (top + pop.height > window.innerHeight - margin) {
 			top = window.innerHeight - pop.height - margin;
+		}
 		top = Math.max(margin, top);
 
 		style = `top:${top}px;left:${left}px;opacity:1`;
 	});
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape") onClose();
+		if (e.key === "Escape") {
+			onClose();
+		}
 	}
 
 	function onOutsideClick(e: MouseEvent) {
-		if (popoverEl && !e.composedPath().includes(popoverEl)) onClose();
+		if (popoverEl && !e.composedPath().includes(popoverEl)) {
+			onClose();
+		}
 	}
 </script>
 
@@ -323,7 +350,9 @@
 				bind:this={fileInputEl}
 				onchange={(e) => {
 					const f = (e.target as HTMLInputElement).files?.[0];
-					if (f) readFile(f);
+					if (f) {
+						readFile(f);
+					}
 				}}
 			/>
 			<div

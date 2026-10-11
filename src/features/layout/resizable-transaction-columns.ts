@@ -104,7 +104,9 @@ function markBudgetPage(): void {
 
 function onRouteSignal(): void {
 	const currentRouteKey = getCurrentRouteKey();
-	if (currentRouteKey === observedRouteKey) return;
+	if (currentRouteKey === observedRouteKey) {
+		return;
+	}
 	observedRouteKey = currentRouteKey;
 	markBudgetPage();
 
@@ -124,8 +126,12 @@ function onRouteSignal(): void {
 
 function areWidthsEqual(a: StoredWidths, b: StoredWidths): boolean {
 	for (const column of HEADER_COLUMNS) {
-		if (column === "date") continue;
-		if (a[column] !== b[column]) return false;
+		if (column === "date") {
+			continue;
+		}
+		if (a[column] !== b[column]) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -152,17 +158,23 @@ function cssVariableName(column: HeaderColumn): string {
 
 function isLegacySnapshot(widths: StoredWidths): boolean {
 	for (const column of LEGACY_COLUMNS) {
-		if (widths[column] !== LEGACY_DEFAULT_WIDTHS[column]) return false;
+		if (widths[column] !== LEGACY_DEFAULT_WIDTHS[column]) {
+			return false;
+		}
 	}
 	return true;
 }
 
 function normalizeSavedWidths(value: unknown): StoredWidths {
-	if (!value || typeof value !== "object") return {};
+	if (!value || typeof value !== "object") {
+		return {};
+	}
 
 	const result: StoredWidths = {};
 	for (const column of HEADER_COLUMNS) {
-		if (column === "date") continue;
+		if (column === "date") {
+			continue;
+		}
 		const raw = (value as Record<string, unknown>)[column];
 		if (typeof raw === "number" && Number.isFinite(raw)) {
 			result[column] = clampWidth(raw);
@@ -221,11 +233,15 @@ function applyWidths(widths: StoredWidths): void {
 function updateColumnWidth(column: HeaderColumn, width: number): void {
 	cachedWidths[column] = clampWidthLive(width);
 	setFixedColumn(column, cachedWidths[column] as number, false);
-	if (AMOUNT_COLUMNS.has(column)) syncFixedAmountsAttr(cachedWidths);
+	if (AMOUNT_COLUMNS.has(column)) {
+		syncFixedAmountsAttr(cachedWidths);
+	}
 }
 
 async function persistCurrentWidths(): Promise<void> {
-	if (!currentStorageKey) return;
+	if (!currentStorageKey) {
+		return;
+	}
 	pageWidthsCache.set(currentStorageKey, { ...cachedWidths });
 	await setValue(currentStorageKey, cachedWidths);
 }
@@ -237,7 +253,9 @@ async function resetAllWidths(): Promise<void> {
 }
 
 async function syncPageWidths(force = false): Promise<void> {
-	if (!storagePrefixKey) return;
+	if (!storagePrefixKey) {
+		return;
+	}
 
 	const nextStorageKey = getPageStorageKey(storagePrefixKey);
 	const previousStorageKey = currentStorageKey;
@@ -256,7 +274,9 @@ async function syncPageWidths(force = false): Promise<void> {
 
 	const syncToken = ++routeSyncToken;
 	const storedWidths = normalizeSavedWidths(await getValue(nextStorageKey, {}));
-	if (syncToken !== routeSyncToken || currentStorageKey !== nextStorageKey) return;
+	if (syncToken !== routeSyncToken || currentStorageKey !== nextStorageKey) {
+		return;
+	}
 
 	const changed = !areWidthsEqual(cachedWidths, storedWidths);
 	cachedWidths = storedWidths;
@@ -363,9 +383,13 @@ function getColumnCell(row: HTMLElement, testId: string): HTMLElement | null {
 }
 
 function isVisibleCell(cell: HTMLElement | null): cell is HTMLElement {
-	if (!cell) return false;
+	if (!cell) {
+		return false;
+	}
 	const style = window.getComputedStyle(cell);
-	if (style.display === "none" || style.visibility === "hidden") return false;
+	if (style.display === "none" || style.visibility === "hidden") {
+		return false;
+	}
 	return cell.getBoundingClientRect().width > 0;
 }
 
@@ -407,13 +431,17 @@ function findHeaderRow(): HTMLElement | null {
 		const directCells = Array.from(
 			container.querySelectorAll<HTMLElement>(":scope > [data-testid]"),
 		);
-		if (directCells.length < 4) return false;
+		if (directCells.length < 4) {
+			return false;
+		}
 		const ids = directCells.map((cell) => cell.dataset.testid ?? "");
 		return ids.includes("date") && ids.some((id) => amountIds.has(id));
 	};
 
 	const header = document.querySelector<HTMLElement>("[data-testid='transaction-table-header']");
-	if (header && isHeaderLike(header)) return header;
+	if (header && isHeaderLike(header)) {
+		return header;
+	}
 
 	// Older Actual versions render the header as a plain row.
 	const rows = document.querySelectorAll<HTMLElement>("[data-testid='row']");
@@ -459,14 +487,18 @@ function getHardMaxWidth(column: ResizableColumn, currentWidth = 0): number {
 
 function getMaxResizableWidth(column: ResizableColumn): number {
 	const headerRow = findHeaderRow();
-	if (!headerRow) return getHardMaxWidth(column);
+	if (!headerRow) {
+		return getHardMaxWidth(column);
+	}
 
 	const containerWidth = headerRow.getBoundingClientRect().width;
 	let reserved = 0;
 
 	const visibleColumns = getVisibleColumnOrder(headerRow);
 	for (const other of visibleColumns) {
-		if (other === column) continue;
+		if (other === column) {
+			continue;
+		}
 
 		const current = getCellWidth(headerRow, other);
 		const isKnownColumn = HEADER_COLUMNS.includes(other as HeaderColumn);
@@ -496,15 +528,21 @@ function getNextResizableColumn(
 ): ResizableColumn | null {
 	const freeColumns = getVisibleFreeColumns(headerRow);
 	const index = freeColumns.indexOf(column);
-	if (index === -1) return null;
+	if (index === -1) {
+		return null;
+	}
 	const next = freeColumns[index + 1] ?? null;
 	// A flexible anchor absorbs the change itself; pairing would fix its width.
-	if (next && next === getAnchorColumn(headerRow) && FLEX_DEFAULT_COLUMNS.has(next)) return null;
+	if (next && next === getAnchorColumn(headerRow) && FLEX_DEFAULT_COLUMNS.has(next)) {
+		return null;
+	}
 	return next;
 }
 
 function addHandle(cell: HTMLElement, column: ResizableColumn): void {
-	if (cell.querySelector(`.${RESIZE_HANDLE_CLASS}`)) return;
+	if (cell.querySelector(`.${RESIZE_HANDLE_CLASS}`)) {
+		return;
+	}
 
 	const handle = createElement("div", {
 		className: RESIZE_HANDLE_CLASS,
@@ -517,7 +555,9 @@ function addHandle(cell: HTMLElement, column: ResizableColumn): void {
 
 		// Bail before entering drag state, or nothing would ever clear it.
 		const headerRow = findHeaderRow();
-		if (!headerRow || !isVisibleColumn(headerRow, column)) return;
+		if (!headerRow || !isVisibleColumn(headerRow, column)) {
+			return;
+		}
 
 		document.documentElement.setAttribute(ROOT_RESIZING_ATTR, "on");
 		handle.setPointerCapture(event.pointerId);
@@ -560,7 +600,9 @@ function addHandle(cell: HTMLElement, column: ResizableColumn): void {
 
 		const onPointerMove = (moveEvent: PointerEvent) => {
 			latestX = moveEvent.clientX;
-			if (framePending) return;
+			if (framePending) {
+				return;
+			}
 			framePending = true;
 			requestAnimationFrame(applyDrag);
 		};

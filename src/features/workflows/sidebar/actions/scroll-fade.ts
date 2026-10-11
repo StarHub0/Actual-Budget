@@ -23,7 +23,9 @@ function update(node: HTMLElement, lastState: { value: keyof typeof MASK | null 
 	// The ResizeObserver below fires often (live data reflows constantly);
 	// skip the write unless the fade state actually changed, or every
 	// no-op firing forces a repaint on this masked layer.
-	if (state === lastState.value) return;
+	if (state === lastState.value) {
+		return;
+	}
 	lastState.value = state;
 	node.style.setProperty("mask-image", MASK[state]);
 	node.style.setProperty("-webkit-mask-image", MASK[state]);

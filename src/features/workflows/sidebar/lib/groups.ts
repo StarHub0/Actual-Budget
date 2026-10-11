@@ -83,7 +83,9 @@ export function renameGroup(
 	label: string,
 ): Record<string, AccountGroup> {
 	const trimmed = label.trim();
-	if (!trimmed || !groups[id]) return groups;
+	if (!trimmed || !groups[id]) {
+		return groups;
+	}
 	return { ...groups, [id]: { ...groups[id], label: trimmed } };
 }
 
@@ -97,7 +99,9 @@ export function removeGroup(
 	delete nextGroups[id];
 	const nextAssignments = { ...assignments };
 	for (const accountId of Object.keys(nextAssignments)) {
-		if (nextAssignments[accountId] === id) delete nextAssignments[accountId];
+		if (nextAssignments[accountId] === id) {
+			delete nextAssignments[accountId];
+		}
 	}
 	return { groups: nextGroups, assignments: nextAssignments };
 }
@@ -108,7 +112,10 @@ export function assignAccount(
 	groupId: string | null,
 ): Record<string, string> {
 	const next = { ...assignments };
-	if (groupId) next[accountId] = groupId;
-	else delete next[accountId];
+	if (groupId) {
+		next[accountId] = groupId;
+	} else {
+		delete next[accountId];
+	}
 	return next;
 }

@@ -15,7 +15,9 @@
 		hasResult = false;
 
 		if (["+", "-", "×", "÷", "%"].includes(val)) {
-			if (expression) calculate();
+			if (expression) {
+				calculate();
+			}
 			expression = display + " " + val + " ";
 			display = "0";
 			hasResult = false;
@@ -23,7 +25,9 @@
 		}
 
 		if (val === ".") {
-			if (!display.includes(".")) display += ".";
+			if (!display.includes(".")) {
+				display += ".";
+			}
 			return;
 		}
 
@@ -31,7 +35,9 @@
 	}
 
 	function calculate() {
-		if (!expression) return;
+		if (!expression) {
+			return;
+		}
 		const parts = expression.trim().split(" ");
 		const left = parseFloat(parts[0]);
 		const op = parts[1];
@@ -78,18 +84,28 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key >= "0" && e.key <= "9") input(e.key);
-		else if (e.key === ".") input(".");
-		else if (e.key === "+") input("+");
-		else if (e.key === "-") input("-");
-		else if (e.key === "*") input("×");
-		else if (e.key === "/") {
+		if (e.key >= "0" && e.key <= "9") {
+			input(e.key);
+		} else if (e.key === ".") {
+			input(".");
+		} else if (e.key === "+") {
+			input("+");
+		} else if (e.key === "-") {
+			input("-");
+		} else if (e.key === "*") {
+			input("×");
+		} else if (e.key === "/") {
 			e.preventDefault();
 			input("÷");
-		} else if (e.key === "%") input("%");
-		else if (e.key === "Enter" || e.key === "=") calculate();
-		else if (e.key === "Escape") onClose();
-		else if (e.key === "Backspace") backspace();
+		} else if (e.key === "%") {
+			input("%");
+		} else if (e.key === "Enter" || e.key === "=") {
+			calculate();
+		} else if (e.key === "Escape") {
+			onClose();
+		} else if (e.key === "Backspace") {
+			backspace();
+		}
 	}
 </script>
 

@@ -292,7 +292,9 @@
 
 	function rgbToHex(rgb: string): string | null {
 		const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-		if (!m) return null;
+		if (!m) {
+			return null;
+		}
 		return "#" + [m[1], m[2], m[3]].map((n) => parseInt(n).toString(16).padStart(2, "0")).join("");
 	}
 
@@ -301,7 +303,9 @@
 			const canvas = document.createElement("canvas");
 			canvas.width = canvas.height = 1;
 			const ctx = canvas.getContext("2d");
-			if (!ctx) return null;
+			if (!ctx) {
+				return null;
+			}
 			ctx.fillStyle = value;
 			ctx.fillRect(0, 0, 1, 1);
 			const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
@@ -312,16 +316,24 @@
 	}
 
 	function resolveToHex(raw: string): string | null {
-		if (!raw) return null;
+		if (!raw) {
+			return null;
+		}
 		raw = raw.trim();
-		if (/^#[0-9a-f]{3,8}$/i.test(raw)) return raw;
-		if (/^rgb/.test(raw)) return rgbToHex(raw);
+		if (/^#[0-9a-f]{3,8}$/i.test(raw)) {
+			return raw;
+		}
+		if (/^rgb/.test(raw)) {
+			return rgbToHex(raw);
+		}
 		return resolveViaCanvas(raw);
 	}
 
 	function getComputedTokens(): ColorKeys {
 		const root = document.querySelector<HTMLElement>(":root");
-		if (!root) return {};
+		if (!root) {
+			return {};
+		}
 		const computed = getComputedStyle(root);
 		const result: ColorKeys = {};
 		for (const group of COLOR_GROUPS) {
@@ -374,7 +386,9 @@
 	});
 
 	async function initForTheme(theme: string) {
-		if (theme === currentTheme) return;
+		if (theme === currentTheme) {
+			return;
+		}
 
 		// Flush pending save for the outgoing theme before switching
 		if (saveTimer) {
@@ -406,16 +420,22 @@
 		stored: ThemeOverrides | ColorKeys | null,
 		theme: string,
 	): ColorKeys {
-		if (!stored) return {};
+		if (!stored) {
+			return {};
+		}
 		const firstKey = Object.keys(stored)[0];
 		// Migrate old flat format (keys start with "--")
-		if (firstKey?.startsWith("--")) return stored as ColorKeys;
+		if (firstKey?.startsWith("--")) {
+			return stored as ColorKeys;
+		}
 		return (stored as ThemeOverrides)[theme] ?? {};
 	}
 
 	function applyColors(keys: ColorKeys) {
 		const root = document.querySelector<HTMLElement>(":root");
-		if (!root) return;
+		if (!root) {
+			return;
+		}
 		for (const [key, val] of Object.entries(keys)) {
 			setRootProperty(root, key, val);
 		}
@@ -438,7 +458,9 @@
 	}
 
 	async function doSave(theme: string) {
-		if (!theme) return;
+		if (!theme) {
+			return;
+		}
 		const stored = (await getValue<ThemeOverrides | ColorKeys | null>(STORAGE_KEY, null)) ?? {};
 		const firstKey = Object.keys(stored)[0];
 		const base: ThemeOverrides = firstKey?.startsWith("--") ? {} : (stored as ThemeOverrides);
@@ -462,7 +484,9 @@
 	}
 
 	function scheduleSave() {
-		if (saveTimer) clearTimeout(saveTimer);
+		if (saveTimer) {
+			clearTimeout(saveTimer);
+		}
 		isSaving = true;
 		saveTimer = setTimeout(async () => {
 			await doSave(currentTheme);
@@ -484,7 +508,9 @@
 
 		const root = document.querySelector<HTMLElement>(":root");
 		if (root) {
-			for (const key of allKeys) root.style.removeProperty(key);
+			for (const key of allKeys) {
+				root.style.removeProperty(key);
+			}
 		}
 		const computed = getComputedTokens();
 		const resolved: ColorKeys = {};

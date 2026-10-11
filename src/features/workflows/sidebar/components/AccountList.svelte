@@ -125,7 +125,9 @@
 	// See PrimaryNav.svelte for why any navigation elsewhere in this sidebar
 	// has to close the spending-calendar overlay itself, if open.
 	function go(path: string) {
-		if (isCalendarOpen()) closeCalendar();
+		if (isCalendarOpen()) {
+			closeCalendar();
+		}
 		navigate(path);
 	}
 
@@ -202,9 +204,13 @@
 	}
 
 	function onAccountRowEnter(e: MouseEvent, account: SidebarAccount) {
-		if (dragSrcId || menuAccount || menuGroup || editingAccountId || editingGroupId) return;
+		if (dragSrcId || menuAccount || menuGroup || editingAccountId || editingGroupId) {
+			return;
+		}
 		const el = e.currentTarget as HTMLElement;
-		if (hoverTimer) clearTimeout(hoverTimer);
+		if (hoverTimer) {
+			clearTimeout(hoverTimer);
+		}
 		hoverTimer = setTimeout(() => showHoverCard(el, account), HOVER_DELAY);
 	}
 
@@ -218,13 +224,17 @@
 
 	function commitAccountRename(accountId: string, name: string) {
 		const trimmed = name.trim();
-		if (trimmed) onRenameAccount(accountId, trimmed);
+		if (trimmed) {
+			onRenameAccount(accountId, trimmed);
+		}
 		editingAccountId = null;
 	}
 
 	function addCategory(sectionLabel: string) {
 		const kind = SECTION_KIND[sectionLabel];
-		if (!kind) return;
+		if (!kind) {
+			return;
+		}
 		const created = createGroup(groups, kind);
 		groups = created.groups;
 		saveGroups(budgetId, created.groups);
@@ -285,9 +295,13 @@
 	}
 
 	function onDragOver(e: DragEvent, targetId: string) {
-		if (!dragSrcId || dragSrcId === targetId) return;
+		if (!dragSrcId || dragSrcId === targetId) {
+			return;
+		}
 		e.preventDefault();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = "move";
+		}
 		overId = targetId;
 		overGroupId = null;
 		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -295,15 +309,21 @@
 	}
 
 	function onGroupDragOver(e: DragEvent, groupId: string) {
-		if (!dragSrcId) return;
+		if (!dragSrcId) {
+			return;
+		}
 		e.preventDefault();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = "move";
+		}
 		overGroupId = groupId;
 		overId = null;
 	}
 
 	function onGroupDrop(e: DragEvent, groupId: string) {
-		if (!dragSrcId) return;
+		if (!dragSrcId) {
+			return;
+		}
 		e.preventDefault();
 		const next = assignAccount(assignments, dragSrcId, groupId);
 		assignments = next;
@@ -319,7 +339,9 @@
 		targetGroupId: string | null,
 		sectionItems: SidebarAccount[],
 	) {
-		if (!dragSrcId || dragSrcId === targetId) return;
+		if (!dragSrcId || dragSrcId === targetId) {
+			return;
+		}
 		e.preventDefault();
 
 		if (bucketOf(dragSrcId) !== targetGroupId) {
@@ -330,10 +352,16 @@
 
 		const ids = sectionItems.map((a) => a.id);
 		const srcIndex = ids.indexOf(dragSrcId);
-		if (srcIndex !== -1) ids.splice(srcIndex, 1);
+		if (srcIndex !== -1) {
+			ids.splice(srcIndex, 1);
+		}
 		let targetIndex = ids.indexOf(targetId);
-		if (targetIndex === -1) targetIndex = ids.length;
-		if (overPos === "after") targetIndex += 1;
+		if (targetIndex === -1) {
+			targetIndex = ids.length;
+		}
+		if (overPos === "after") {
+			targetIndex += 1;
+		}
 		ids.splice(targetIndex, 0, dragSrcId);
 
 		const nextOrder = orderedSections.flatMap((s) =>

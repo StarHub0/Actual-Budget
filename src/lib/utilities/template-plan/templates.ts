@@ -39,7 +39,9 @@ export type TemplateKind =
 export function templateEntriesFromGoalDef(entries: GoalDefEntry[]): TemplateEntry[] {
 	const out: TemplateEntry[] = [];
 	for (const d of entries) {
-		if (d.directive === "goal") continue;
+		if (d.directive === "goal") {
+			continue;
+		}
 
 		switch (d.type) {
 			case "simple": {

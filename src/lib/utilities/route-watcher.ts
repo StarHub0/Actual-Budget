@@ -1,7 +1,9 @@
 let patched = false;
 
 function ensurePatched(): void {
-	if (patched) return;
+	if (patched) {
+		return;
+	}
 	patched = true;
 
 	for (const method of ["pushState", "replaceState"] as const) {

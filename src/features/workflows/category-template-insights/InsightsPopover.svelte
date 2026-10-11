@@ -35,12 +35,22 @@
 	}
 
 	function relativeDay(iso: string): string {
-		if (!iso) return "";
+		if (!iso) {
+			return "";
+		}
 		const diff = daysBetween(isoDate(), iso);
-		if (diff === 0) return "today";
-		if (diff === 1) return "tomorrow";
-		if (diff === -1) return "yesterday";
-		if (diff > 1) return `in ${diff} days`;
+		if (diff === 0) {
+			return "today";
+		}
+		if (diff === 1) {
+			return "tomorrow";
+		}
+		if (diff === -1) {
+			return "yesterday";
+		}
+		if (diff > 1) {
+			return `in ${diff} days`;
+		}
 		return `${-diff} days ago`;
 	}
 
@@ -67,18 +77,26 @@
 
 	function fmtMonth(month: string): string {
 		const [y, m] = month.split("-").map(Number);
-		if (!y || !m) return month;
+		if (!y || !m) {
+			return month;
+		}
 		return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: "short", year: "numeric" });
 	}
 
 	function percentCategoryLabel(category: string): string {
-		if (category === "all income" || category === "available funds") return category;
+		if (category === "all income" || category === "available funds") {
+			return category;
+		}
 		return getCategoryName(category) ?? category;
 	}
 
 	function getScheduleStatus(link: LinkedSchedule): string {
-		if (link.schedule.completed) return "completed";
-		if (link.paid) return "paid";
+		if (link.schedule.completed) {
+			return "completed";
+		}
+		if (link.paid) {
+			return "paid";
+		}
 		return "upcoming";
 	}
 
@@ -87,8 +105,12 @@
 	}
 
 	function scheduleWhen(status: string, date: string): [string, string?] {
-		if (status === "completed") return ["Completed"];
-		if (!date) return [status === "paid" ? "Paid" : "No date"];
+		if (status === "completed") {
+			return ["Completed"];
+		}
+		if (!date) {
+			return [status === "paid" ? "Paid" : "No date"];
+		}
 		const day = fmtDateShort(date);
 		return [status === "paid" ? `Paid ${day}` : day, relativeDay(date)];
 	}
@@ -111,7 +133,9 @@
 				row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 				return;
 			}
-			if (++tries < 40) setTimeout(step, 100);
+			if (++tries < 40) {
+				setTimeout(step, 100);
+			}
 		};
 		setTimeout(step, 120);
 	}
@@ -128,8 +152,12 @@
 		}
 		if ((e.key === "f" || e.key === "F") && onlySched) {
 			const t = e.target as HTMLElement;
-			if (t?.tagName === "INPUT" || t?.tagName === "TEXTAREA" || t?.isContentEditable) return;
-			if (e.ctrlKey || e.metaKey || e.altKey) return;
+			if (t?.tagName === "INPUT" || t?.tagName === "TEXTAREA" || t?.isContentEditable) {
+				return;
+			}
+			if (e.ctrlKey || e.metaKey || e.altKey) {
+				return;
+			}
 			e.preventDefault();
 			openScheduleModal(onlySched.id);
 		}

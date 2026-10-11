@@ -151,12 +151,16 @@
 	);
 
 	async function perform(action: () => Promise<ActionResult | null>) {
-		if (busy) return;
+		if (busy) {
+			return;
+		}
 		menuOpen = false;
 		busy = true;
 		try {
 			const result = await bulkEdit(action);
-			if (result) showToast(result);
+			if (result) {
+				showToast(result);
+			}
 		} finally {
 			busy = false;
 		}
@@ -180,10 +184,14 @@
 	}
 
 	$effect(() => {
-		if (!menuOpen || !menu || !moreBtn) return;
+		if (!menuOpen || !menu || !moreBtn) {
+			return;
+		}
 		positionPopover(menu, moreBtn, { align: "right", gap: 6 });
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") menuOpen = false;
+			if (e.key === "Escape") {
+				menuOpen = false;
+			}
 		};
 		document.addEventListener("keydown", onKey);
 		const stop = onOutsideClick([menu, moreBtn], () => (menuOpen = false));

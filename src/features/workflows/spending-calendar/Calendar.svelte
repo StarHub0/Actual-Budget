@@ -83,13 +83,19 @@
 	const tabIso = $derived.by(() => {
 		const inMonth = (iso: string | null) =>
 			!!iso && days.some((d) => d.isCurrentMonth && d.iso === iso);
-		if (inMonth(focusIso)) return focusIso;
-		if (inMonth(selectedIso)) return selectedIso;
+		if (inMonth(focusIso)) {
+			return focusIso;
+		}
+		if (inMonth(selectedIso)) {
+			return selectedIso;
+		}
 		return days.find((d) => d.isToday)?.iso ?? days.find((d) => d.isCurrentMonth)?.iso ?? null;
 	});
 
 	function setMonth(y: number, m: number): boolean {
-		if (monthsFromNow(y, m) > MAX_FUTURE_MONTHS) return false;
+		if (monthsFromNow(y, m) > MAX_FUTURE_MONTHS) {
+			return false;
+		}
 		navDir = Math.sign((y - year) * 12 + (m - month));
 		year = y;
 		month = m;
@@ -109,7 +115,9 @@
 
 	/** A refilter keeps the month on screen, so its cells update in place instead of sliding in. */
 	async function loadMonth({ refilter = false } = {}) {
-		if (!filters) return;
+		if (!filters) {
+			return;
+		}
 		const seq = ++loadSeq;
 		loading = !refilter;
 		try {
@@ -119,7 +127,9 @@
 				firstDayOfWeek: prefs.firstDayOfWeek,
 			});
 			// A slower, older request must not overwrite the month paged to since.
-			if (seq !== loadSeq) return;
+			if (seq !== loadSeq) {
+				return;
+			}
 			firstDayOfWeek = prefs.firstDayOfWeek;
 			lists = {
 				accounts: loader.accounts(),
@@ -156,7 +166,9 @@
 	}
 
 	function setFilters(patch: Partial<Filters>) {
-		if (!filters) return;
+		if (!filters) {
+			return;
+		}
 		filters = { ...filters, ...patch };
 		closeDayPanel();
 		loadMonth({ refilter: true });
@@ -166,7 +178,9 @@
 	function focusCell(iso: string, open: boolean) {
 		pageEl?.querySelector<HTMLElement>(`[data-iso="${iso}"]`)?.focus();
 		const day = days.find((d) => d.isCurrentMonth && d.iso === iso);
-		if (open && day && hasTransactions(day)) openDayPanel(day);
+		if (open && day && hasTransactions(day)) {
+			openDayPanel(day);
+		}
 	}
 
 	async function focusDate(d: Date, open: boolean) {
@@ -174,7 +188,9 @@
 		focusIso = iso;
 		if (d.getFullYear() !== year || d.getMonth() !== month) {
 			pendingFocus = { open };
-			if (!setMonth(d.getFullYear(), d.getMonth())) pendingFocus = null;
+			if (!setMonth(d.getFullYear(), d.getMonth())) {
+				pendingFocus = null;
+			}
 			return;
 		}
 		await tick();
@@ -189,21 +205,33 @@
 	}
 
 	function onArrowKey(e: KeyboardEvent) {
-		if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
-		if (filtersOpen || pickerOpen) return;
+		if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) {
+			return;
+		}
+		if (filtersOpen || pickerOpen) {
+			return;
+		}
 		const target = e.target as Node;
-		if (document.querySelector(`[${SIDEBAR_ATTR}]`)?.contains(target)) return;
+		if (document.querySelector(`[${SIDEBAR_ATTR}]`)?.contains(target)) {
+			return;
+		}
 
 		const step = ARROW_STEPS[e.key];
-		if (!step) return;
+		if (!step) {
+			return;
+		}
 		const inGrid = !!gridEl?.contains(target);
 		// Outside the grid, arrows only drive the open day panel.
-		if (!inGrid && !(selectedIso && target === document.body)) return;
+		if (!inGrid && !(selectedIso && target === document.body)) {
+			return;
+		}
 		const from =
 			(inGrid && (target as HTMLElement).closest<HTMLElement>("[data-iso]")?.dataset.iso) ||
 			selectedIso ||
 			tabIso;
-		if (!from) return;
+		if (!from) {
+			return;
+		}
 		e.preventDefault();
 
 		const panelOpen = !!selectedIso;
@@ -244,7 +272,9 @@
 	}
 
 	function openDayPanel(day: DayData) {
-		if (!hasTransactions(day)) return;
+		if (!hasTransactions(day)) {
+			return;
+		}
 
 		cleanupPanel();
 
@@ -301,7 +331,9 @@
 		// A schedule edited in Actual's editor shows once the editor closes.
 		let editorOpen = false;
 		const unwatch = watchDom(() => {
-			if (selectedIso && !sidepanel.isOpen()) selectedIso = null;
+			if (selectedIso && !sidepanel.isOpen()) {
+				selectedIso = null;
+			}
 			const open = !!document.querySelector(SCHEDULE_EDITOR);
 			if (editorOpen && !open) {
 				loader.invalidate();

@@ -24,7 +24,9 @@
 	const categoryBreakdown = $derived.by(() => {
 		const map = new Map<string, { name: string; amount: number; id: string }>();
 		for (const t of transactions) {
-			if (t.amount >= 0 || t.upcoming || t.missed) continue;
+			if (t.amount >= 0 || t.upcoming || t.missed) {
+				continue;
+			}
 			const key = t.categoryId || "__uncategorized";
 			const existing = map.get(key);
 			if (existing) {

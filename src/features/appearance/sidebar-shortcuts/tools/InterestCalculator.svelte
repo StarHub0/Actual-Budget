@@ -20,7 +20,9 @@
 		const r = parseFloat(rate) / 100;
 		const t = parseFloat(years);
 		const n = parseInt(compounding);
-		if (!p || !r || !t || !n) return null;
+		if (!p || !r || !t || !n) {
+			return null;
+		}
 
 		const total = p * Math.pow(1 + r / n, n * t);
 		const interest = total - p;

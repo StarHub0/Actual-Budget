@@ -47,9 +47,13 @@
 
 	function go(page: Page) {
 		const covered = isCalendarOpen();
-		if (covered) closeCalendar();
+		if (covered) {
+			closeCalendar();
+		}
 		// The page under the calendar is already showing; navigating again makes Actual remount it.
-		if (covered && matchesPage(page)) return;
+		if (covered && matchesPage(page)) {
+			return;
+		}
 		navigate(pagePath(page));
 	}
 
@@ -99,7 +103,9 @@
 			onExpand();
 			return;
 		}
-		if (!avatarEl) return;
+		if (!avatarEl) {
+			return;
+		}
 		iconAnchorRect = avatarEl.getBoundingClientRect();
 		iconPickerOpen = true;
 	}
@@ -107,13 +113,17 @@
 	async function handleIconSelect(result: BudgetIcon): Promise<void> {
 		budgetIcon = result;
 		iconPickerOpen = false;
-		if (budgetId) await setBudgetIcon(budgetId, result);
+		if (budgetId) {
+			await setBudgetIcon(budgetId, result);
+		}
 	}
 
 	async function handleIconRemove(): Promise<void> {
 		budgetIcon = undefined;
 		iconPickerOpen = false;
-		if (budgetId) await removeBudgetIcon(budgetId);
+		if (budgetId) {
+			await removeBudgetIcon(budgetId);
+		}
 	}
 
 	const avatarLabel = $derived(split ? "Change budget icon" : `${budgetName} — expand`);
@@ -125,7 +135,9 @@
 	let moreOpen = $state(false);
 
 	$effect(() => {
-		if (!showAccounts) moreOpen = false;
+		if (!showAccounts) {
+			moreOpen = false;
+		}
 	});
 
 	let moreX = $state(0);
@@ -156,7 +168,9 @@
 
 	function accountInitials(name: string): string {
 		const words = name.trim().split(/\s+/);
-		if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+		if (words.length >= 2) {
+			return (words[0][0] + words[1][0]).toUpperCase();
+		}
 		return name
 			.replace(/[^a-z0-9]/gi, "")
 			.slice(0, 2)
@@ -179,7 +193,9 @@
 <svelte:window
 	onclick={() => (moreOpen = false)}
 	onkeydown={(e) => {
-		if (e.key === "Escape") moreOpen = false;
+		if (e.key === "Escape") {
+			moreOpen = false;
+		}
 	}}
 />
 
@@ -313,7 +329,9 @@
 					aria-label={account.name}
 					use:tooltip={account.name}
 					onclick={() => {
-						if (isCalendarOpen()) closeCalendar();
+						if (isCalendarOpen()) {
+							closeCalendar();
+						}
 						navigate(`/accounts/${account.id}`);
 					}}
 				>

@@ -61,8 +61,12 @@ async function refreshAccountView(): Promise<void> {
 export async function loadAccount(id: string): Promise<void> {
 	// accounts-get, not a query: the bank balance isn't a queryable field.
 	const row = (await send<AccountRow[]>("accounts-get")).find((a) => a.id === id);
-	if (!row) return;
-	if (reconcile.accountId !== id) reconcile.target = null;
+	if (!row) {
+		return;
+	}
+	if (reconcile.accountId !== id) {
+		reconcile.target = null;
+	}
 	reconcile.accountId = id;
 	reconcile.accountName = row.name;
 	reconcile.bankBalance = row.balance_current;
@@ -73,7 +77,9 @@ export async function loadAccount(id: string): Promise<void> {
 // Same sums as Actual's own reconcile: every cleared transaction, splits counted once.
 export async function refreshTotals(): Promise<void> {
 	const account = reconcile.accountId;
-	if (!account) return;
+	if (!account) {
+		return;
+	}
 	const [cleared, checked, uncleared] = await Promise.all([
 		calculate<number>(
 			"transactions",
@@ -91,7 +97,9 @@ export async function refreshTotals(): Promise<void> {
 			options: { splits: "none" },
 		}),
 	]);
-	if (account !== reconcile.accountId) return;
+	if (account !== reconcile.accountId) {
+		return;
+	}
 	reconcile.cleared = cleared ?? 0;
 	reconcile.checked = checked ?? 0;
 	reconcile.unclearedRows = uncleared.sort((a, b) => b.date.localeCompare(a.date));
@@ -142,9 +150,13 @@ export function cancel(): void {
 /** Adds the transaction that closes the gap, cleared and run through rules, as Actual does. */
 export async function addAdjustment(): Promise<void> {
 	const account = reconcile.accountId;
-	if (!account || reconcile.target == null || reconcile.busy) return;
+	if (!account || reconcile.target == null || reconcile.busy) {
+		return;
+	}
 	const amount = reconcile.target - reconcile.cleared;
-	if (amount === 0) return;
+	if (amount === 0) {
+		return;
+	}
 	reconcile.busy = true;
 	try {
 		const transaction = await send("rules-run", {
@@ -171,11 +183,15 @@ export async function addAdjustment(): Promise<void> {
 /** Locks every cleared transaction and records the date, as Actual's "Lock transactions" does. */
 export async function finish(): Promise<void> {
 	const account = reconcile.accountId;
-	if (!account || reconcile.target == null || reconcile.busy) return;
+	if (!account || reconcile.target == null || reconcile.busy) {
+		return;
+	}
 	reconcile.busy = true;
 	try {
 		await refreshTotals();
-		if (reconcile.target !== reconcile.cleared) return;
+		if (reconcile.target !== reconcile.cleared) {
+			return;
+		}
 		const rows = await query<{ id: string }[]>("transactions", {
 			filter: { account, cleared: true, reconciled: false },
 			select: ["id"],
@@ -204,7 +220,9 @@ export async function finish(): Promise<void> {
 			{
 				title: "Undo",
 				action: async () => {
-					for (let i = 0; i < steps; i++) await send("undo");
+					for (let i = 0; i < steps; i++) {
+						await send("undo");
+					}
 				},
 			},
 		);

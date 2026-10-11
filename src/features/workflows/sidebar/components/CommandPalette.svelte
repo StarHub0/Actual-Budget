@@ -139,7 +139,9 @@
 	let reports = $state<CustomReport[]>([]);
 	let reportsLoaded = false;
 	async function ensureReportsLoaded(): Promise<void> {
-		if (reportsLoaded) return;
+		if (reportsLoaded) {
+			return;
+		}
 		reportsLoaded = true;
 		try {
 			reports = await queryTable<(CustomReport & { tombstone?: boolean })[]>("custom_reports", {
@@ -154,7 +156,9 @@
 	let communityThemes = $state<RemoteTheme[]>([]);
 	let communityThemesLoaded = false;
 	async function ensureCommunityThemesLoaded(): Promise<void> {
-		if (communityThemesLoaded) return;
+		if (communityThemesLoaded) {
+			return;
+		}
 		communityThemesLoaded = true;
 		try {
 			communityThemes = await fetchCommunityThemeCatalog();
@@ -278,7 +282,9 @@
 						: []),
 					...(() => {
 						const label = privacyEnabled ? "Show amounts" : "Hide amounts";
-						if (!match(label)) return [];
+						if (!match(label)) {
+							return [];
+						}
 						return [
 							{
 								kind: "action" as const,
@@ -319,7 +325,9 @@
 		query = "";
 		index = 0;
 		animatePageChange = true;
-		if (target === "themes") ensureCommunityThemesLoaded();
+		if (target === "themes") {
+			ensureCommunityThemesLoaded();
+		}
 	}
 	function goBackToRoot(): void {
 		page = "root";
@@ -332,20 +340,29 @@
 			goToPage(item.target);
 			return;
 		}
-		if (isCalendarOpen()) closeCalendar();
-		if (item.kind === "nav") navigate(pagePath(item.page));
-		else if (item.kind === "account") navigate(`/accounts/${item.account.id}`);
-		else if (item.kind === "report") navigate(`/reports/custom/${item.report.id}`);
-		else if (item.kind === "theme") {
+		if (isCalendarOpen()) {
+			closeCalendar();
+		}
+		if (item.kind === "nav") {
+			navigate(pagePath(item.page));
+		} else if (item.kind === "account") {
+			navigate(`/accounts/${item.account.id}`);
+		} else if (item.kind === "report") {
+			navigate(`/reports/custom/${item.report.id}`);
+		} else if (item.kind === "theme") {
 			activeThemeKey = item.key;
 			setValue(THEME_SETTING_KEY, item.key);
 			applyThemeByKey(item.key, DEFAULT_THEME_KEY);
-		} else item.run();
+		} else {
+			item.run();
+		}
 		closePalette();
 	}
 	function moveIndex(delta: number): void {
 		const n = items.length;
-		if (!n) return;
+		if (!n) {
+			return;
+		}
 		index = (index + delta + n) % n;
 		listEl?.querySelector(`[data-pidx="${index}"]`)?.scrollIntoView({ block: "nearest" });
 	}
@@ -359,14 +376,19 @@
 		} else if (e.key === "Enter") {
 			e.preventDefault();
 			const item = items[index];
-			if (item) runItem(item);
+			if (item) {
+				runItem(item);
+			}
 		} else if (e.key === "Backspace" && query === "" && page !== "root") {
 			e.preventDefault();
 			goBackToRoot();
 		} else if (e.key === "Escape") {
 			e.preventDefault();
-			if (page !== "root") goBackToRoot();
-			else closePalette();
+			if (page !== "root") {
+				goBackToRoot();
+			} else {
+				closePalette();
+			}
 		}
 	}
 
@@ -385,8 +407,11 @@
 				openPalette();
 			}
 		} else if (e.key === "Escape" && open) {
-			if (page !== "root") goBackToRoot();
-			else closePalette();
+			if (page !== "root") {
+				goBackToRoot();
+			} else {
+				closePalette();
+			}
 		}
 	}
 

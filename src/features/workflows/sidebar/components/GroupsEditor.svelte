@@ -59,7 +59,9 @@
 
 	function rename(id: string, label: string) {
 		const next = renameGroup(groups, id, label);
-		if (next === groups) return;
+		if (next === groups) {
+			return;
+		}
 		groups = next;
 		saveGroups(budgetId, next);
 	}

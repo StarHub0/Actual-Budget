@@ -83,13 +83,19 @@
 	// Full-width tiles split top/bottom; the rest split left/right, nearest tile wins.
 	function onBarDragOver(e: DragEvent) {
 		e.preventDefault();
-		if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-		if (dragIdx == null || !barEl) return;
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = "move";
+		}
+		if (dragIdx == null || !barEl) {
+			return;
+		}
 
 		let closest: { idx: number; side: "before" | "after"; dist: number } | null = null;
 		const tiles = barEl.querySelectorAll<HTMLElement>(":scope > .item:not(.is-ghost)");
 		for (const [idx, el] of tiles.entries()) {
-			if (idx === dragIdx) continue;
+			if (idx === dragIdx) {
+				continue;
+			}
 			const rect = el.getBoundingClientRect();
 			const vertical = items[idx]?.size === "wide";
 			const mid = vertical ? rect.top + rect.height / 2 : rect.left + rect.width / 2;
@@ -113,8 +119,12 @@
 		e.preventDefault();
 		if (dragIdx != null && dropTarget) {
 			let insertAt = dropTarget.idx;
-			if (dragIdx < insertAt) insertAt--;
-			if (dropTarget.side === "after") insertAt++;
+			if (dragIdx < insertAt) {
+				insertAt--;
+			}
+			if (dropTarget.side === "after") {
+				insertAt++;
+			}
 			move(dragIdx, insertAt);
 		}
 		onDragEnd();
@@ -131,7 +141,9 @@
 			onRemove?.(items[idx].id);
 			return;
 		}
-		if (!e.altKey) return;
+		if (!e.altKey) {
+			return;
+		}
 		const step =
 			e.key === "ArrowLeft" || e.key === "ArrowUp"
 				? -1
@@ -139,7 +151,9 @@
 					? 1
 					: 0;
 		const to = idx + step;
-		if (!step || to < 0 || to >= items.length) return;
+		if (!step || to < 0 || to >= items.length) {
+			return;
+		}
 		e.preventDefault();
 		const id = items[idx].id;
 		move(idx, to);

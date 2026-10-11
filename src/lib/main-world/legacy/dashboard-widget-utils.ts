@@ -66,7 +66,9 @@ declare global {
 }
 
 function parseMeta(meta: unknown): Record<string, unknown> {
-	if (!meta) return {};
+	if (!meta) {
+		return {};
+	}
 	if (typeof meta === "string") {
 		try {
 			return (JSON.parse(meta) as Record<string, unknown>) || {};
@@ -119,7 +121,9 @@ function getReactFiber(element: HTMLElement) {
 }
 
 function normalizeReactKey(key: unknown): string | null {
-	if (typeof key !== "string") return null;
+	if (typeof key !== "string") {
+		return null;
+	}
 	return key.replace(/^\.\$/, "").replace(/^\$/, "");
 }
 
@@ -127,7 +131,9 @@ function getNativeMenuItemName(button: HTMLElement): string | null {
 	let fiber = getReactFiber(button);
 	while (fiber) {
 		const key = normalizeReactKey((fiber as { key?: unknown }).key);
-		if (key) return key;
+		if (key) {
+			return key;
+		}
 		fiber = (fiber as { return?: unknown }).return ?? null;
 	}
 	return null;
@@ -202,7 +208,9 @@ function bindMenuButtonInteractionState(button: HTMLButtonElement) {
 		clearHovered();
 	});
 	button.addEventListener("keydown", (event) => {
-		if (event.key === "Enter" || event.key === " ") setPressed();
+		if (event.key === "Enter" || event.key === " ") {
+			setPressed();
+		}
 	});
 	button.addEventListener("keyup", clearPressed);
 }
@@ -260,11 +268,17 @@ function enhanceAddWidgetMenu({
 		.filter(isDashboardAddWidgetMenu)
 		.forEach((menu) => {
 			let anchor = getButtonByMenuItemName(menu, "markdown-card");
-			if (!anchor) return;
+			if (!anchor) {
+				return;
+			}
 
 			widgetDefinitions.forEach((widgetDefinition) => {
-				if (!widgetDefinition?.key || !widgetDefinition?.label) return;
-				if (menu.querySelector(`[${CUSTOM_WIDGET_ATTR}="${widgetDefinition.key}"]`)) return;
+				if (!widgetDefinition?.key || !widgetDefinition?.label) {
+					return;
+				}
+				if (menu.querySelector(`[${CUSTOM_WIDGET_ATTR}="${widgetDefinition.key}"]`)) {
+					return;
+				}
 
 				const button = createCustomMenuButton(
 					anchor!,
@@ -283,7 +297,9 @@ function enhanceAddWidgetMenu({
 
 function ensureDashboardWidgetUtils(): DashboardWidgetUtilsGlobal {
 	const existing = window[GLOBAL_NAME];
-	if (existing) return existing;
+	if (existing) {
+		return existing;
+	}
 
 	const utils = Object.freeze({
 		createMarkdownWidgetDefinition,

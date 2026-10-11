@@ -11,7 +11,9 @@ export function relativeTime(ms: number): string {
 	const diff = ms - Date.now();
 	const format = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 	for (const [unit, size] of UNITS) {
-		if (Math.abs(diff) >= size) return format.format(Math.round(diff / size), unit);
+		if (Math.abs(diff) >= size) {
+			return format.format(Math.round(diff / size), unit);
+		}
 	}
 	return "just now";
 }

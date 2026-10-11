@@ -8,7 +8,11 @@ export function statusBadge(status: Status | undefined): {
 	tone: "positive" | "warning" | "negative";
 	label: string;
 } {
-	if (status === "full") return { tone: "positive", label: "funded" };
-	if (status === "partial") return { tone: "warning", label: "partial" };
+	if (status === "full") {
+		return { tone: "positive", label: "funded" };
+	}
+	if (status === "partial") {
+		return { tone: "warning", label: "partial" };
+	}
 	return { tone: "negative", label: "unfunded" };
 }

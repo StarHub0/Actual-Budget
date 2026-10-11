@@ -45,7 +45,9 @@ const CSS = `
 
 function parseRgb(color: string): [number, number, number] | null {
 	const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-	if (!m) return null;
+	if (!m) {
+		return null;
+	}
 	return [+m[1], +m[2], +m[3]];
 }
 
@@ -62,13 +64,19 @@ function needsColors(el: HTMLElement): boolean {
 // Reading a native color forces a style recalc, so clear every override first, read them all,
 // then write: one recalc per pass instead of one per tag.
 function colorTags(els: HTMLElement[]) {
-	if (!els.length) return;
-	for (const el of els) el.style.removeProperty("background-color");
+	if (!els.length) {
+		return;
+	}
+	for (const el of els) {
+		el.style.removeProperty("background-color");
+	}
 	const colors = els.map((el) => parseRgb(getComputedStyle(el).backgroundColor));
 	els.forEach((el, i) => {
 		el.dataset.abtTagClass = el.className;
 		const rgb = colors[i];
-		if (!rgb) return;
+		if (!rgb) {
+			return;
+		}
 		const [r, g, b] = rgb;
 		el.style.setProperty("background-color", `rgba(${r}, ${g}, ${b}, 0.15)`, "important");
 		el.style.setProperty("color", tagText(r, g, b), "important");
@@ -77,7 +85,9 @@ function colorTags(els: HTMLElement[]) {
 
 function splitHash(el: HTMLElement) {
 	const text = el.textContent?.trim() || "";
-	if (!text.startsWith("#")) return;
+	if (!text.startsWith("#")) {
+		return;
+	}
 
 	const hash = document.createElement("span");
 	hash.className = "abt-tag-hash";
@@ -93,7 +103,9 @@ function scanTags() {
 		'button[data-react-aria-pressable="true"]',
 	)) {
 		if (btn.hasAttribute(ATTR)) {
-			if (needsColors(btn)) stale.push(btn);
+			if (needsColors(btn)) {
+				stale.push(btn);
+			}
 		} else if (btn.textContent?.trim().startsWith("#")) {
 			btn.setAttribute(ATTR, "");
 			splitHash(btn);
@@ -102,9 +114,13 @@ function scanTags() {
 	}
 	for (const item of document.querySelectorAll<HTMLElement>(".react-aria-ListBoxItem")) {
 		const textEl = item.querySelector<HTMLElement>("div");
-		if (!textEl) continue;
+		if (!textEl) {
+			continue;
+		}
 		if (item.hasAttribute(ATTR)) {
-			if (needsColors(textEl)) stale.push(textEl);
+			if (needsColors(textEl)) {
+				stale.push(textEl);
+			}
 		} else if (textEl.textContent?.trim().startsWith("#")) {
 			item.setAttribute(ATTR, "");
 			splitHash(textEl);

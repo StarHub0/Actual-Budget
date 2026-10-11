@@ -48,8 +48,11 @@ const RULES = [
 function* walk(dir) {
 	for (const entry of readdirSync(dir, { withFileTypes: true })) {
 		const path = join(dir, entry.name);
-		if (entry.isDirectory()) yield* walk(path);
-		else if (EXT.test(entry.name)) yield path;
+		if (entry.isDirectory()) {
+			yield* walk(path);
+		} else if (EXT.test(entry.name)) {
+			yield path;
+		}
 	}
 }
 
@@ -61,7 +64,9 @@ for (const base of SCAN) {
 		readFileSync(file, "utf8")
 			.split("\n")
 			.forEach((line, i) => {
-				if (line.includes("raw:")) return;
+				if (line.includes("raw:")) {
+					return;
+				}
 				for (const { re, hint } of rules) {
 					for (const m of line.matchAll(re)) {
 						problems.push(`${rel}:${i + 1}  ${m[0].replace(/[;}"]$/, "")}  → ${hint}`);

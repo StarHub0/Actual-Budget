@@ -47,7 +47,9 @@ function injectControl(): void {
 	const bar = document.querySelector<HTMLElement>('[data-testid="budget-totals"]')
 		?.firstElementChild as HTMLElement | null;
 	const menuBtn = bar?.lastElementChild as HTMLElement | null;
-	if (!bar || !menuBtn || (group && bar.contains(group))) return;
+	if (!bar || !menuBtn || (group && bar.contains(group))) {
+		return;
+	}
 
 	const wrap = document.createElement("span");
 	wrap.className = GROUP_CLASS;
@@ -75,7 +77,9 @@ function injectControl(): void {
 }
 
 function renderToggle(): void {
-	if (!toggleBtn) return;
+	if (!toggleBtn) {
+		return;
+	}
 	const label = insightsOn ? "Hide template insight bars" : "Show template insight bars";
 	toggleBtn.title = label;
 	toggleBtn.setAttribute("aria-label", label);
@@ -100,7 +104,9 @@ export const budgetViewOptions = {
 		insightsOn = Boolean(await getValue(INSIGHTS_KEY, insightsOn));
 		// Follows changes from the settings dialog and page too.
 		browser.storage.onChanged.addListener((changes, area) => {
-			if (area !== "local" || !(`local:${INSIGHTS_KEY}` in changes)) return;
+			if (area !== "local" || !(`local:${INSIGHTS_KEY}` in changes)) {
+				return;
+			}
 			insightsOn = Boolean(changes[`local:${INSIGHTS_KEY}`].newValue);
 			renderToggle();
 		});

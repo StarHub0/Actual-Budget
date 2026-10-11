@@ -358,7 +358,9 @@ export function isCommunityTheme(value: string): boolean {
 
 export function applyUserPaletteTheme(id: string, keys: Record<string, string>) {
 	const root = document.querySelector<HTMLElement>(":root");
-	if (!root) return;
+	if (!root) {
+		return;
+	}
 	for (const [varName, val] of Object.entries(keys)) {
 		setRootProperty(root, varName, val);
 	}
@@ -371,7 +373,9 @@ export function applyUserCSSTheme(id: string, css: string) {
 	const root = document.querySelector<HTMLElement>(":root");
 	if (root) {
 		for (const prop of Array.from(root.style)) {
-			if (prop.startsWith("--ctp-")) root.style.removeProperty(prop);
+			if (prop.startsWith("--ctp-")) {
+				root.style.removeProperty(prop);
+			}
 		}
 	}
 	applyGlobalCSS(css, TOKENS_STYLE_ID);
@@ -381,9 +385,13 @@ export function applyUserCSSTheme(id: string, css: string) {
 
 export function applyOverrides(key: string) {
 	const overrides = editorState.overrides[key];
-	if (!overrides || Object.keys(overrides).length === 0) return;
+	if (!overrides || Object.keys(overrides).length === 0) {
+		return;
+	}
 	const root = document.querySelector<HTMLElement>(":root");
-	if (!root) return;
+	if (!root) {
+		return;
+	}
 	for (const [prop, val] of Object.entries(overrides)) {
 		setRootProperty(root, prop, val);
 	}
@@ -391,9 +399,13 @@ export function applyOverrides(key: string) {
 
 export function applyPalette(name: string) {
 	const palette = getTheme(name);
-	if (!palette) return;
+	if (!palette) {
+		return;
+	}
 	const root = document.querySelector<HTMLElement>(":root");
-	if (!root) return;
+	if (!root) {
+		return;
+	}
 	for (const [varName, val] of Object.entries(palette.keys)) {
 		setRootProperty(root, varName, val);
 	}
@@ -411,13 +423,17 @@ export async function fetchCommunityThemeCatalog(): Promise<RemoteTheme[]> {
 		responseType: "json",
 		url: COMMUNITY_CATALOG_URL,
 	});
-	if (!res?.ok) throw new Error(`Could not fetch community theme catalog (status ${res?.status})`);
+	if (!res?.ok) {
+		throw new Error(`Could not fetch community theme catalog (status ${res?.status})`);
+	}
 	return res.data;
 }
 
 export function getBuiltinPreviewColors(key: string): string[] {
 	const theme = themes[key];
-	if (!theme) return [];
+	if (!theme) {
+		return [];
+	}
 	const k = theme.keys;
 	return [
 		k["--ctp-base"],
@@ -446,7 +462,9 @@ export function getNativePreviewColors(): string[] {
 	const root = getComputedStyle(document.documentElement);
 	for (const sheet of document.styleSheets) {
 		const owner = sheet.ownerNode;
-		if (!(owner instanceof HTMLStyleElement) || owner.id.startsWith("ABT-")) continue;
+		if (!(owner instanceof HTMLStyleElement) || owner.id.startsWith("ABT-")) {
+			continue;
+		}
 		let rules: CSSRuleList;
 		try {
 			rules = sheet.cssRules;
@@ -454,8 +472,12 @@ export function getNativePreviewColors(): string[] {
 			continue;
 		}
 		for (const rule of rules) {
-			if (!(rule instanceof CSSStyleRule) || rule.selectorText !== ":root") continue;
-			if (!rule.style.getPropertyValue("--color-pageBackground")) continue;
+			if (!(rule instanceof CSSStyleRule) || rule.selectorText !== ":root") {
+				continue;
+			}
+			if (!rule.style.getPropertyValue("--color-pageBackground")) {
+				continue;
+			}
 			return NATIVE_PREVIEW_TOKENS.map((token) => {
 				const value = rule.style.getPropertyValue(token).trim();
 				const ref = value.match(/^var\((--[\w-]+)\)$/)?.[1];
@@ -471,7 +493,9 @@ export async function fetchCommunityCSS(repo: string): Promise<string> {
 	for (const branch of branches) {
 		const url = `https://raw.githubusercontent.com/${repo}/${branch}/actual.css`;
 		const res = await browser.runtime.sendMessage({ type: "fetch", url });
-		if (res?.ok) return res.data;
+		if (res?.ok) {
+			return res.data;
+		}
 	}
 	throw new Error(`Could not fetch actual.css from ${repo}`);
 }
@@ -481,7 +505,9 @@ export async function applyCommunityTheme(repo: string) {
 	const root = document.querySelector<HTMLElement>(":root");
 	if (root) {
 		for (const prop of Array.from(root.style)) {
-			if (prop.startsWith("--ctp-")) root.style.removeProperty(prop);
+			if (prop.startsWith("--ctp-")) {
+				root.style.removeProperty(prop);
+			}
 		}
 	}
 	applyGlobalCSS(css, TOKENS_STYLE_ID);

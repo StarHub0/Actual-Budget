@@ -20,7 +20,9 @@
 	const loading = $derived(templatePlanState.overviewLoading);
 
 	function triggerRefresh() {
-		if (!loading) templatePlanState.onTabChange?.("overview");
+		if (!loading) {
+			templatePlanState.onTabChange?.("overview");
+		}
 	}
 
 	function longMonth(monthKey: string): string {

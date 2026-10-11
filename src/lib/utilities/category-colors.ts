@@ -25,14 +25,20 @@ let loaded = false;
 let autoIndex = 0;
 
 export async function loadCategoryColors(): Promise<void> {
-	if (loaded) return;
+	if (loaded) {
+		return;
+	}
 	colors = await getValue<Record<string, string>>(STORAGE_KEY, {});
 	loaded = true;
 }
 
 export function getCategoryColor(categoryId: string): string {
-	if (!categoryId) return "#666";
-	if (colors[categoryId]) return colors[categoryId];
+	if (!categoryId) {
+		return "#666";
+	}
+	if (colors[categoryId]) {
+		return colors[categoryId];
+	}
 	const color = DEFAULTS[autoIndex % DEFAULTS.length];
 	autoIndex++;
 	colors[categoryId] = color;

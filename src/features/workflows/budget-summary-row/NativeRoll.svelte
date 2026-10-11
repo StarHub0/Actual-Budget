@@ -17,7 +17,9 @@
 
 	function read() {
 		// Mid bulk edit the amount changes once per step; it rolls once, to the final value.
-		if (isBulkEditing()) return;
+		if (isBulkEditing()) {
+			return;
+		}
 		text = source.textContent?.trim() ?? "";
 		const parent = source.parentElement;
 		if (parent) {
@@ -45,8 +47,12 @@
 
 	$effect(() => {
 		const parent = source.parentElement;
-		if (!parent) return;
-		if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
+		if (!parent) {
+			return;
+		}
+		if (getComputedStyle(parent).position === "static") {
+			parent.style.position = "relative";
+		}
 		parent.appendChild(host);
 		source.setAttribute(HIDDEN_ATTR, "");
 		read();

@@ -8,13 +8,17 @@ export function findUncategorizedButton(): HTMLButtonElement | null {
 	const help = document.querySelector('[data-testid="help-menu-button"]');
 	if (notifications && help) {
 		let bar = notifications.parentElement;
-		while (bar && !bar.contains(help)) bar = bar.parentElement;
+		while (bar && !bar.contains(help)) {
+			bar = bar.parentElement;
+		}
 		return bar?.querySelector<HTMLButtonElement>(":scope > button") ?? null;
 	}
 
 	// Older layouts without those test ids.
 	for (const btn of document.querySelectorAll<HTMLButtonElement>("button")) {
-		if (btn.textContent?.includes("uncategorized")) return btn;
+		if (btn.textContent?.includes("uncategorized")) {
+			return btn;
+		}
 	}
 	return null;
 }

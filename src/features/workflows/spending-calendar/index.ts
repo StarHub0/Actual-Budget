@@ -37,16 +37,22 @@ function updateActiveState(): void {
  * feature's own trigger mechanism), since it isn't a real `<a href>` element.
  */
 export function openCalendar(): void {
-	if (calendarContainer) return;
+	if (calendarContainer) {
+		return;
+	}
 
 	const target = document.querySelector(CONTENT_GRID) as HTMLElement;
-	if (!target) return;
+	if (!target) {
+		return;
+	}
 
 	const columns = Array.from(target.children).filter(
 		(child) => !child.hasAttribute(SIDEBAR_ATTR),
 	) as HTMLElement[];
 	const lastChild = columns[columns.length - 1];
-	if (!lastChild) return;
+	if (!lastChild) {
+		return;
+	}
 
 	// Hidden in place rather than display: none, which makes Actual drop the budget table and
 	// rebuild it (blank for a moment) on the way back. The calendar covers the column instead.
@@ -66,7 +72,9 @@ export function openCalendar(): void {
 	});
 	// Also hide siblings of lastChild (e.g. Plan button) but not the nav header
 	for (const sibling of columns) {
-		if (sibling === lastChild || sibling === target.firstElementChild) continue;
+		if (sibling === lastChild || sibling === target.firstElementChild) {
+			continue;
+		}
 		hiddenChildren.push({ el: sibling, style: sibling.getAttribute("style") ?? "" });
 		sibling.style.display = "none";
 	}
@@ -94,7 +102,9 @@ export function openCalendar(): void {
 }
 
 export function closeCalendar(): void {
-	if (!calendarContainer) return;
+	if (!calendarContainer) {
+		return;
+	}
 
 	sidepanel.dismiss();
 
@@ -104,7 +114,9 @@ export function closeCalendar(): void {
 	calendarContainer = null;
 
 	for (const { el, style } of hiddenChildren) {
-		if (el.parentElement) el.setAttribute("style", style);
+		if (el.parentElement) {
+			el.setAttribute("style", style);
+		}
 	}
 	hiddenChildren = [];
 
@@ -119,17 +131,25 @@ export function closeCalendar(): void {
 }
 
 function injectSidebarLink(): void {
-	if (document.querySelector(`[${LINK_ATTR}]`)) return;
+	if (document.querySelector(`[${LINK_ATTR}]`)) {
+		return;
+	}
 
 	const schedulesLink = document.querySelector('a[href="/schedules"]') as HTMLAnchorElement;
-	if (!schedulesLink) return;
+	if (!schedulesLink) {
+		return;
+	}
 
 	const wrapper = schedulesLink.parentElement;
-	if (!wrapper?.parentElement) return;
+	if (!wrapper?.parentElement) {
+		return;
+	}
 
 	const clone = wrapper.cloneNode(true) as HTMLElement;
 	const link = clone.querySelector("a") as HTMLAnchorElement;
-	if (!link) return;
+	if (!link) {
+		return;
+	}
 
 	link.setAttribute(LINK_ATTR, "1");
 	link.setAttribute("data-active", "false");
@@ -218,14 +238,18 @@ export const spendingCalendar = defineSetting({
 				}
 			}
 			// Actual changed the route without telling this world (a shortcut, say).
-			if (calendarContainer && !isCalendarOpen()) closeCalendar();
+			if (calendarContainer && !isCalendarOpen()) {
+				closeCalendar();
+			}
 			attachCloseListeners();
 			updateActiveState();
 		});
 
 		// The calendar has no route, so any route change means Actual moved to another page.
 		const stopWatchingRoute = watchRoute(() => {
-			if (calendarContainer) closeCalendar();
+			if (calendarContainer) {
+				closeCalendar();
+			}
 			updateActiveState();
 		});
 

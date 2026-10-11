@@ -25,13 +25,17 @@
 			: null,
 	);
 	async function fetchData() {
-		if (!symbol) return;
+		if (!symbol) {
+			return;
+		}
 		try {
 			const res = await browser.runtime.sendMessage({
 				type: "fetch",
 				url: `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`,
 			});
-			if (!res.ok) throw new Error();
+			if (!res.ok) {
+				throw new Error();
+			}
 			const data = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
 			currentPrice = data.chart?.result?.[0]?.meta?.regularMarketPrice ?? null;
 
@@ -56,7 +60,9 @@
 
 	function fmtCompact(n: number): string {
 		const abs = Math.abs(n);
-		if (abs >= 1000) return (n < 0 ? "-" : "") + "$" + (abs / 1000).toFixed(1) + "k";
+		if (abs >= 1000) {
+			return (n < 0 ? "-" : "") + "$" + (abs / 1000).toFixed(1) + "k";
+		}
 		return (n < 0 ? "-" : "") + "$" + abs.toFixed(0);
 	}
 

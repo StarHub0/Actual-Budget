@@ -36,14 +36,18 @@
 
 		let settled = false;
 		const finish = () => {
-			if (settled) return;
+			if (settled) {
+				return;
+			}
 			settled = true;
 			sidebar.removeEventListener("animationend", onAnimationEnd);
 			onClose();
 		};
 
 		const onAnimationEnd = (e: AnimationEvent) => {
-			if (e.target === sidebar) finish();
+			if (e.target === sidebar) {
+				finish();
+			}
 		};
 
 		sidebar.addEventListener("animationend", onAnimationEnd);
@@ -57,20 +61,28 @@
 	// they're attached imperatively rather than rendered from a Svelte template.
 	$effect(() => {
 		const node = panelState.headerNode;
-		if (!headerSlotEl) return;
+		if (!headerSlotEl) {
+			return;
+		}
 		// eslint-disable-next-line svelte/no-dom-manipulating
 		headerSlotEl.replaceChildren();
-		// eslint-disable-next-line svelte/no-dom-manipulating
-		if (node) headerSlotEl.appendChild(node);
+		if (node) {
+			// eslint-disable-next-line svelte/no-dom-manipulating
+			headerSlotEl.appendChild(node);
+		}
 	});
 
 	$effect(() => {
 		const node = panelState.bodyNode;
-		if (!bodyEl) return;
+		if (!bodyEl) {
+			return;
+		}
 		// eslint-disable-next-line svelte/no-dom-manipulating
 		bodyEl.replaceChildren();
-		// eslint-disable-next-line svelte/no-dom-manipulating
-		if (node) bodyEl.appendChild(node);
+		if (node) {
+			// eslint-disable-next-line svelte/no-dom-manipulating
+			bodyEl.appendChild(node);
+		}
 	});
 
 	let dragging = $state(false);

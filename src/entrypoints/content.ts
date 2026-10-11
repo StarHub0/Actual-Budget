@@ -24,14 +24,20 @@ export default defineContentScript({
 		let mounted = false;
 
 		async function checkAndMount() {
-			if (isContextInvalidated()) return;
+			if (isContextInvalidated()) {
+				return;
+			}
 
 			const baseUrl = await getBaseUrl();
-			if (!baseUrl || !window.location.href.startsWith(baseUrl)) return;
+			if (!baseUrl || !window.location.href.startsWith(baseUrl)) {
+				return;
+			}
 
 			// Already mounted — subsequent locationchange events are handled
 			// by the route listeners inside each script (pushState patching).
-			if (mounted) return;
+			if (mounted) {
+				return;
+			}
 			mounted = true;
 
 			// The bridge's own content script only checks the address at page load, so a page
@@ -96,7 +102,9 @@ export default defineContentScript({
 					}
 				},
 				onRemove: (app) => {
-					if (app) unmount(app);
+					if (app) {
+						unmount(app);
+					}
 				},
 			});
 

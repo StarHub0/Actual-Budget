@@ -22,7 +22,9 @@
 		let stale = false;
 		loadMonthTotals(sheet)
 			.then((t) => {
-				if (!stale) totals = t;
+				if (!stale) {
+					totals = t;
+				}
 			})
 			.catch(() => {});
 		return () => {
@@ -31,7 +33,9 @@
 	});
 
 	$effect(() => {
-		if (!totals) return;
+		if (!totals) {
+			return;
+		}
 		card.toggleAttribute("data-abt-to-budget-negative", totals.toBudget < 0);
 		return () => card.removeAttribute("data-abt-to-budget-negative");
 	});

@@ -8,7 +8,9 @@ let loaded = false;
 let loadGeneration = 0;
 
 export async function loadCurrency(force = false): Promise<void> {
-	if (loaded && !force) return;
+	if (loaded && !force) {
+		return;
+	}
 	if (force) {
 		currencyCode = null;
 		currencyScale = 100;
@@ -19,9 +21,13 @@ export async function loadCurrency(force = false): Promise<void> {
 		const rows = await query<{ id: string; value: string }[]>("preferences", {
 			filter: { id: { $oneof: ["defaultCurrencyCode", "numberFormat"] } },
 		});
-		if (generation !== loadGeneration) return;
+		if (generation !== loadGeneration) {
+			return;
+		}
 		const format = rows?.find((r) => r.id === "numberFormat")?.value;
-		if (format) numberFormat = format;
+		if (format) {
+			numberFormat = format;
+		}
 		const code = rows?.find((r) => r.id === "defaultCurrencyCode")?.value;
 		if (code && typeof code === "string") {
 			currencyCode = code;
@@ -42,7 +48,9 @@ export async function loadCurrency(force = false): Promise<void> {
 	} catch {
 		// fallback to USD
 	}
-	if (generation === loadGeneration) loaded = true;
+	if (generation === loadGeneration) {
+		loaded = true;
+	}
 }
 
 /** The budget's currency code, or "" when none is set (call loadCurrency first). */
@@ -77,8 +85,12 @@ export function fmtMoney(cents: number, opts?: { sign?: boolean; short?: boolean
 		str = new Intl.NumberFormat(undefined, fmtOpts).format(abs);
 	}
 
-	if (opts?.sign && cents > 0) return "+" + str;
-	if (n < 0) return "-" + str;
+	if (opts?.sign && cents > 0) {
+		return "+" + str;
+	}
+	if (n < 0) {
+		return "-" + str;
+	}
 	return str;
 }
 
@@ -95,12 +107,16 @@ export function parseMoney(text: string): number | null {
 	const negative = /^\s*[-−(]/.test(text);
 	const cleaned = text.replace(new RegExp(`[^0-9${decimal === "," ? "," : "."}]`, "g"), "");
 	const normalized = decimal === "," ? cleaned.replace(",", ".") : cleaned;
-	if (!/^\d*\.?\d*$/.test(normalized) || !/\d/.test(normalized)) return null;
+	if (!/^\d*\.?\d*$/.test(normalized) || !/\d/.test(normalized)) {
+		return null;
+	}
 	const cents = amountToCents(parseFloat(normalized));
 	return negative ? -cents : cents;
 }
 
 export function amountToCents(amount: number): number {
-	if (!Number.isFinite(amount)) return 0;
+	if (!Number.isFinite(amount)) {
+		return 0;
+	}
 	return Math.round(amount * currencyScale);
 }

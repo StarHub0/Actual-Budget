@@ -52,7 +52,9 @@
 	}
 
 	async function choose(tx: (typeof txs)[number], category: string) {
-		if (!category) return;
+		if (!category) {
+			return;
+		}
 		const before = tx.category;
 		tx.category = category;
 		saving[tx.id] = true;

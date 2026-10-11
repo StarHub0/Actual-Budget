@@ -12,7 +12,9 @@ export function overlayScrollbar(
 	node: HTMLElement,
 	params: { enabled: boolean } = { enabled: true },
 ) {
-	if (!params.enabled) return {};
+	if (!params.enabled) {
+		return {};
+	}
 
 	// Appended to the parent (a non-scrolling positioning wrapper — see
 	// .accounts-viewport in AccountList.svelte), not `node` itself: an absolutely
@@ -46,7 +48,9 @@ export function overlayScrollbar(
 		thumb.classList.add("visible");
 		clearTimeout(hideTimer);
 		hideTimer = setTimeout(() => {
-			if (!dragging) thumb.classList.remove("visible");
+			if (!dragging) {
+				thumb.classList.remove("visible");
+			}
 		}, HIDE_DELAY);
 	}
 
@@ -63,11 +67,15 @@ export function overlayScrollbar(
 		show();
 	}
 	function onThumbPointerMove(e: PointerEvent) {
-		if (!dragging) return;
+		if (!dragging) {
+			return;
+		}
 		const { scrollHeight, clientHeight } = node;
 		const maxThumbTravel = clientHeight - thumb.clientHeight;
 		const maxScroll = scrollHeight - clientHeight;
-		if (maxThumbTravel <= 0) return;
+		if (maxThumbTravel <= 0) {
+			return;
+		}
 		node.scrollTop = dragStartScrollTop + ((e.clientY - dragStartY) / maxThumbTravel) * maxScroll;
 	}
 	function onThumbPointerUp(e: PointerEvent) {

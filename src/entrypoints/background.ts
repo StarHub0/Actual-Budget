@@ -15,7 +15,9 @@ export default defineBackground(() => {
 			};
 			return fetch(message.url, { headers })
 				.then(async (res) => {
-					if (!res.ok) return { ok: false, status: res.status };
+					if (!res.ok) {
+						return { ok: false, status: res.status };
+					}
 					const text = await res.text();
 					const data = message.responseType === "json" ? JSON.parse(text) : text;
 					return { ok: true, data };

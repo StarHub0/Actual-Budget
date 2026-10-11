@@ -88,11 +88,17 @@ async function setup({ deferRestore = false } = {}) {
 	};
 	const imports = new Map();
 	for (const statement of ast.statements) {
-		if (!ts.isImportDeclaration(statement) || statement.importClause?.isTypeOnly) continue;
+		if (!ts.isImportDeclaration(statement) || statement.importClause?.isTypeOnly) {
+			continue;
+		}
 		const names = [];
-		if (statement.importClause?.name) names.push("default");
+		if (statement.importClause?.name) {
+			names.push("default");
+		}
 		for (const entry of statement.importClause?.namedBindings?.elements ?? []) {
-			if (!entry.isTypeOnly) names.push(entry.propertyName?.text ?? entry.name.text);
+			if (!entry.isTypeOnly) {
+				names.push(entry.propertyName?.text ?? entry.name.text);
+			}
 		}
 		imports.set(statement.moduleSpecifier.text, names);
 	}
@@ -102,7 +108,9 @@ async function setup({ deferRestore = false } = {}) {
 			new SyntheticModule(
 				imports.get(name),
 				function () {
-					for (const key of imports.get(name)) this.setExport(key, overrides[key] ?? (() => {}));
+					for (const key of imports.get(name)) {
+						this.setExport(key, overrides[key] ?? (() => {}));
+					}
 				},
 				{ context },
 			),

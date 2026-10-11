@@ -21,7 +21,9 @@
 
 	async function loadLastSync() {
 		const ids = linked.map((a) => a.id);
-		if (!ids.length) return;
+		if (!ids.length) {
+			return;
+		}
 		try {
 			const rows = await query<Pick<Account, "id" | "last_sync">[]>("accounts", {
 				filter: { id: { $oneof: ids } },
@@ -36,13 +38,19 @@
 
 	// Refreshed after each sync ends (and once the linked accounts are known).
 	$effect(() => {
-		if (!syncing && linked.length) void loadLastSync();
+		if (!syncing && linked.length) {
+			void loadLastSync();
+		}
 	});
 
 	function ago(time: number): string {
 		const mins = Math.round((Date.now() - time) / 60000);
-		if (mins < 1) return "just now";
-		if (mins < 60) return `${mins}m ago`;
+		if (mins < 1) {
+			return "just now";
+		}
+		if (mins < 60) {
+			return `${mins}m ago`;
+		}
 		const hours = Math.round(mins / 60);
 		return hours < 24 ? `${hours}h ago` : `${Math.round(hours / 24)}d ago`;
 	}
@@ -56,7 +64,9 @@
 	);
 
 	async function sync() {
-		if (syncing) return;
+		if (syncing) {
+			return;
+		}
 		running = true;
 		try {
 			await syncAllAccounts(accounts);

@@ -32,19 +32,27 @@
 	let error = $state(false);
 
 	function parseAmount(raw: unknown): number {
-		if (typeof raw === "number") return raw;
+		if (typeof raw === "number") {
+			return raw;
+		}
 		if (typeof raw === "string") {
 			try {
 				const parsed = JSON.parse(raw);
-				if (typeof parsed === "number") return parsed;
-				if (parsed?.value != null) return parsed.value;
+				if (typeof parsed === "number") {
+					return parsed;
+				}
+				if (parsed?.value != null) {
+					return parsed.value;
+				}
 			} catch {
 				return 0;
 			}
 		}
 		if (raw && typeof raw === "object") {
 			const obj = raw as Record<string, unknown>;
-			if (typeof obj.value === "number") return obj.value;
+			if (typeof obj.value === "number") {
+				return obj.value;
+			}
 		}
 		return 0;
 	}
@@ -57,8 +65,12 @@
 	}
 
 	function formatDate(days: number): string {
-		if (days === 0) return "Today";
-		if (days === 1) return "Tmrw";
+		if (days === 0) {
+			return "Today";
+		}
+		if (days === 1) {
+			return "Tmrw";
+		}
 		return `${days}d`;
 	}
 
@@ -106,7 +118,9 @@
 	tabindex="0"
 	onclick={() => navigate("/schedules")}
 	onkeydown={(e) => {
-		if (e.key === "Enter") navigate("/schedules");
+		if (e.key === "Enter") {
+			navigate("/schedules");
+		}
 	}}
 >
 	<div class="sched__hd">

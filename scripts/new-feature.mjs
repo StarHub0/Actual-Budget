@@ -27,7 +27,9 @@ const CATEGORIES = {
 };
 
 function usageAndExit(message) {
-	if (message) console.error(`Error: ${message}\n`);
+	if (message) {
+		console.error(`Error: ${message}\n`);
+	}
 	console.error(
 		[
 			'Usage: pnpm new-feature <category> <kebab-name> "<Label>" <type> [--component]',
@@ -48,7 +50,9 @@ const args = process.argv.slice(2);
 const withComponent = args.includes("--component");
 const [category, kebabName, label, type] = args.filter((a) => a !== "--component");
 
-if (!category || !kebabName || !label || !type) usageAndExit("missing arguments");
+if (!category || !kebabName || !label || !type) {
+	usageAndExit("missing arguments");
+}
 if (!CATEGORIES[category]) {
 	usageAndExit(`category must be one of: ${Object.keys(CATEGORIES).join(", ")}`);
 }
@@ -76,7 +80,9 @@ const targetPath = withComponent
 	? resolve(featureDir, kebabName, "index.ts")
 	: resolve(featureDir, `${kebabName}.ts`);
 
-if (existsSync(targetPath)) usageAndExit(`${targetPath.replace(root + "/", "")} already exists`);
+if (existsSync(targetPath)) {
+	usageAndExit(`${targetPath.replace(root + "/", "")} already exists`);
+}
 
 async function loadTypeScript() {
 	const candidates = [
@@ -183,7 +189,9 @@ function registerInIndex(ts) {
 	// Find the target registry array's closing bracket.
 	let arrayNode;
 	source.forEachChild((node) => {
-		if (arrayNode || !ts.isVariableStatement(node)) return;
+		if (arrayNode || !ts.isVariableStatement(node)) {
+			return;
+		}
 		for (const decl of node.declarationList.declarations) {
 			if (
 				ts.isIdentifier(decl.name) &&
@@ -206,10 +214,16 @@ function registerInIndex(ts) {
 	let importInsertPos;
 	let lastImportEnd;
 	source.forEachChild((node) => {
-		if (!ts.isImportDeclaration(node)) return;
+		if (!ts.isImportDeclaration(node)) {
+			return;
+		}
 		lastImportEnd = node.end;
-		if (importInsertPos !== undefined) return;
-		if (!ts.isStringLiteral(node.moduleSpecifier)) return;
+		if (importInsertPos !== undefined) {
+			return;
+		}
+		if (!ts.isStringLiteral(node.moduleSpecifier)) {
+			return;
+		}
 		if (node.moduleSpecifier.text.localeCompare(importPath) > 0) {
 			importInsertPos = node.getStart();
 		}

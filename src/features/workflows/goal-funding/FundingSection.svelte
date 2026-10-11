@@ -23,11 +23,15 @@
 	// Tops up rather than replacing the budget, so it never lowers what's already
 	// assigned. Undoable through Actual's own undo, like any budget edit.
 	async function assign() {
-		if (assigning || !month) return;
+		if (assigning || !month) {
+			return;
+		}
 		assigning = true;
 		try {
 			const fresh = await load();
-			if (!fresh) return;
+			if (!fresh) {
+				return;
+			}
 			const amount = Math.min(
 				Math.max(0, fresh.goal - fresh.current),
 				Math.max(0, fresh.toBudget ?? 0),

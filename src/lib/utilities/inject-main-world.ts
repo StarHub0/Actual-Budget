@@ -4,7 +4,9 @@ import { createElement } from "./dom";
 export async function injectMainWorldScript(path: string): Promise<void> {
 	const id = path.replace(/^\/|\.js$/g, "");
 
-	if (document.getElementById(id)) return;
+	if (document.getElementById(id)) {
+		return;
+	}
 
 	const scriptUrl = browser.runtime.getURL(path as unknown as PublicPath);
 

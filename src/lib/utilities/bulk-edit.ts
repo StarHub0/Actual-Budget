@@ -15,7 +15,11 @@ export async function bulkEdit<T>(edits: () => Promise<T>): Promise<T> {
 		return await edits();
 	} finally {
 		depth--;
-		if (depth === 0) for (const listener of endListeners) listener();
+		if (depth === 0) {
+			for (const listener of endListeners) {
+				listener();
+			}
+		}
 	}
 }
 

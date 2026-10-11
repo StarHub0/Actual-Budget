@@ -50,14 +50,20 @@ function normalize(param: string | TipOpts): Required<TipOpts> {
 export function tooltip(node: HTMLElement, param: string | TipOpts) {
 	let o: Required<TipOpts> = normalize(param);
 	const enter = () => {
-		if (tipTimer) clearTimeout(tipTimer);
-		if (!o.text) return;
+		if (tipTimer) {
+			clearTimeout(tipTimer);
+		}
+		if (!o.text) {
+			return;
+		}
 		tipTimer = setTimeout(() => placeTip(node, o), TIP_DELAY);
 	};
 	const leave = () => hideTip();
 	// A click focuses the button too; only keyboard focus should bring the tip back.
 	const focus = () => {
-		if (node.matches(":focus-visible") || node.querySelector(":focus-visible")) enter();
+		if (node.matches(":focus-visible") || node.querySelector(":focus-visible")) {
+			enter();
+		}
 	};
 	node.addEventListener("pointerenter", enter);
 	node.addEventListener("pointerleave", leave);

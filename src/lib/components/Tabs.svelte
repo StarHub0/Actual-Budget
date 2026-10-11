@@ -16,7 +16,9 @@
 	} = $props();
 
 	function select(tab: T) {
-		if (tab === value) return;
+		if (tab === value) {
+			return;
+		}
 		value = tab;
 		onChange?.(tab);
 	}

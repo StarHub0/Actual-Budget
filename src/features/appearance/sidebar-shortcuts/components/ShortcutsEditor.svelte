@@ -48,7 +48,9 @@
 			const style = getComputedStyle(bar);
 			const width =
 				bar.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-			if (width > 0) stageWidth = width;
+			if (width > 0) {
+				stageWidth = width;
+			}
 		}
 		return () => {
 			mounted = false;
@@ -172,7 +174,9 @@
 	}
 
 	function websiteLabel(url: string): string {
-		if (!url) return "";
+		if (!url) {
+			return "";
+		}
 		try {
 			return new URL(url).hostname.replace("www.", "");
 		} catch {
@@ -246,7 +250,9 @@
 	}
 
 	function submitForm() {
-		if (!formValid) return;
+		if (!formValid) {
+			return;
+		}
 		if (form === "website") {
 			const url = websiteUrl(addUrl.trim());
 			pin({
@@ -289,7 +295,9 @@
 
 	// Escape leaves a form first; only from the catalog does it reach the dialog and close it.
 	function onKeydown(e: KeyboardEvent) {
-		if (e.key !== "Escape" || !form) return;
+		if (e.key !== "Escape" || !form) {
+			return;
+		}
 		e.stopPropagation();
 		closeForm();
 	}

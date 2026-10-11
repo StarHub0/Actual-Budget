@@ -31,7 +31,9 @@
 	let hovered = $state<number | null>(null);
 
 	const xScale = $derived.by(() => {
-		if (w <= 0) return null;
+		if (w <= 0) {
+			return null;
+		}
 		return scaleBand<string>()
 			.domain(trend.map((t) => t.monthKey))
 			.range([0, w])
@@ -46,7 +48,9 @@
 	function bar(x: number, bw: number, top: number, h: number): string {
 		const safeH = Math.max(h, 2);
 		const r = Math.min(R, safeH, bw / 2);
-		if (safeH <= r * 2) return `M${x},${top + safeH} h${bw} v${-safeH} h${-bw}z`;
+		if (safeH <= r * 2) {
+			return `M${x},${top + safeH} h${bw} v${-safeH} h${-bw}z`;
+		}
 		return `M${x},${top + safeH} v${-(safeH - r)} a${r},${r} 0 0 1 ${r},${-r} h${bw - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${safeH - r}z`;
 	}
 

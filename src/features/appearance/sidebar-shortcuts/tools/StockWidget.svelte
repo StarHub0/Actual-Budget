@@ -17,11 +17,15 @@
 				url: `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`,
 			});
 
-			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			if (!res.ok) {
+				throw new Error(`HTTP ${res.status}`);
+			}
 
 			const data = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
 			const result = data.chart?.result?.[0];
-			if (!result) throw new Error("No chart data");
+			if (!result) {
+				throw new Error("No chart data");
+			}
 
 			const meta = result.meta;
 			price = meta.regularMarketPrice;

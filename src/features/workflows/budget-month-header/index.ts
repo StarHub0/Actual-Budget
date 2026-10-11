@@ -26,7 +26,9 @@ let countSelector: HTMLElement | null = null;
 let fellBack = false;
 
 function unmountHeader(): void {
-	if (instance) unmount(instance);
+	if (instance) {
+		unmount(instance);
+	}
 	instance = null;
 	host?.remove();
 	host = null;
@@ -34,7 +36,9 @@ function unmountHeader(): void {
 
 function restoreNative(): void {
 	for (const attr of [NATIVE_HEADER_ATTR, NATIVE_COUNT_ATTR, FULL_WIDTH_ATTR]) {
-		for (const el of document.querySelectorAll(`[${attr}]`)) el.removeAttribute(attr);
+		for (const el of document.querySelectorAll(`[${attr}]`)) {
+			el.removeAttribute(attr);
+		}
 	}
 	countSelector = null;
 }
@@ -60,12 +64,18 @@ const sameMonths = (a: string[], b: string[]) =>
 
 function sync(): void {
 	// The budget page stays mounted, hidden, under the calendar; ABT's parts stay with it.
-	if (isCalendarOpen()) return;
-	if (!matchesPage(Page.Budget)) {
-		if (host) unmountHeader();
+	if (isCalendarOpen()) {
 		return;
 	}
-	if (fellBack) return;
+	if (!matchesPage(Page.Budget)) {
+		if (host) {
+			unmountHeader();
+		}
+		return;
+	}
+	if (fellBack) {
+		return;
+	}
 	// Before the table check: Actual re-renders the titlebar while the table is still missing.
 	if (!countSelector?.isConnected) {
 		countSelector = findMonthCountSelector();
@@ -73,23 +83,35 @@ function sync(): void {
 	}
 	const table = document.querySelector<HTMLElement>(BUDGET_TABLE);
 	const parent = table?.parentElement;
-	if (!table || !parent) return;
+	if (!table || !parent) {
+		return;
+	}
 	// Actual's own header stays mounted (hidden) as the source of truth for the shown months.
 	const native = [...parent.children].find((el) =>
 		el.querySelector('[data-testid="selected-budget-month"]'),
 	);
-	if (!native) return;
+	if (!native) {
+		return;
+	}
 	native.setAttribute(NATIVE_HEADER_ATTR, "");
 	parent.setAttribute(FULL_WIDTH_ATTR, "");
 
 	const months = readShownMonths(native);
-	if (!sameMonths(months, budgetNav.months)) budgetNav.months = months;
+	if (!sameMonths(months, budgetNav.months)) {
+		budgetNav.months = months;
+	}
 	const displayMax = countSelector ? countMonthIcons(countSelector) : 1;
-	if (displayMax !== budgetNav.displayMax) budgetNav.displayMax = displayMax;
+	if (displayMax !== budgetNav.displayMax) {
+		budgetNav.displayMax = displayMax;
+	}
 
-	if (host?.isConnected && host.nextElementSibling?.contains(table)) return;
+	if (host?.isConnected && host.nextElementSibling?.contains(table)) {
+		return;
+	}
 	const slot = findPageSlot(table);
-	if (!slot) return;
+	if (!slot) {
+		return;
+	}
 	unmountHeader();
 	host = document.createElement("div");
 	// Out to the column's edges, where the calendar's header sits. The top padding is base.css's,

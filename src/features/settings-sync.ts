@@ -60,8 +60,11 @@ const BUDGET_SCOPED: BudgetScoped[] = [
 		read: async (id) => (await getValue<Record<string, unknown>>(BUDGET_ICONS_KEY, {}))[id] ?? null,
 		write: async (id, value) => {
 			const icons = { ...(await getValue<Record<string, unknown>>(BUDGET_ICONS_KEY, {})) };
-			if (value == null) delete icons[id];
-			else icons[id] = value;
+			if (value == null) {
+				delete icons[id];
+			} else {
+				icons[id] = value;
+			}
 			await setValue(BUDGET_ICONS_KEY, icons);
 		},
 		watched: false,
@@ -76,12 +79,20 @@ const isBudgetLoaded = () => !!document.querySelector(BUDGET_LOADED);
 
 // Chrome's storage hands objects back with their keys sorted, so key order can't count.
 function sameValue(a: unknown, b: unknown): boolean {
-	if (a === b) return true;
-	if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) return false;
-	if (Array.isArray(a) !== Array.isArray(b)) return false;
+	if (a === b) {
+		return true;
+	}
+	if (typeof a !== "object" || typeof b !== "object" || a === null || b === null) {
+		return false;
+	}
+	if (Array.isArray(a) !== Array.isArray(b)) {
+		return false;
+	}
 	const ak = Object.keys(a);
 	const bk = Object.keys(b);
-	if (ak.length !== bk.length) return false;
+	if (ak.length !== bk.length) {
+		return false;
+	}
 	return ak.every(
 		(k) =>
 			k in b && sameValue((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]),
@@ -97,7 +108,9 @@ function push(key: string, value: unknown): Promise<void> {
 
 /** Saves every stored setting to the open budget, for writes that bypass setValue (imports). */
 export async function pushStoredSettings(): Promise<void> {
-	if (!isBudgetLoaded()) return;
+	if (!isBudgetLoaded()) {
+		return;
+	}
 	const keys = [...synced];
 	const stored = await Promise.all(keys.map(async (key) => ((await hasValue(key)) ? key : null)));
 	await Promise.all(
@@ -112,18 +125,30 @@ export async function pushStoredSettings(): Promise<void> {
 export function startSettingsSync(settings: Setting[]): () => void {
 	const live = new Map<string, Setting>();
 	for (const s of settings) {
-		if (s.type === "core") continue;
+		if (s.type === "core") {
+			continue;
+		}
 		synced.add(s.context.key);
-		if (s.type !== "custom") live.set(s.context.key, s);
+		if (s.type !== "custom") {
+			live.set(s.context.key, s);
+		}
 	}
 
 	onSetValue((key, value) => {
-		if (applying || !isBudgetLoaded()) return;
-		if (synced.has(key)) void push(key, value);
-		if (!budgetId) return;
+		if (applying || !isBudgetLoaded()) {
+			return;
+		}
+		if (synced.has(key)) {
+			void push(key, value);
+		}
+		if (!budgetId) {
+			return;
+		}
 		for (const scoped of BUDGET_SCOPED) {
 			const write = scoped.fromWrite(key, value, budgetId);
-			if (write) void push(scoped.remote, write.value);
+			if (write) {
+				void push(scoped.remote, write.value);
+			}
 		}
 	});
 
@@ -148,11 +173,15 @@ export function startSettingsSync(settings: Setting[]): () => void {
 		for (const key of synced) {
 			const remote = prefs[PREFIX + key];
 			if (remote === undefined) {
-				if (await hasValue(key)) void push(key, await getValue(key, null));
+				if (await hasValue(key)) {
+					void push(key, await getValue(key, null));
+				}
 				continue;
 			}
 			// Undoing the first save of a key leaves its row empty; keep what this browser has.
-			if (remote === null) continue;
+			if (remote === null) {
+				continue;
+			}
 			// getValue reads a stored null as missing, which would never match the budget's "null".
 			const local = (await hasValue(key)) ? await getValue<unknown>(key, null) : undefined;
 			let value: unknown;
@@ -161,11 +190,16 @@ export function startSettingsSync(settings: Setting[]): () => void {
 			} catch {
 				continue;
 			}
-			if (local !== undefined && sameValue(local, value)) continue;
+			if (local !== undefined && sameValue(local, value)) {
+				continue;
+			}
 			await adopt(key, () => setValue(key, value));
 			const setting = live.get(key);
-			if (setting) await reapplySetting(setting, value);
-			else needsReload.push(key);
+			if (setting) {
+				await reapplySetting(setting, value);
+			} else {
+				needsReload.push(key);
+			}
 		}
 
 		budgetId = await loadCurrentBudgetId().catch(() => undefined);
@@ -175,19 +209,27 @@ export function startSettingsSync(settings: Setting[]): () => void {
 				const remote = prefs[PREFIX + scoped.remote];
 				const local = await scoped.read(id);
 				if (remote === undefined) {
-					if (local !== undefined) void push(scoped.remote, local);
+					if (local !== undefined) {
+						void push(scoped.remote, local);
+					}
 					continue;
 				}
-				if (remote === null) continue;
+				if (remote === null) {
+					continue;
+				}
 				let value: unknown;
 				try {
 					value = JSON.parse(remote);
 				} catch {
 					continue;
 				}
-				if (sameValue(local, value)) continue;
+				if (sameValue(local, value)) {
+					continue;
+				}
 				await adopt(scoped.remote, () => scoped.write(id, value));
-				if (!scoped.watched) needsReload.push(scoped.remote);
+				if (!scoped.watched) {
+					needsReload.push(scoped.remote);
+				}
 			}
 		}
 		if (needsReload.length) {
@@ -204,7 +246,9 @@ export function startSettingsSync(settings: Setting[]): () => void {
 
 	// Coalesced, so a burst of triggers runs at most one more pull after the current one.
 	function schedulePull(): void {
-		if (!isBudgetLoaded()) return;
+		if (!isBudgetLoaded()) {
+			return;
+		}
 		if (pulling) {
 			again = true;
 			return;
@@ -225,19 +269,27 @@ export function startSettingsSync(settings: Setting[]): () => void {
 	const unwatch = watchDom(() => {
 		const now = isBudgetLoaded();
 		// Forgotten until the next pull reads it, so a switch can't file writes under the old one.
-		if (!now) budgetId = undefined;
-		if (now && !loaded) schedulePull();
+		if (!now) {
+			budgetId = undefined;
+		}
+		if (now && !loaded) {
+			schedulePull();
+		}
 		loaded = now;
 	});
 	loaded = isBudgetLoaded();
-	if (loaded) schedulePull();
+	if (loaded) {
+		schedulePull();
+	}
 
 	// Actual exposes no event for other devices' changes or for Ctrl+Z reverting ours, so
 	// re-check when either is likely. Focus covers switching windows, which isn't a visibility change.
 	const onFocus = () => schedulePull();
 	const onVisible = () => document.visibilityState === "visible" && schedulePull();
 	const onKey = (e: KeyboardEvent) => {
-		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") setTimeout(schedulePull, 300);
+		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+			setTimeout(schedulePull, 300);
+		}
 	};
 	window.addEventListener("focus", onFocus);
 	document.addEventListener("visibilitychange", onVisible);

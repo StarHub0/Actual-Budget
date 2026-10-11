@@ -51,7 +51,9 @@
 	const short = (m: number) => MONTH_NAMES[m].slice(0, 3);
 	const startIdx = $derived(year * 12 + month);
 	const label = $derived.by(() => {
-		if (span <= 1) return `${MONTH_NAMES[month]} ${year}`;
+		if (span <= 1) {
+			return `${MONTH_NAMES[month]} ${year}`;
+		}
 		const end = new Date(year, month + span - 1, 1);
 		const endYear = end.getFullYear();
 		return endYear === year
@@ -62,19 +64,25 @@
 	const shortLabel = $derived(span <= 1 ? `${short(month)} ${year}` : label);
 
 	$effect(() => {
-		if (!open || !menu || !button) return;
+		if (!open || !menu || !button) {
+			return;
+		}
 		positionPopover(menu, button);
 		return onOutsideClick([menu, button], () => (open = false));
 	});
 
 	$effect(() => {
-		if (!open || !loadMarks) return;
+		if (!open || !loadMarks) {
+			return;
+		}
 		const y = pickerYear;
 		let stale = false;
 		marks = {};
 		loadMarks(y)
 			.then((m) => {
-				if (!stale) marks = m;
+				if (!stale) {
+					marks = m;
+				}
 			})
 			.catch(() => {});
 		return () => {

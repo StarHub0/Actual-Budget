@@ -36,9 +36,13 @@
 	// navigates elsewhere has to close the overlay itself first.
 	function go(page: Page) {
 		const covered = isCalendarOpen();
-		if (covered) closeCalendar();
+		if (covered) {
+			closeCalendar();
+		}
 		// The page under the calendar is already showing; navigating again makes Actual remount it.
-		if (covered && matchesPage(page)) return;
+		if (covered && matchesPage(page)) {
+			return;
+		}
 		navigate(pagePath(page));
 	}
 
@@ -85,7 +89,9 @@
 
 	// Opens on arriving at a settings page, like Actual's own menu; collapsing it there sticks.
 	$effect(() => {
-		if (inSettings) moreExpanded = true;
+		if (inSettings) {
+			moreExpanded = true;
+		}
 	});
 </script>
 

@@ -41,7 +41,9 @@ function ensureTooltipEl(): HTMLElement {
 function findTitledAncestor(node: EventTarget | null): HTMLElement | null {
 	let el = node as HTMLElement | null;
 	while (el && el !== document.body) {
-		if (el.hasAttribute("title") || el.hasAttribute(ORIG_TITLE_ATTR)) return el;
+		if (el.hasAttribute("title") || el.hasAttribute(ORIG_TITLE_ATTR)) {
+			return el;
+		}
 		el = el.parentElement;
 	}
 	return null;
@@ -73,7 +75,9 @@ function restoreTitle(el: HTMLElement) {
 
 function showTooltip(anchor: HTMLElement) {
 	const text = anchor.getAttribute(ORIG_TITLE_ATTR) ?? anchor.getAttribute("title");
-	if (!text) return;
+	if (!text) {
+		return;
+	}
 
 	if (anchor.hasAttribute("title")) {
 		anchor.setAttribute(ORIG_TITLE_ATTR, text);
@@ -89,11 +93,15 @@ function showTooltip(anchor: HTMLElement) {
 }
 
 function hideTooltip() {
-	if (tooltipEl) tooltipEl.style.display = "none";
+	if (tooltipEl) {
+		tooltipEl.style.display = "none";
+	}
 }
 
 function clearCurrentTarget() {
-	if (currentTarget) restoreTitle(currentTarget);
+	if (currentTarget) {
+		restoreTitle(currentTarget);
+	}
 	currentTarget = null;
 	if (showTimer) {
 		clearTimeout(showTimer);
@@ -104,20 +112,32 @@ function clearCurrentTarget() {
 
 function onPointerOver(e: MouseEvent) {
 	const target = findTitledAncestor(e.target);
-	if (!target || target === currentTarget) return;
-	if (currentTarget) restoreTitle(currentTarget);
+	if (!target || target === currentTarget) {
+		return;
+	}
+	if (currentTarget) {
+		restoreTitle(currentTarget);
+	}
 	currentTarget = target;
 
-	if (showTimer) clearTimeout(showTimer);
+	if (showTimer) {
+		clearTimeout(showTimer);
+	}
 	showTimer = setTimeout(() => {
-		if (currentTarget === target) showTooltip(target);
+		if (currentTarget === target) {
+			showTooltip(target);
+		}
 	}, SHOW_DELAY_MS);
 }
 
 function onPointerOut(e: MouseEvent) {
-	if (!currentTarget) return;
+	if (!currentTarget) {
+		return;
+	}
 	const related = e.relatedTarget as Node | null;
-	if (related && currentTarget.contains(related)) return;
+	if (related && currentTarget.contains(related)) {
+		return;
+	}
 	clearCurrentTarget();
 }
 

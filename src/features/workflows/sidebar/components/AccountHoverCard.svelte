@@ -25,7 +25,9 @@
 		let cancelled = false;
 		detail = null;
 		loadAccountDetail(account.id, account.status, account.balance).then((d) => {
-			if (!cancelled) detail = d;
+			if (!cancelled) {
+				detail = d;
+			}
 		});
 		return () => {
 			cancelled = true;

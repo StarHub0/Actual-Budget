@@ -14,7 +14,9 @@ async function preview(rows) {
 		if (method === "get-cell") {
 			assert.equal(args.sheetName, "budget202701");
 			const row = rows.find((row) => args.name === `budget-${row.id}`);
-			if (row.readFails) throw new Error("Cell read failed");
+			if (row.readFails) {
+				throw new Error("Cell read failed");
+			}
 			return { value: row.assigned };
 		}
 		assert.equal(method, "budget/dry-run-category-template");
@@ -40,7 +42,9 @@ async function preview(rows) {
 	async function load(name) {
 		if (mocks[name]) {
 			return new SyntheticModule(Object.keys(mocks[name]), function () {
-				for (const [key, value] of Object.entries(mocks[name])) this.setExport(key, value);
+				for (const [key, value] of Object.entries(mocks[name])) {
+					this.setExport(key, value);
+				}
 			});
 		}
 		const source = await readFile(new URL(`${name}.ts`, sourceRoot), "utf8");

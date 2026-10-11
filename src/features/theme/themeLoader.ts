@@ -14,7 +14,9 @@ export const themeLoader = defineSetting({
 	init: async (ctx) => {
 		const activeTheme = (await getVal<string>("catppuccin-palette", DEFAULT_THEME)) as string;
 		const stored = await getValue<ThemeOverrides | Record<string, string> | null>(ctx.key, null);
-		if (!stored) return;
+		if (!stored) {
+			return;
+		}
 
 		// Detect and handle old flat format (keys start with "--color-")
 		const firstKey = Object.keys(stored)[0];

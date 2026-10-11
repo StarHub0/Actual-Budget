@@ -13,8 +13,12 @@
 	const canSave = $derived(isDirty);
 
 	const status = $derived.by<"active" | "inactive" | "unconfigured">(() => {
-		if (!savedBaseUrl) return "unconfigured";
-		if (activeTabUrl && activeTabUrl.startsWith(savedBaseUrl)) return "active";
+		if (!savedBaseUrl) {
+			return "unconfigured";
+		}
+		if (activeTabUrl && activeTabUrl.startsWith(savedBaseUrl)) {
+			return "active";
+		}
 		return "inactive";
 	});
 
@@ -45,13 +49,17 @@
 	}
 
 	function useCurrentPage() {
-		if (!activeTabUrl) return;
+		if (!activeTabUrl) {
+			return;
+		}
 		userLink = normalizeBaseUrl(activeTabUrl) ?? activeTabUrl;
 		justSaved = false;
 	}
 
 	async function save() {
-		if (!canSave) return;
+		if (!canSave) {
+			return;
+		}
 		const toStore = userLink.trim() === "" ? "" : (pendingBaseUrl ?? userLink.trim());
 		await setValue("user-link", toStore);
 		userLink = toStore;
@@ -67,7 +75,9 @@
 	}
 
 	async function openActual() {
-		if (!savedBaseUrl) return;
+		if (!savedBaseUrl) {
+			return;
+		}
 		await browser.tabs.create({ url: savedBaseUrl });
 	}
 </script>
