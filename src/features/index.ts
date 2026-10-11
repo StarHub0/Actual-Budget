@@ -37,6 +37,7 @@ import { newTransactionStyle } from "./readability/new-transactions";
 import { reportCardBorders } from "./readability/report-card-borders";
 import { reportsHeader } from "./layout/reports-header";
 import { incomeBreakdown } from "./workflows/income-breakdown";
+import { mobileAccounts } from "./mobile/accounts";
 import { mobileBudgetBanners } from "./mobile/budget-banners";
 import { mobileBudgetCards } from "./mobile/budget-cards";
 import { mobileHeader } from "./mobile/header";
@@ -179,6 +180,7 @@ export const scriptSections: SettingsSection[] = [
 					mobileHeader,
 					mobileTabBar,
 					mobileBudgetCards,
+					mobileAccounts,
 					mobileBudgetBanners,
 					mobileModalSheets,
 					mobileTransactionList,
