@@ -22,6 +22,10 @@ pnpm new-feature <category> <kebab-name> "<Label>" <checkbox|select|custom> [--c
 
 This creates the setting file and registers it in `src/features/index.ts` for you. From there, fill in `description`/`icon`, and implement `init`/`css`.
 
+### Desktop and mobile
+
+Below 512px, Actual renders a separate mobile app with its own markup, so a setting declares where it runs with `platform`: `"desktop"` (the default), `"mobile"` or `"all"`. The runtime starts and stops each one as the window crosses that width, and scopes its `css` to match (`desktopOnly()` / `mobileOnly()` in `src/lib/utilities/pages.ts`). Mobile-only tweaks live in `src/features/mobile/` and are listed in the Mobile section of `src/features/index.ts`; `new-feature` doesn't scaffold them yet, so add them by hand.
+
 ## Conventions
 
 - **Page-gate inside the watcher, not around it.** Register a permanent `watchDom()` callback (`src/lib/utilities/dom-watcher.ts`) in `init` that checks `matchesPage()` (`src/lib/utilities/pages.ts`) and returns early on the wrong page — not a start/stop pair triggered by route changes.

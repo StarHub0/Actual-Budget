@@ -352,6 +352,68 @@
 		]
 	},
 	{
+		"title": "Mobile",
+		"description": null,
+		"items": [
+			{
+				"label": "Header",
+				"description": "Gives page headers a native look: the page's colour, a hairline, and a plain title.",
+				"icon": "layout",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Tab bar",
+				"description": "Replaces the slide-up menu with a tab bar, and puts the other pages under More.",
+				"icon": "layout",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Cards",
+				"description": "Budget groups, account lists and report widgets as rounded cards, or flush sections.",
+				"icon": "square",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Accounts",
+				"description": "Lists accounts in your sidebar groups, with their icons and group totals.",
+				"icon": "rows",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Budget banners",
+				"description": "Restyles the overspent and uncategorized banners as quiet cards with a coloured icon.",
+				"icon": "alert",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Modals as sheets",
+				"description": "Opens Actual's pop-up windows as sheets from the bottom, closed by swiping down.",
+				"icon": "layout",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Transaction list",
+				"description": "Restyles account transactions as a native list, with quiet date headings.",
+				"icon": "rows",
+				"group": null,
+				"writes": null
+			},
+			{
+				"label": "Snackbar toasts",
+				"description": "Shows notifications as compact snackbars above the tab bar, with the action as text.",
+				"icon": "bell",
+				"group": null,
+				"writes": null
+			}
+		]
+	},
+	{
 		"title": "Experimental",
 		"description": null,
 		"items": [
