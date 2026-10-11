@@ -3,6 +3,7 @@ import { query } from "./actual-api";
 let currencyCode: string | null = null;
 // Actual's own number format, e.g. "comma-dot" (1,234.56) or "dot-comma" (1.234,56).
 let numberFormat = "comma-dot";
+let hideFraction = false;
 let currencyScale = 100;
 let loaded = false;
 let loadGeneration = 0;
@@ -19,12 +20,13 @@ export async function loadCurrency(force = false): Promise<void> {
 	const generation = ++loadGeneration;
 	try {
 		const rows = await query<{ id: string; value: string }[]>("preferences", {
-			filter: { id: { $oneof: ["defaultCurrencyCode", "numberFormat"] } },
+			filter: { id: { $oneof: ["defaultCurrencyCode", "numberFormat", "hideFraction"] } },
 		});
 		if (generation !== loadGeneration) {
 			return;
 		}
 		const format = rows?.find((r) => r.id === "numberFormat")?.value;
+		hideFraction = rows?.find((r) => r.id === "hideFraction")?.value === "true";
 		if (format) {
 			numberFormat = format;
 		}
@@ -61,7 +63,9 @@ export function getCurrencyCode(): string {
 export function fmtMoney(cents: number, opts?: { sign?: boolean; short?: boolean }): string {
 	const n = (cents || 0) / currencyScale;
 	const abs = Math.abs(n);
-	const noDecimals = Math.round(currencyScale) === 1;
+	const noDecimals = hideFraction || Math.round(currencyScale) === 1;
+	// Rounded away, a sign would read as "-$0".
+	const zero = noDecimals && Math.round(abs) === 0;
 
 	const fmtOpts: Intl.NumberFormatOptions = currencyCode
 		? { style: "currency", currency: currencyCode }
@@ -85,6 +89,9 @@ export function fmtMoney(cents: number, opts?: { sign?: boolean; short?: boolean
 		str = new Intl.NumberFormat(undefined, fmtOpts).format(abs);
 	}
 
+	if (zero) {
+		return str;
+	}
 	if (opts?.sign && cents > 0) {
 		return "+" + str;
 	}
