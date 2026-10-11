@@ -8,6 +8,7 @@ import { sidebarSearch } from "./appearance/sidebar-search";
 import { sidebarShortcuts } from "./appearance/sidebar-shortcuts";
 import { modernTitlebar } from "./appearance/titlebar";
 import { modernAccountToolbar } from "./appearance/account-toolbar";
+import { mobilePageTransitions } from "./mobile/page-transitions";
 import { modernReconcile } from "./workflows/reconcile";
 import { themedScrollbars } from "./appearance/scrollbars";
 import { modernToasts } from "./appearance/toasts";
@@ -185,6 +186,7 @@ export const scriptSections: SettingsSection[] = [
 					mobileModalSheets,
 					mobileTransactionList,
 					mobileToasts,
+					mobilePageTransitions,
 				],
 			},
 		],
