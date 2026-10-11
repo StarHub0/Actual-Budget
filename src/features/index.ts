@@ -37,6 +37,13 @@ import { newTransactionStyle } from "./readability/new-transactions";
 import { reportCardBorders } from "./readability/report-card-borders";
 import { reportsHeader } from "./layout/reports-header";
 import { incomeBreakdown } from "./workflows/income-breakdown";
+import { mobileBudgetBanners } from "./mobile/budget-banners";
+import { mobileBudgetCards } from "./mobile/budget-cards";
+import { mobileHeader } from "./mobile/header";
+import { mobileModalSheets } from "./mobile/modal-sheets";
+import { mobileTabBar } from "./mobile/tab-bar";
+import { mobileToasts } from "./mobile/toasts";
+import { mobileTransactionList } from "./mobile/transaction-list";
 import { showDailyAvailable } from "./readability/show-daily-available";
 import { tagStyling } from "./readability/tag-styling";
 import { headerBorder } from "./readability/top-nav-border";
@@ -159,6 +166,23 @@ export const scriptSections: SettingsSection[] = [
 					reportsHeader,
 					spendingCalendar,
 					incomeBreakdown,
+				],
+			},
+		],
+	},
+	{
+		title: "Mobile",
+		groups: [
+			{
+				label: null,
+				items: [
+					mobileHeader,
+					mobileTabBar,
+					mobileBudgetCards,
+					mobileBudgetBanners,
+					mobileModalSheets,
+					mobileTransactionList,
+					mobileToasts,
 				],
 			},
 		],
