@@ -15,8 +15,7 @@
 		onClose: () => void;
 	}>();
 
-	// svelte-ignore state_referenced_locally
-	let hasIconActual = $state(hasIcon);
+	let hasIconActual = $derived(hasIcon);
 
 	onMount(async () => {
 		const icons = await loadIconCache();

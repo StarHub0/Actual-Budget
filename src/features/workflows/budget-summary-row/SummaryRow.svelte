@@ -18,8 +18,7 @@
 
 	const { sheet }: { sheet: string } = $props();
 
-	// svelte-ignore state_referenced_locally
-	let totals = $state<MonthTotals | null>(cachedTotals(sheet));
+	let totals = $derived<MonthTotals | null>(cachedTotals(sheet));
 	let root = $state<HTMLElement | null>(null);
 
 	// Tints Actual's own To Budget card, which sits outside this component.

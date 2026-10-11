@@ -30,8 +30,7 @@
 		onClose,
 	}: { title: string; tabs: SettingsTab[]; initialTab?: string; onClose: () => void } = $props();
 
-	// svelte-ignore state_referenced_locally
-	let tab = $state(initialTab ?? tabs[0].value);
+	let tab = $derived(initialTab ?? tabs[0].value);
 	const current = $derived(tabs.find((t) => t.value === tab) ?? tabs[0]);
 
 	let dialog: HTMLDivElement;

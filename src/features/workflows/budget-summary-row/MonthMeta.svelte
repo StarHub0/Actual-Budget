@@ -14,8 +14,7 @@
 		return month === current ? "Now" : month > current ? "Plan" : null;
 	});
 
-	// svelte-ignore state_referenced_locally
-	let totals = $state<MonthTotals | null>(cachedTotals(sheet));
+	let totals = $derived<MonthTotals | null>(cachedTotals(sheet));
 
 	$effect(() => {
 		void summaryState.versions[sheet];

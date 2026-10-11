@@ -14,8 +14,7 @@
 
 	const { sheet, month }: { sheet: string; month: string } = $props();
 
-	// svelte-ignore state_referenced_locally
-	let totals = $state<TrackingTotals | null>(cachedTrackingTotals(sheet));
+	let totals = $derived<TrackingTotals | null>(cachedTrackingTotals(sheet));
 	let root = $state<HTMLElement | null>(null);
 
 	// This month and later are still a plan, as in Actual's own card: what's budgeted to be left.

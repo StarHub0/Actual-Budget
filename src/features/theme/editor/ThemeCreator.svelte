@@ -57,11 +57,9 @@
 		onCssApply: (css: string) => void;
 	} = $props();
 
-	// svelte-ignore state_referenced_locally
-	let activeTab = $state<Tab>(initialTab ?? "palette");
+	let activeTab = $derived<Tab>(initialTab ?? "palette");
 	let colors = $state<Record<string, string>>({});
-	// svelte-ignore state_referenced_locally
-	let cssInput = $state(initialCss ?? "");
+	let cssInput = $derived(initialCss ?? "");
 
 	onMount(() => {
 		if (initialKeys && Object.keys(initialKeys).length > 0) {

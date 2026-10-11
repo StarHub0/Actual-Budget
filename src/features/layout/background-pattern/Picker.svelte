@@ -9,8 +9,7 @@
 
 	const options = Object.keys(bgPatterns);
 
-	// svelte-ignore state_referenced_locally
-	let selected = $state(ctx.defaultValue);
+	let selected = $derived(ctx.defaultValue);
 
 	onMount(async () => {
 		selected = (await getValue<string>(ctx.key, ctx.defaultValue)) as string;

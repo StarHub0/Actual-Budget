@@ -22,8 +22,11 @@
 		onDone: () => void;
 	} = $props();
 
-	// svelte-ignore state_referenced_locally
-	let txs = $state(transactions.map((t) => ({ ...t })));
+	// Categories chosen here, laid over the transactions as synced.
+	let picked = $state<Record<string, string | null>>({});
+	const txs = $derived(
+		transactions.map((t) => ({ ...t, category: t.id in picked ? picked[t.id] : t.category })),
+	);
 	let saving = $state<Record<string, boolean>>({});
 	let errors = $state<Record<string, boolean>>({});
 
@@ -31,8 +34,7 @@
 		new Map(groups.flatMap((g) => g.categories.map((c) => [c.id, c.name] as const))),
 	);
 	// Rows stay in this list once categorized, so the one being worked on doesn't jump away.
-	// svelte-ignore state_referenced_locally
-	const toCategorize = $state(
+	const toCategorize = $derived(
 		transactions.filter((t) => t.needsCategory && !t.category).map((t) => t.id),
 	);
 	const remaining = $derived(txs.filter((t) => toCategorize.includes(t.id) && !t.category).length);
@@ -58,13 +60,13 @@
 			return;
 		}
 		const before = tx.category;
-		tx.category = category;
+		picked[tx.id] = category;
 		saving[tx.id] = true;
 		errors[tx.id] = false;
 		try {
 			await onCategorize(tx.id, category);
 		} catch {
-			tx.category = before;
+			picked[tx.id] = before;
 			errors[tx.id] = true;
 		} finally {
 			saving[tx.id] = false;

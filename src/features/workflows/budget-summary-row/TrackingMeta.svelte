@@ -15,8 +15,7 @@
 	});
 	const projected = $derived(month >= currentMonth());
 
-	// svelte-ignore state_referenced_locally
-	let totals = $state<TrackingTotals | null>(cachedTrackingTotals(sheet));
+	let totals = $derived<TrackingTotals | null>(cachedTrackingTotals(sheet));
 	const value = $derived(totals ? (projected ? totals.projected : totals.saved) : 0);
 
 	/** How full a pie reads, as Actual's own: full when there's money but nothing budgeted. */
