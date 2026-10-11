@@ -1,4 +1,4 @@
-import { query } from "@lib/utilities/actual-api";
+import { query, readDetail } from "@lib/utilities/actual-api";
 import { createLogger } from "@lib/utilities/logger";
 
 const log = createLogger("privacy");
@@ -34,7 +34,10 @@ export const privacyMode = {
 		void refreshPrivacyMode();
 		// The bridge reports each toggle from Actual's store, on any page and for any budget.
 		document.addEventListener("abt:api:privacy", (e) => {
-			const { on } = JSON.parse((e as CustomEvent<string>).detail) as { on: boolean };
+			const { on } = readDetail<{ on: boolean }>(e);
+			if (typeof on !== "boolean") {
+				return;
+			}
 			privacyModeEnabled = on;
 			setPrivacyModeClass(on);
 		});

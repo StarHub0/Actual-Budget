@@ -35,9 +35,18 @@ export default defineUnlistedScript(async () => {
 		return true;
 	}
 
+	// Any script on the page can dispatch these events; a malformed one is ignored, not thrown.
 	function parseDetail(e) {
-		const raw = e.detail;
-		return typeof raw === "string" ? JSON.parse(raw) : raw;
+		let detail = e.detail;
+		if (typeof detail === "string") {
+			try {
+				detail = JSON.parse(detail);
+			} catch {
+				log.warn(`ignored "${e.type}": detail isn't JSON`);
+				return {};
+			}
+		}
+		return detail && typeof detail === "object" ? detail : {};
 	}
 
 	function respond(id, data, error) {

@@ -17,13 +17,24 @@ interface Pending {
 // request still waiting, which a budget page's thousands of cell reads made quadratic.
 const pending = new Map<string, Pending>();
 
-function readDetail(e: Event): { id: string; data?: unknown; error?: string } {
-	const raw = (e as CustomEvent).detail;
-	return typeof raw === "string" ? JSON.parse(raw) : raw;
+/** An event's JSON detail; any script on the page can dispatch these, so a malformed one reads as {}. */
+export function readDetail<T>(e: Event): Partial<T> {
+	let detail = (e as CustomEvent).detail;
+	if (typeof detail === "string") {
+		try {
+			detail = JSON.parse(detail);
+		} catch {
+			return {};
+		}
+	}
+	return detail && typeof detail === "object" ? detail : {};
 }
 
+type Response = { id: string; data?: unknown; error?: string };
+
 function onAck(e: Event) {
-	const entry = pending.get(readDetail(e).id);
+	const { id } = readDetail<Response>(e);
+	const entry = id ? pending.get(id) : undefined;
 	if (entry?.retryTimer) {
 		clearTimeout(entry.retryTimer);
 		entry.retryTimer = null;
@@ -31,9 +42,9 @@ function onAck(e: Event) {
 }
 
 function onResponse(e: Event) {
-	const d = readDetail(e);
-	const entry = pending.get(d.id);
-	if (!entry) {
+	const d = readDetail<Response>(e);
+	const entry = d.id ? pending.get(d.id) : undefined;
+	if (!d.id || !entry) {
 		return;
 	}
 	settle(d.id, entry);
@@ -213,7 +224,10 @@ export interface Toast {
 const toastActions = new Map<string, () => unknown>();
 
 function onToastEvent(e: Event) {
-	const { key, kind } = JSON.parse((e as CustomEvent).detail);
+	const { key, kind } = readDetail<{ key: string; kind: string }>(e);
+	if (!key) {
+		return;
+	}
 	const action = toastActions.get(key);
 	toastActions.delete(key);
 	if (kind === "press") {
@@ -315,8 +329,7 @@ export function invalidateQueries(queryKey: string[]): void {
  */
 export function onListChange(scope: string, callback: () => void): () => void {
 	const listener = (e: Event) => {
-		const detail = JSON.parse((e as CustomEvent<string>).detail) as { scope?: string };
-		if (detail.scope === scope) {
+		if (readDetail<{ scope: string }>(e).scope === scope) {
 			callback();
 		}
 	};
@@ -327,8 +340,10 @@ export function onListChange(scope: string, callback: () => void): () => void {
 /** Calls back with the accounts bank-syncing right now, each time that set changes. */
 export function onSyncingAccounts(callback: (ids: Set<string>) => void): () => void {
 	const listener = (e: Event) => {
-		const { ids } = JSON.parse((e as CustomEvent<string>).detail) as { ids: string[] };
-		callback(new Set(ids));
+		const { ids } = readDetail<{ ids: string[] }>(e);
+		if (Array.isArray(ids)) {
+			callback(new Set(ids));
+		}
 	};
 	document.addEventListener("abt:api:syncing", listener);
 	document.dispatchEvent(new CustomEvent("abt:api:syncing-request"));
@@ -380,8 +395,8 @@ export interface ImportResult {
 /** Calls back after each bank sync or file import that added or matched transactions. */
 export function onImported(callback: (result: ImportResult) => void): () => void {
 	const listener = (e: Event) => {
-		const raw = (e as CustomEvent).detail;
-		callback(typeof raw === "string" ? JSON.parse(raw) : raw);
+		const { added = [], matched = [], failed = [] } = readDetail<ImportResult>(e);
+		callback({ added, matched, failed });
 	};
 	document.addEventListener("abt:api:imported", listener);
 	return () => document.removeEventListener("abt:api:imported", listener);
