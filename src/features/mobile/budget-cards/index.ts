@@ -107,16 +107,8 @@ const CARDS_CSS = `
 		}
 
 		[${ACCOUNT_LIST_ATTR}] ${ACCOUNT_ROW} {
-			position: relative;
 			padding-left: var(--abt-space-4) !important;
 			padding-right: var(--abt-space-4) !important;
-		}
-
-		/* The bank sync dot, kept in the gutter so names line up with the heading's. */
-		[${ACCOUNT_LIST_ATTR}] ${ACCOUNT_ROW} > div > div:first-child {
-			position: absolute;
-			left: var(--abt-space-2);
-			margin: 0 !important;
 		}
 
 		[${ACCOUNT_LIST_ATTR}] [data-testid="account-name"] {
