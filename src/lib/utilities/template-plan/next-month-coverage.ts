@@ -2,6 +2,9 @@ import { send } from "@lib/utilities/actual-api";
 import { monthToSheet } from "@lib/utilities/months";
 import { loadTemplatesByCategoryId } from "./actual-data";
 import { isRemainderTemplate } from "./templates";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("template-plan");
 
 const CONCURRENCY = 8;
 
@@ -53,7 +56,7 @@ export async function previewMonthTemplateTotal(
 		}
 		return total;
 	} catch (error) {
-		console.warn("[ABT] next-month template preview failed", error);
+		log.warn("next-month template preview failed", error);
 		// Never present a partial target or silently fall back to applied goals.
 		return null;
 	}

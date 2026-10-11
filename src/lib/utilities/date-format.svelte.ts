@@ -1,4 +1,7 @@
 import { query } from "@lib/utilities/actual-api";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("date-format");
 
 /** Actual's Settings › Format choices that ABT's dates and calendars follow. */
 export interface DatePrefs {
@@ -29,7 +32,7 @@ export async function loadDatePrefs(): Promise<DatePrefs> {
 			firstDayOfWeek: Number.isInteger(day) && day >= 0 && day <= 6 ? day : 0,
 		};
 	} catch (e) {
-		console.warn("[ABT] Failed to read date format:", e);
+		log.warn("Failed to read date format:", e);
 	}
 	return prefs;
 }

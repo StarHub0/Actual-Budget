@@ -3,6 +3,9 @@ import { readCell } from "@lib/utilities/budget-cells";
 import { isoDate } from "@lib/utilities/months";
 import type { GoalDefEntry } from "@lib/types/actual-schema";
 import type { CategoryInsight, LinkedSchedule, ProgressInfo, RawSchedule } from "./types";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("insights");
 
 let insights: Map<string, CategoryInsight> | null = null;
 let loading: Promise<Map<string, CategoryInsight> | null> | null = null;
@@ -205,7 +208,7 @@ export async function loadData(): Promise<Map<string, CategoryInsight> | null> {
 			return insights;
 		} catch (err) {
 			loading = null;
-			console.error("[ABT CTI] Failed to load data:", err);
+			log.error("Failed to load data:", err);
 			return null;
 		}
 	})();

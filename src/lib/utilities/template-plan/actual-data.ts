@@ -5,6 +5,9 @@ import { Page, matchesPage } from "@lib/utilities/pages";
 import type { Category } from "./priority-plan";
 import { templateEntriesFromGoalDef } from "./templates";
 import type { TemplateEntry } from "./templates";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("template-plan");
 
 export interface SnapshotDescriptor {
 	sheet: string;
@@ -78,7 +81,7 @@ export async function loadCategories(force?: boolean): Promise<Category[]> {
 					};
 				});
 		} catch (e) {
-			console.warn("[ABT TAB] categories query failed", e);
+			log.warn("categories query failed", e);
 			if (!categoriesCache) {
 				categoriesCache = [];
 			}
@@ -370,7 +373,7 @@ export async function loadTemplatesByCategoryId(
 		if (throwOnError) {
 			throw e;
 		}
-		console.warn("[ABT TAB] categories query failed", e);
+		log.warn("categories query failed", e);
 	}
 	return byCat;
 }

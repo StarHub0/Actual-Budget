@@ -32,6 +32,9 @@
 	import { isoDate } from "@lib/utilities/months";
 	import { dayHeat, maxDaySpent, summarizeMonth } from "./summary";
 	import type { DayData } from "./types";
+	import { createLogger } from "@lib/utilities/logger";
+
+	const log = createLogger("calendar");
 
 	const ARROW_STEPS: Record<string, number> = {
 		ArrowLeft: -1,
@@ -156,7 +159,7 @@
 				focusCell(focusIso, open);
 			}
 		} catch (e) {
-			console.warn("[ABT Calendar]", e);
+			log.warn(e);
 		} finally {
 			if (seq === loadSeq) {
 				loading = false;

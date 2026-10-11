@@ -1,4 +1,8 @@
 // @ts-nocheck
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("bridge");
+
 export default defineUnlistedScript(async () => {
 	function waitForApi(cb, onFail, retries = 50) {
 		if (window.$q && window.$query && window.$send) {
@@ -313,9 +317,7 @@ export default defineUnlistedScript(async () => {
 		}
 		// Found through React's internals, so an Actual update can hide it; Sync recap and privacy then stop following.
 		else {
-			console.warn(
-				"[ABT] Couldn't find Actual's store: Sync recap and privacy mode won't update live.",
-			);
+			log.warn("Couldn't find Actual's store: Sync recap and privacy mode won't update live.");
 		}
 	})();
 

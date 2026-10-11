@@ -55,6 +55,9 @@ import {
 	type BreakdownState,
 } from "./state.svelte";
 import TemplatePlanPanel from "./TemplatePlanPanel.svelte";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("template-plan");
 
 const TRIGGER_ID = "abt-template-plan-trigger";
 // Aborted when the feature turns off, so async work started before then drops its result.
@@ -310,7 +313,7 @@ async function refreshOverview({ quiet = false }: { quiet?: boolean } = {}): Pro
 			hasTemplates: cats.some((c) => templates.has(c.id)),
 		};
 	} catch (e) {
-		console.warn("[ABT] overview refresh failed", e);
+		log.warn("overview refresh failed", e);
 	} finally {
 		if (seq === overviewSeq) {
 			templatePlanState.overviewLoading = false;
@@ -332,7 +335,7 @@ async function refreshPriorityIfNeeded(): Promise<void> {
 			templatePlanState.priorityData = data;
 		}
 	} catch (e) {
-		console.warn("[ABT] template plan priority compute failed", e);
+		log.warn("template plan priority compute failed", e);
 		if (seq !== prioritySeq) {
 			return;
 		}
@@ -435,7 +438,7 @@ async function handleTrigger(
 		const priorityBreakdown =
 			sheet && diff
 				? await buildBreakdownPrioritySummary(sheet, diff).catch((e) => {
-						console.warn("[ABT] template plan priority breakdown failed", e);
+						log.warn("template plan priority breakdown failed", e);
 						return null;
 					})
 				: null;
@@ -454,7 +457,7 @@ async function handleTrigger(
 		invalidatePriorityStatus();
 		refreshPriorityIfNeeded();
 	} catch (e) {
-		console.warn("[ABT] template plan breakdown failed", e);
+		log.warn("template plan breakdown failed", e);
 	} finally {
 		if (seq === runSeq) {
 			templatePlanState.breakdownLoading = false;

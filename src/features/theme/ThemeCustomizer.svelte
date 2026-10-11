@@ -33,6 +33,9 @@
 		userThemeState,
 		type UserTheme,
 	} from "./user-themes.svelte";
+	import { createLogger } from "@lib/utilities/logger";
+
+	const log = createLogger("themes");
 
 	let { ctx }: { ctx: { key: string; defaultValue: string } } = $props();
 
@@ -390,7 +393,7 @@
 		try {
 			remoteThemes = await fetchCommunityThemeCatalog();
 		} catch (r) {
-			console.warn("[ABT Themes] fetch error", r);
+			log.warn("fetch error", r);
 			remoteError = true;
 		}
 		loadingRemote = false;

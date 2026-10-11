@@ -11,6 +11,9 @@ import { isoDate } from "@lib/utilities/months";
 import { dailyBalances, projectSchedule, scheduleEffect } from "./balance";
 import type { CalendarFilters } from "./filters";
 import type { DayData, DayTransaction } from "./types";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("calendar");
 
 export const MONTH_NAMES = [
 	"January",
@@ -95,7 +98,7 @@ async function wasOccurrencePosted(s: Schedule, occurrenceDate: string): Promise
 		});
 		return rows.length > 0;
 	} catch (e) {
-		console.warn("[ABT Calendar] could not check schedule posting", s.id, e);
+		log.warn("could not check schedule posting", s.id, e);
 		return false;
 	}
 }
@@ -143,7 +146,7 @@ export function createMonthLoader() {
 		try {
 			dates = await send<string[]>("schedule/get-upcoming-dates", { config: s._date, count });
 		} catch (e) {
-			console.warn("[ABT Calendar] could not expand schedule", s.id, e);
+			log.warn("could not expand schedule", s.id, e);
 		}
 		upcomingDates.set(s.id, { count, dates });
 		return dates;

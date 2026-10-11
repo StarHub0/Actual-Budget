@@ -1,4 +1,7 @@
 import { query } from "@lib/utilities/actual-api";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("privacy");
 
 const PRIVACY_CLASS = "abt-privacy-enabled";
 
@@ -16,7 +19,7 @@ async function refreshPrivacyMode(): Promise<boolean> {
 		privacyModeEnabled = String(rows?.[0]?.value) === "true";
 		setPrivacyModeClass(privacyModeEnabled);
 	} catch (err) {
-		console.warn("[ABT] Failed to read privacy mode:", err);
+		log.warn("Failed to read privacy mode:", err);
 	}
 	return privacyModeEnabled;
 }

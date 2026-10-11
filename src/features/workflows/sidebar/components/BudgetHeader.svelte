@@ -26,6 +26,9 @@
 		selectBudgetFile,
 		setBudgetIcon,
 	} from "../lib/budgets";
+	import { createLogger } from "@lib/utilities/logger";
+
+	const log = createLogger("sidebar");
 
 	const {
 		name,
@@ -70,7 +73,7 @@
 				icon = await loadBudgetIcon(id);
 			}
 		} catch (err) {
-			console.error("[ABT live sidebar] failed to load budget header data", err);
+			log.error("failed to load budget header data", err);
 		} finally {
 			filesLoaded = true;
 		}
@@ -139,7 +142,7 @@
 			files = loadedFiles;
 			currentId = id;
 		} catch (err) {
-			console.error("[ABT live sidebar] failed to load budget files", err);
+			log.error("failed to load budget files", err);
 			files = [];
 		}
 	}

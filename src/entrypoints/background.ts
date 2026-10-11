@@ -1,4 +1,7 @@
 import { setValue } from "@lib/utilities/store";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("background");
 
 export default defineBackground(() => {
 	browser.runtime.onInstalled.addListener((details) => {
@@ -23,7 +26,7 @@ export default defineBackground(() => {
 					return { ok: true, data };
 				})
 				.catch((err) => {
-					console.warn("[ABT Background] fetch error", message.url, err);
+					log.warn("fetch error", message.url, err);
 					return { ok: false, status: 0 };
 				});
 		}

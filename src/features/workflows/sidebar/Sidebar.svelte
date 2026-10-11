@@ -49,6 +49,9 @@
 	import { isMac } from "./lib/search";
 	import "./styles/layout.css";
 	import "./styles/shared.css";
+	import { createLogger } from "@lib/utilities/logger";
+
+	const log = createLogger("sidebar");
 
 	let paletteRef: CommandPalette | undefined = $state();
 	function openPalette(): void {
@@ -447,7 +450,7 @@
 			loading = false;
 			await refreshUncategorizedCounts(accounts);
 		} catch (err) {
-			console.error("[ABT live sidebar] failed to load live data", err);
+			log.error("failed to load live data", err);
 			if (loading) {
 				failed = true;
 			}

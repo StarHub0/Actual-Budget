@@ -1,6 +1,9 @@
 <script lang="ts">
 	import RollingNumber from "@lib/components/RollingNumber.svelte";
 	import { onMount } from "svelte";
+	import { createLogger } from "@lib/utilities/logger";
+
+	const log = createLogger("stock");
 
 	const { symbol = "SPY" } = $props<{ symbol?: string }>();
 
@@ -43,7 +46,7 @@
 				}
 			}
 		} catch (e) {
-			console.warn("[ABT Stock]", symbol, e);
+			log.warn(symbol, e);
 			error = true;
 		} finally {
 			loading = false;

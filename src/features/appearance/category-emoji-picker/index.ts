@@ -6,6 +6,9 @@ import { notify, send } from "@lib/utilities/actual-api";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { getValue, setValue } from "@lib/utilities/store";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("emoji");
 
 const STORAGE_KEY = "category-emoji-picker";
 const ICONS_KEY = "abt-category-icons";
@@ -103,7 +106,7 @@ async function updateCategoryName(catId: string, newName: string) {
 	try {
 		await send("category-update", { id: catId, name: newName });
 	} catch (err) {
-		console.warn("[ABT Emoji] Failed to update category:", err);
+		log.warn("Failed to update category:", err);
 		void notify({
 			type: "error",
 			message: "Couldn't update the category's emoji",

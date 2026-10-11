@@ -3,6 +3,9 @@
 import * as d3 from "d3";
 import { sankey, sankeyJustify, sankeyLinkHorizontal } from "d3-sankey";
 import { dashboardWidgetUtils } from "./dashboard-widget-utils";
+import { createLogger } from "@lib/utilities/logger";
+
+const log = createLogger("income-breakdown");
 
 (function () {
 	"use strict";
@@ -304,7 +307,7 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 				el.classList.toggle("abt-ib-privacy", isPrivacyMode);
 			});
 		} catch (err) {
-			console.warn("[ABT Income Breakdown] Failed to read privacy mode:", err);
+			log.warn("Failed to read privacy mode:", err);
 		}
 	}
 
@@ -1244,7 +1247,7 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			try {
 				await onClick();
 			} catch (err) {
-				console.error("[ABT Income Breakdown] Dashboard action failed:", err);
+				log.error("Dashboard action failed:", err);
 			}
 		});
 		return button;
@@ -1534,7 +1537,7 @@ import { dashboardWidgetUtils } from "./dashboard-widget-utils";
 			const sankeyData = buildSankeyData(data);
 			renderSankey(chart, sankeyData);
 		} catch (err) {
-			console.error("[ABT Income Breakdown] Error:", err);
+			log.error("Error:", err);
 			chart.innerHTML = `<div class="abt-ib-empty">Error loading data: ${err.message}</div>`;
 		}
 	}
