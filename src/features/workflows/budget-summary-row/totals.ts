@@ -58,6 +58,28 @@ function categoryIds(): string[] {
 	return [...ids];
 }
 
+/** Targets and overspending, from the category cells both budget types share. */
+type CategoryStats = Pick<MonthTotals, "goals" | "funded" | "short" | "overspentNow" | "overIds">;
+
+async function categoryStats(sheet: string): Promise<CategoryStats> {
+	const ids = categoryIds();
+	const cats = (await Promise.all(ids.map((id) => fetchCells(sheet, id)))).map((cells, i) => ({
+		...cells,
+		id: ids[i],
+	}));
+	const withGoal = cats.filter((c) => c.hasGoal);
+	const over = cats.filter((c) => c.balance < 0);
+	return {
+		goals: withGoal.length,
+		funded: withGoal.filter((c) => c.goalShortfall === 0).length,
+		short: withGoal
+			.filter((c) => c.goalShortfall > 0)
+			.map((c) => ({ id: c.id, shortfall: c.goalShortfall })),
+		overspentNow: over.reduce((sum, c) => sum - c.balance, 0),
+		overIds: over.map((c) => c.id),
+	};
+}
+
 export async function loadMonthTotals(sheet: string): Promise<MonthTotals> {
 	await loadCurrency();
 	const [toBudget, available, budgeted, overspent, nextMonth, spent] = await Promise.all(
@@ -70,13 +92,6 @@ export async function loadMonthTotals(sheet: string): Promise<MonthTotals> {
 			"total-spent",
 		].map((name) => readCell(sheet, name, 0)),
 	);
-	const ids = categoryIds();
-	const cats = (await Promise.all(ids.map((id) => fetchCells(sheet, id)))).map((cells, i) => ({
-		...cells,
-		id: ids[i],
-	}));
-	const withGoal = cats.filter((c) => c.hasGoal);
-	const over = cats.filter((c) => c.balance < 0);
 	// Actual stores these as negative outflows.
 	const totals: MonthTotals = {
 		toBudget,
@@ -85,15 +100,53 @@ export async function loadMonthTotals(sheet: string): Promise<MonthTotals> {
 		overspent: Math.abs(overspent),
 		nextMonth: Math.abs(nextMonth),
 		spent: Math.abs(spent),
-		goals: withGoal.length,
-		funded: withGoal.filter((c) => c.goalShortfall === 0).length,
-		short: withGoal
-			.filter((c) => c.goalShortfall > 0)
-			.map((c) => ({ id: c.id, shortfall: c.goalShortfall })),
-		overspentNow: over.reduce((sum, c) => sum - c.balance, 0),
-		overIds: over.map((c) => c.id),
+		...(await categoryStats(sheet)),
 	};
 	latest.set(sheet, totals);
+	rememberTargets(totals.goals > 0);
+	return totals;
+}
+
+/** A tracking budget's month: income and spending against what's budgeted, and the difference. */
+export interface TrackingTotals extends CategoryStats {
+	income: number;
+	incomeBudgeted: number;
+	spent: number;
+	spentBudgeted: number;
+	/** Income less spending so far. */
+	saved: number;
+	/** Budgeted income less budgeted spending. */
+	projected: number;
+}
+
+const latestTracking = new Map<string, TrackingTotals>();
+
+export const cachedTrackingTotals = (sheet: string): TrackingTotals | null =>
+	latestTracking.get(sheet) ?? null;
+
+export async function loadTrackingTotals(sheet: string): Promise<TrackingTotals> {
+	await loadCurrency();
+	// The cells Actual's own tracking summary shows.
+	const [income, incomeBudgeted, spent, spentBudgeted, saved, projected] = await Promise.all(
+		[
+			"total-income",
+			"total-budget-income",
+			"total-spent",
+			"total-budgeted",
+			"real-saved",
+			"total-saved",
+		].map((name) => readCell(sheet, name, 0)),
+	);
+	const totals: TrackingTotals = {
+		income,
+		incomeBudgeted,
+		spent: Math.abs(spent),
+		spentBudgeted: Math.abs(spentBudgeted),
+		saved,
+		projected,
+		...(await categoryStats(sheet)),
+	};
+	latestTracking.set(sheet, totals);
 	rememberTargets(totals.goals > 0);
 	return totals;
 }
@@ -102,15 +155,16 @@ export async function loadMonthTotals(sheet: string): Promise<MonthTotals> {
  * Loads the months either side, so the card that slides in next draws complete and tinted
  * during the slide rather than popping in once its reads return.
  */
-export function prefetchNeighbours(sheet: string): void {
+export function prefetchNeighbours(sheet: string, tracking = false): void {
 	const month = sheetToMonth(sheet);
 	if (!month) {
 		return;
 	}
 	for (const step of [-1, 1]) {
 		const next = monthToSheet(addMonths(month, step));
-		if (!latest.has(next)) {
-			loadMonthTotals(next).catch(() => {});
+		if (tracking ? latestTracking.has(next) : latest.has(next)) {
+			continue;
 		}
+		(tracking ? loadTrackingTotals(next) : loadMonthTotals(next)).catch(() => {});
 	}
 }

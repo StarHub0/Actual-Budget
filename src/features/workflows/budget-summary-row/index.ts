@@ -7,6 +7,7 @@ import {
 	collectChanges,
 	watchBudgetTable,
 } from "@lib/utilities/budget-cells";
+import { BUDGET_TYPE_ATTR, isTrackingBudget, onBudgetType } from "@lib/utilities/budget-type";
 import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { currentMonth, monthToSheet } from "@lib/utilities/months";
 import { Page, matchesPage } from "@lib/utilities/pages";
@@ -14,6 +15,8 @@ import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import MonthMeta from "./MonthMeta.svelte";
 import { summaryState } from "./state.svelte";
 import SummaryRow from "./SummaryRow.svelte";
+import TrackingMeta from "./TrackingMeta.svelte";
+import TrackingRow from "./TrackingRow.svelte";
 
 const BUDGET_TABLE = '[data-testid="budget-table"]';
 const SELECTED_CELL = '[data-testid="selected-budget-month"][data-month]';
@@ -42,8 +45,14 @@ const NOTE_MASK = iconMask("note");
  */
 const SUMMARY_CARD = `[${SINGLE_MONTH_ATTR}] [data-testid="budget-summary"]`;
 const MONTH_CARD = `[${MULTI_MONTH_ATTR}] [data-testid="budget-summary"]`;
+/*
+ * Envelope cards end in Actual's To Budget, which the row keeps as its lead; tracking cards end
+ * in Actual's totals and savings, which ABT's own cards replace. Set on <html> from the first frame.
+ */
+const ENVELOPE = `:root:not([${BUDGET_TYPE_ATTR}="tracking"])`;
+const TRACKING = `:root[${BUDGET_TYPE_ATTR}="tracking"]`;
 
-let summary: (Mounted & { card: HTMLElement }) | null = null;
+let summary: (Mounted & { card: HTMLElement; tracking: boolean }) | null = null;
 const metas = new Map<HTMLElement, Mounted>();
 // The table sync() last set up on the budget page; its changes are followed until it's dropped.
 let tableShown: HTMLElement | null = null;
@@ -132,6 +141,9 @@ function applyMode(table: HTMLElement): { months: string[]; cards: HTMLElement[]
 		card.parentElement?.toggleAttribute(CARD_SLOT_ATTR, true);
 		card.toggleAttribute(SUMMARY_CARD_ATTR, single);
 		card.toggleAttribute(CURRENT_MONTH_ATTR, card.dataset.month === current);
+		if (isTrackingBudget()) {
+			continue;
+		}
 		for (const part of card.querySelectorAll(":scope > :last-child > * > * > :first-child")) {
 			part.toggleAttribute(MONTH_LABEL_ATTR, !single && !part.querySelector("[data-cellname]"));
 		}
@@ -233,7 +245,13 @@ function onTableChange({ table, changed }: BudgetTableChange): void {
  */
 function syncSummary(cards: HTMLElement[], month: string | undefined): void {
 	const card = month ? cards.find((c) => c.dataset.month === month) : undefined;
-	if (summary && summary.card === card && summary.node.isConnected) {
+	const tracking = isTrackingBudget();
+	if (
+		summary &&
+		summary.card === card &&
+		summary.tracking === tracking &&
+		summary.node.isConnected
+	) {
 		return;
 	}
 	unmountSummary();
@@ -241,9 +259,14 @@ function syncSummary(cards: HTMLElement[], month: string | undefined): void {
 	if (!card || !toBudget || !month) {
 		return;
 	}
-	summary = { ...mountToNodeWithReturn(SummaryRow, { sheet: monthToSheet(month) }), card };
+	const sheet = monthToSheet(month);
+	const mounted = tracking
+		? mountToNodeWithReturn(TrackingRow, { sheet, month })
+		: mountToNodeWithReturn(SummaryRow, { sheet });
+	summary = { ...mounted, card, tracking };
 	summary.node.setAttribute(SUMMARY_STATS_ATTR, "");
-	card.insertBefore(summary.node, toBudget);
+	// Envelope's To Budget stays last; tracking's own parts are hidden, so ABT's go after them.
+	card.insertBefore(summary.node, tracking ? null : toBudget);
 }
 
 /**
@@ -260,9 +283,12 @@ function syncMetas(cards: HTMLElement[], multi: boolean): void {
 		if (metas.has(card) || !card.dataset.month || !toBudget) {
 			continue;
 		}
-		const meta = mountToNodeWithReturn(MonthMeta, { card, month: card.dataset.month });
+		const tracking = isTrackingBudget();
+		const meta = tracking
+			? mountToNodeWithReturn(TrackingMeta, { month: card.dataset.month })
+			: mountToNodeWithReturn(MonthMeta, { card, month: card.dataset.month });
 		meta.node.setAttribute(MONTH_META_ATTR, "");
-		card.insertBefore(meta.node, toBudget);
+		card.insertBefore(meta.node, tracking ? null : toBudget);
 		metas.set(card, meta);
 	}
 }
@@ -301,7 +327,7 @@ export const budgetSummaryRow = defineSetting({
 	type: "checkbox",
 	label: "Month cards (experimental)",
 	description:
-		"Compact month headers when several months are shown; with one, a full-width row of To Budget, spending, targets, and quick budget actions.",
+		"Compact month headers when several months are shown; with one, a full-width row of To Budget (or savings, on a tracking budget), spending, targets, and quick budget actions.",
 	icon: "sparkles",
 	group: "Budget",
 	writes: "Applies budget templates or covers overspending when you click those actions.",
@@ -400,12 +426,12 @@ export const budgetSummaryRow = defineSetting({
 			border-radius: var(--abt-radius) !important;
 		}
 		/* ABT's notes icon in place of Actual's, matching the Insights icon beside it. */
-		${SUMMARY_CARD} > :first-child > :last-child button svg,
-		${MONTH_CARD} > :first-child > :last-child button svg {
+		${SUMMARY_CARD} > :first-child > :last-child > :first-child button svg,
+		${MONTH_CARD} > :first-child > :last-child > :first-child button svg {
 			display: none !important;
 		}
-		${SUMMARY_CARD} > :first-child > :last-child button::before,
-		${MONTH_CARD} > :first-child > :last-child button::before {
+		${SUMMARY_CARD} > :first-child > :last-child > :first-child button::before,
+		${MONTH_CARD} > :first-child > :last-child > :first-child button::before {
 			content: "";
 			width: 17px;
 			height: 17px;
@@ -416,20 +442,26 @@ export const budgetSummaryRow = defineSetting({
 		${SUMMARY_CARD} > :first-child > :last-child button:hover {
 			background: var(--abt-fill-hover) !important;
 		}
-		/* Actual's month menu: Budget Actions covers everything in it. */
-		${SUMMARY_CARD} > :first-child > :last-child > :last-child:not(:first-child),
-		${MONTH_CARD} > :first-child > :last-child > :last-child:not(:first-child) {
+		/* Actual's month menu: Budget Actions covers everything in it. Tracking has no Budget
+		   Actions, so its menu (copy last month, averages, templates) stays. */
+		${ENVELOPE} ${SUMMARY_CARD} > :first-child > :last-child > :last-child:not(:first-child),
+		${ENVELOPE} ${MONTH_CARD} > :first-child > :last-child > :last-child:not(:first-child) {
 			display: none !important;
 		}
 		/* Actual's totals and ABT's flow bar: the summary cards cover them. */
-		${SUMMARY_CARD} > :not(:first-child):not(:last-child):not([${SUMMARY_STATS_ATTR}]) {
+		${ENVELOPE} ${SUMMARY_CARD} > :not(:first-child):not(:last-child):not([${SUMMARY_STATS_ATTR}]) {
+			display: none !important;
+		}
+		/* Tracking: Actual's income, expenses and savings; ABT's cards show all three. */
+		${TRACKING} ${SUMMARY_CARD} > :not(:first-child):not([${SUMMARY_STATS_ATTR}]),
+		${TRACKING} ${MONTH_CARD} > :not(:first-child):not([${MONTH_META_ATTR}]) {
 			display: none !important;
 		}
 		/* Each mode's pieces show only in that mode, including the frame before they unmount. */
 		[${SUMMARY_STATS_ATTR}], [${MONTH_META_ATTR}] { display: none; }
 		${SUMMARY_CARD} > [${SUMMARY_STATS_ATTR}] { display: contents; }
 		/* Actual's To Budget, menu and all, is the lead card. */
-		${SUMMARY_CARD} > :last-child {
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child {
 			position: relative;
 			order: 0;
 			/* Its content's width, from a floor that keeps a small amount from looking cramped and
@@ -455,32 +487,32 @@ export const budgetSummaryRow = defineSetting({
 				linear-gradient(var(--abt-glow-angle), color-mix(in srgb, var(--abt-card-tone) var(--abt-glow-strength), transparent), var(--abt-panel-border) var(--abt-glow-reach)) border-box,
 				linear-gradient(var(--abt-panel-surface), var(--abt-panel-surface)) border-box !important;
 		}
-		${SUMMARY_CARD}[data-abt-to-budget-known] > :last-child {
+		${ENVELOPE} ${SUMMARY_CARD}[data-abt-to-budget-known] > :last-child {
 			--abt-card-tone: var(--color-noticeTextLight);
 		}
-		${SUMMARY_CARD}[data-abt-to-budget-negative] > :last-child {
+		${ENVELOPE} ${SUMMARY_CARD}[data-abt-to-budget-negative] > :last-child {
 			--abt-card-tone: var(--color-errorText);
 		}
-		${SUMMARY_CARD} > :last-child,
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child,
 		${MONTH_CARD}[${CURRENT_MONTH_ATTR}] {
 			transition:
 				--abt-glow-angle var(--abt-glow-duration) ease,
 				--abt-glow-reach var(--abt-glow-duration) ease,
 				--abt-glow-strength var(--abt-glow-duration) ease;
 		}
-		${SUMMARY_CARD} > :last-child:hover,
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child:hover,
 		${MONTH_CARD}[${CURRENT_MONTH_ATTR}]:hover {
 			--abt-glow-angle: 225deg;
 			--abt-glow-reach: 100%;
 			--abt-glow-strength: 75%;
 		}
-		${SUMMARY_CARD} > :last-child > * { margin: 0 !important; }
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child > * { margin: 0 !important; }
 		/* Same label colour as the summary cards; the subdued default is faint on the tint. */
-		${SUMMARY_CARD} > :last-child,
-		${SUMMARY_CARD} > :last-child .abt-to-budget-label {
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child,
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child .abt-to-budget-label {
 			color: var(--color-tableHeaderText) !important;
 		}
-		${SUMMARY_CARD} > :last-child *:not([data-abt-summary-more], [data-abt-summary-more] *) {
+		${ENVELOPE} ${SUMMARY_CARD} > :last-child *:not([data-abt-summary-more], [data-abt-summary-more] *) {
 			align-items: flex-start !important;
 			text-align: left !important;
 			padding-left: 0 !important;
@@ -535,12 +567,12 @@ export const budgetSummaryRow = defineSetting({
 			position: static !important;
 		}
 		/* Totals and ABT's flow bar move into the To Budget hover. */
-		${MONTH_CARD} > :not(:first-child):not(:last-child):not([${MONTH_META_ATTR}]) {
+		${ENVELOPE} ${MONTH_CARD} > :not(:first-child):not(:last-child):not([${MONTH_META_ATTR}]) {
 			display: none !important;
 		}
 		${MONTH_CARD} > [${MONTH_META_ATTR}] { display: contents; }
 		/* Actual's To Budget, menu and all: label and amount, beside the suggested action. */
-		${MONTH_CARD} > :last-child {
+		${ENVELOPE} ${MONTH_CARD} > :last-child {
 			grid-area: 2 / 1 / 3 / 5;
 			align-items: flex-start !important;
 			min-width: 0;
@@ -554,7 +586,7 @@ export const budgetSummaryRow = defineSetting({
 			text-transform: uppercase;
 			color: var(--color-tableHeaderText) !important;
 		}
-		${MONTH_CARD} > :last-child * {
+		${ENVELOPE} ${MONTH_CARD} > :last-child * {
 			flex-direction: row !important;
 			align-items: baseline !important;
 			gap: var(--abt-space-2);
@@ -569,8 +601,8 @@ export const budgetSummaryRow = defineSetting({
 				display: none !important;
 			}
 		}
-		${MONTH_CARD} > :last-child [data-cellname],
-		${MONTH_CARD} > :last-child [data-cellname] * {
+		${ENVELOPE} ${MONTH_CARD} > :last-child [data-cellname],
+		${ENVELOPE} ${MONTH_CARD} > :last-child [data-cellname] * {
 			font-size: var(--abt-text-lg) !important;
 			font-weight: 650;
 			letter-spacing: 0;
@@ -578,8 +610,8 @@ export const budgetSummaryRow = defineSetting({
 			font-variant-numeric: tabular-nums;
 			color: var(--color-noticeTextLight) !important;
 		}
-		${MONTH_CARD}[data-abt-to-budget-negative] > :last-child [data-cellname],
-		${MONTH_CARD}[data-abt-to-budget-negative] > :last-child [data-cellname] * {
+		${ENVELOPE} ${MONTH_CARD}[data-abt-to-budget-negative] > :last-child [data-cellname],
+		${ENVELOPE} ${MONTH_CARD}[data-abt-to-budget-negative] > :last-child [data-cellname] * {
 			color: var(--color-errorText) !important;
 		}
 	`,
@@ -592,10 +624,16 @@ export const budgetSummaryRow = defineSetting({
 		const unwatch = watchDom(sync);
 		const unwatchTable = watchElement(BUDGET_TABLE, sync);
 		const unwatchCells = watchBudgetTable(onTableChange);
+		// The two types' cards are different components, mounted in different places.
+		const unwatchType = onBudgetType(() => {
+			unmountAll();
+			sync();
+		});
 		return () => {
 			unwatch();
 			unwatchTable();
 			unwatchCells();
+			unwatchType();
 			changes?.stop();
 			changes = null;
 			restoreNative();
