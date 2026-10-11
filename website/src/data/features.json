@@ -410,6 +410,13 @@
 				"icon": "bell",
 				"group": null,
 				"writes": null
+			},
+			{
+				"label": "Page transitions",
+				"description": "How each page appears as you move between them.",
+				"icon": "sparkles",
+				"group": null,
+				"writes": null
 			}
 		]
 	},
