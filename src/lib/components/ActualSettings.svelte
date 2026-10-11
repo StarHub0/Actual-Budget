@@ -61,7 +61,8 @@
 		closeBugReport();
 	}
 
-	// Actual's mobile view only lists the settings that run there.
+	// Actual's mobile view only lists the settings that run there; desktop lists them all, so
+	// mobile tweaks can be set up from a computer.
 	const desktopQuery = matchMedia(DESKTOP_QUERY);
 	let isDesktop = $state(desktopQuery.matches);
 	$effect(() => {
@@ -108,7 +109,7 @@
 	const normalizedQuery = $derived(query.trim().toLowerCase());
 
 	function isVisible(item: PageSetting): boolean {
-		if (!isDesktop && !("mobile" in item && item.mobile)) {
+		if (!isDesktop && (item.platform ?? "desktop") === "desktop") {
 			return false;
 		}
 		if (changedOnly && !isChanged(item)) {

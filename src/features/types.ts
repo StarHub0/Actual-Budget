@@ -1,6 +1,9 @@
 import type { Component } from "svelte";
 import type { IconName } from "@lib/utilities/icons";
 
+/** Actual's desktop view, its mobile view (below 512px, a separate component tree), or both. */
+export type Platform = "desktop" | "mobile" | "all";
+
 export interface SettingContext {
 	key: string;
 	defaultValue: unknown;
@@ -11,7 +14,14 @@ export type SettingType = "select" | "checkbox" | "custom" | "core";
 
 /** Known subgroup labels settings can be grouped under within a section. Add new values here as needed. */
 export type SettingGroup =
-	"General" | "Budget" | "Transactions" | "Categories" | "Sidebar" | "Accounts" | "Reports";
+	| "General"
+	| "Budget"
+	| "Transactions"
+	| "Categories"
+	| "Sidebar"
+	| "Accounts"
+	| "Reports"
+	| "Mobile";
 
 export type Cleanup = void | (() => void | Promise<void>);
 
@@ -31,8 +41,8 @@ export interface BaseSetting<C extends SettingContext> {
 	css?: (ctx: C & { value: unknown }) => string;
 	/** Optional mock of the tweak, opened from an eye button on the setting's row. */
 	preview?: Component;
-	/** Also runs in Actual's mobile view. Off by default: most features anchor on desktop markup. */
-	mobile?: boolean;
+	/** Which of Actual's views it runs in; desktop by default, since most features anchor on its markup. */
+	platform?: Platform;
 	/** Built on To Budget and its envelope cells, so it stands down on tracking budgets. */
 	envelopeOnly?: boolean;
 	/** Runs when the setting is activated; return a cleanup for teardown on deactivate. Omit if `css` alone covers the feature. */
@@ -62,8 +72,8 @@ export interface CustomSetting<C extends SettingContext> {
 	/** Optional subgroup label — settings sharing the same group render under one subheading within their section. */
 	group?: SettingGroup;
 	context: C;
-	/** Shown in Actual's mobile view; see BaseSetting.mobile. */
-	mobile?: boolean;
+	/** Where it's listed in the settings page; see BaseSetting.platform. */
+	platform?: Platform;
 	component?: Component<{ ctx: C }>;
 	init: (ctx: C) => Promise<void> | void;
 }

@@ -8,7 +8,7 @@ import { loadUserThemes } from "./user-themes.svelte";
 export const themeSelector = defineSetting({
 	type: "custom",
 	label: "",
-	mobile: true,
+	platform: "all",
 	context: {
 		key: "catppuccin-palette",
 		defaultValue: DEFAULT_THEME,

@@ -2,8 +2,8 @@ import { isTrackingBudget, onBudgetType } from "@lib/utilities/budget-type";
 import { applyGlobalCSS } from "@lib/utilities/dom";
 import { createLogger } from "@lib/utilities/logger";
 import { getValue, setValue } from "@lib/utilities/store";
-import { DESKTOP_QUERY, desktopOnly } from "@lib/utilities/pages";
-import type { Setting, SettingContext } from "./types";
+import { DESKTOP_QUERY, desktopOnly, mobileOnly } from "@lib/utilities/pages";
+import type { Platform, Setting, SettingContext } from "./types";
 
 const log = createLogger("runtime");
 
@@ -15,7 +15,7 @@ interface DeactivateOptions {
 interface Active {
 	setting: Setting;
 	ctx: SettingContext & { value: unknown };
-	/** Set while init has run; null while the window is in Actual's mobile view. */
+	/** Set while init has run; null while the window is in a view the setting doesn't run in. */
 	stop: (() => void | Promise<void>) | null;
 }
 
@@ -26,8 +26,19 @@ function shouldRun(setting: Setting, value: unknown): boolean {
 	return setting.type === "checkbox" ? Boolean(value) : true;
 }
 
+function platformOf(setting: Setting): Platform {
+	return ("platform" in setting && setting.platform) || "desktop";
+}
+
+/** Whether the setting runs in the view Actual shows now. */
+function runsHere(setting: Setting): boolean {
+	const platform = platformOf(setting);
+	return platform === "all" || (platform === "desktop") === desktop.matches;
+}
+
 function scopedCss(setting: Setting, css: string): string {
-	return "mobile" in setting && setting.mobile ? css : desktopOnly(css);
+	const platform = platformOf(setting);
+	return platform === "all" ? css : platform === "mobile" ? mobileOnly(css) : desktopOnly(css);
 }
 
 /** An envelope-only feature on a tracking budget: kept enabled, but with no CSS and not started. */
@@ -70,10 +81,10 @@ async function activate(setting: Setting, value: unknown) {
 	const entry: Active = { setting, ctx, stop: null };
 
 	try {
-		// The media query keeps desktop-only CSS off mobile without a re-render on resize.
+		// The media query keeps CSS out of the other view without a re-render on resize.
 		applyCss(entry);
 		active.set(key, entry);
-		if ((setting.mobile || desktop.matches) && !standsDown(setting)) {
+		if (runsHere(setting) && !standsDown(setting)) {
 			await start(entry);
 		}
 		log.info(`enabled "${key}"`);
@@ -107,16 +118,16 @@ async function deactivate(key: string, opts?: DeactivateOptions) {
 	}
 }
 
-/** Starts or stops desktop-only features as the window crosses Actual's mobile breakpoint. */
+/** Starts or stops features as the window crosses Actual's mobile breakpoint. */
 function onViewportChange(): void {
 	for (const [key, entry] of active) {
 		if (entry.setting.type === "core" || entry.setting.type === "custom") {
 			continue;
 		}
-		if (entry.setting.mobile || standsDown(entry.setting)) {
+		if (platformOf(entry.setting) === "all" || standsDown(entry.setting)) {
 			continue;
 		}
-		const run = desktop.matches ? !entry.stop && start(entry) : entry.stop && stop(entry);
+		const run = runsHere(entry.setting) ? !entry.stop && start(entry) : entry.stop && stop(entry);
 		if (run) {
 			run.catch((err) => log.error(`viewport change failed for "${key}"`, err));
 		}
@@ -132,9 +143,7 @@ function onBudgetTypeChange(): void {
 		}
 		applyCss(entry);
 		const down = standsDown(setting);
-		const run = down
-			? entry.stop && stop(entry)
-			: !entry.stop && (setting.mobile || desktop.matches) && start(entry);
+		const run = down ? entry.stop && stop(entry) : !entry.stop && runsHere(setting) && start(entry);
 		if (run) {
 			run.catch((err) => log.error(`budget type change failed for "${key}"`, err));
 		}

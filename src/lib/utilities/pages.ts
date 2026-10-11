@@ -70,6 +70,11 @@ export function desktopOnly(css: string): string {
 	return `@media ${DESKTOP_QUERY} {\n${css}\n}`;
 }
 
+/** Keeps CSS for Actual's mobile markup out of the desktop view. */
+export function mobileOnly(css: string): string {
+	return `@media not all and ${DESKTOP_QUERY} {\n${css}\n}`;
+}
+
 export function isMobileView(): boolean {
 	return !matchMedia(DESKTOP_QUERY).matches;
 }
