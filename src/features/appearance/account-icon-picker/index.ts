@@ -1,7 +1,7 @@
 import { defineSetting } from "@features/types";
 import { createElement } from "@lib/utilities/dom";
 import { watchDom } from "@lib/utilities/dom-watcher";
-import { getValue, setValue } from "@lib/utilities/store";
+import { getValue, setValue, watchValue } from "@lib/utilities/store";
 
 const ROOT_TOGGLE_ATTR = "data-abt-account-icons";
 const STORAGE_KEY_PREFIX = "abt-account-icons";
@@ -20,8 +20,12 @@ let iconCachePromise: Promise<Record<string, AccountIconData>> | null = null;
 let enabled = false;
 
 export async function loadIconCache(): Promise<Record<string, AccountIconData>> {
-	if (iconCache) return iconCache;
-	if (iconCachePromise) return iconCachePromise;
+	if (iconCache) {
+		return iconCache;
+	}
+	if (iconCachePromise) {
+		return iconCachePromise;
+	}
 
 	iconCachePromise = (async () => {
 		const icons = (await getValue(
@@ -39,6 +43,16 @@ export async function loadIconCache(): Promise<Record<string, AccountIconData>> 
 	return iconCachePromise;
 }
 
+/** Calls `callback` with the whole map whenever it's saved, here or by settings sync. */
+export function watchAccountIcons(
+	callback: (icons: Record<string, AccountIconData>) => void,
+): () => void {
+	return watchValue<Record<string, AccountIconData>>(STORAGE_KEY_PREFIX, (icons) => {
+		iconCache = icons ?? {};
+		callback(iconCache);
+	});
+}
+
 function currentAccountId(): string | null {
 	const match = location.pathname.match(/^\/accounts\/([a-f0-9-]+)$/);
 	return match && match[1].includes("-") ? match[1] : null;
@@ -51,7 +65,9 @@ function emojiToCodepoint(emoji: string): string {
 
 	return codepoints
 		.filter((part, index) => {
-			if (part !== "fe0f") return true;
+			if (part !== "fe0f") {
+				return true;
+			}
 			const next = codepoints[index + 1];
 			// Keep VS16 when it is semantically important in keycap/ZWJ sequences.
 			return next === "200d" || next === "20e3";
@@ -85,7 +101,9 @@ function titleEls(): HTMLElement[] {
 }
 
 function clearTitle(el: HTMLElement): void {
-	if (el.dataset.abtIconSignature === undefined) return;
+	if (el.dataset.abtIconSignature === undefined) {
+		return;
+	}
 	el.textContent = el.dataset.abtBaseText ?? el.textContent ?? "";
 	delete el.dataset.abtIconSignature;
 	delete el.dataset.abtBaseText;
@@ -95,7 +113,9 @@ function renderTitle(el: HTMLElement, iconData: AccountIconData): void {
 	const signature = `${iconData.type}:${iconData.value}`;
 	const current = el.querySelector(`.${ACCOUNT_ICON_IMG_CLASS}`);
 	// React re-renders the title text (e.g. after a rename), which drops our markup.
-	if (el.dataset.abtIconSignature === signature && current) return;
+	if (el.dataset.abtIconSignature === signature && current) {
+		return;
+	}
 
 	const baseText = current
 		? (el.dataset.abtBaseText ?? "")
@@ -132,14 +152,21 @@ function renderTitle(el: HTMLElement, iconData: AccountIconData): void {
 }
 
 function syncTitle(): void {
-	if (!enabled) return;
+	if (!enabled) {
+		return;
+	}
 	const els = titleEls();
-	if (!els.length) return;
+	if (!els.length) {
+		return;
+	}
 	const id = currentAccountId();
 	const iconData = id ? iconCache?.[id] : undefined;
 	for (const el of els) {
-		if (iconData) renderTitle(el, iconData);
-		else clearTitle(el);
+		if (iconData) {
+			renderTitle(el, iconData);
+		} else {
+			clearTitle(el);
+		}
 	}
 }
 

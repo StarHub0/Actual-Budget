@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { AccountIconData } from "@features/appearance/account-icon-picker";
-	import { accountIconPicker, loadIconCache } from "@features/appearance/account-icon-picker";
+	import {
+		accountIconPicker,
+		loadIconCache,
+		watchAccountIcons,
+	} from "@features/appearance/account-icon-picker";
 	import { sidebarSearch } from "@features/appearance/sidebar-search";
 	import { sidebarShortcuts } from "@features/appearance/sidebar-shortcuts";
 	import {
@@ -83,6 +87,7 @@
 
 	// Other features (Modern Reconcile) collapse it for a while and put it back.
 	$effect(() => watchValue<boolean>(COLLAPSED_KEY, (v) => (collapsed = !!v)));
+	$effect(() => watchAccountIcons((v) => (icons = v)));
 
 	// Narrow windows show just the rail; opening it there doesn't change the saved choice.
 	const NARROW_QUERY = "(max-width: 960px)";
@@ -161,12 +166,16 @@
 		}
 	}
 	function onResizeMove(e: PointerEvent) {
-		if (!resizing) return;
+		if (!resizing) {
+			return;
+		}
 		const next = dragStartWidth + (e.clientX - dragStartX);
 		sidebarWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, next));
 	}
 	function endResize(e: PointerEvent) {
-		if (!resizing) return;
+		if (!resizing) {
+			return;
+		}
 		resizing = false;
 		(e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
 		widthStored = true;
@@ -195,18 +204,25 @@
 		getValue<boolean>(ICONS_KEY, ICONS_DEFAULT).then((v) => (iconsEnabled = v));
 
 		const onStorageChange = (changes: Record<string, { newValue?: unknown }>, areaName: string) => {
-			if (areaName !== "local") return;
-			if (`local:${SHORTCUTS_KEY}` in changes)
+			if (areaName !== "local") {
+				return;
+			}
+			if (`local:${SHORTCUTS_KEY}` in changes) {
 				shortcutsFeatureEnabled = Boolean(
 					changes[`local:${SHORTCUTS_KEY}`].newValue ?? SHORTCUTS_DEFAULT,
 				);
-			if (`local:${SEARCH_KEY}` in changes)
+			}
+			if (`local:${SEARCH_KEY}` in changes) {
 				searchEnabled = Boolean(changes[`local:${SEARCH_KEY}`].newValue ?? SEARCH_DEFAULT);
-			if (`local:${ICONS_KEY}` in changes)
+			}
+			if (`local:${ICONS_KEY}` in changes) {
 				iconsEnabled = Boolean(changes[`local:${ICONS_KEY}`].newValue ?? ICONS_DEFAULT);
+			}
 			if (`local:${LAYOUT_KEY}` in changes) {
 				layoutMode = toLayout(changes[`local:${LAYOUT_KEY}`].newValue);
-				if (!widthStored) sidebarWidth = defaultWidth(layoutMode);
+				if (!widthStored) {
+					sidebarWidth = defaultWidth(layoutMode);
+				}
 			}
 		};
 		browser.storage.onChanged.addListener(onStorageChange);
@@ -243,7 +259,9 @@
 			if (justFinished.length) {
 				const finished = accounts.filter((a) => justFinished.includes(a.id));
 				refreshSyncStatuses(finished).then((changed) => {
-					for (const id of changed) invalidateAccountDetail(id);
+					for (const id of changed) {
+						invalidateAccountDetail(id);
+					}
 				});
 				refreshUncategorizedCounts(finished);
 			}
@@ -263,7 +281,9 @@
 	$effect(() => {
 		return watchDom(() => {
 			const text = readNativeUncategorizedButtonText();
-			if (text === lastUncatButtonText) return;
+			if (text === lastUncatButtonText) {
+				return;
+			}
 			lastUncatButtonText = text;
 			refreshUncategorizedCounts(accounts);
 		});
@@ -289,7 +309,9 @@
 			return lastBalanceTexts.get(a.id) !== text;
 		});
 		const withRows = new Set(nowTexts.keys());
-		if (!changedAccounts.length) return;
+		if (!changedAccounts.length) {
+			return;
+		}
 		for (const a of changedAccounts) {
 			const text = nowTexts.get(a.id);
 			if (text !== undefined) {
@@ -297,9 +319,13 @@
 			}
 		}
 		refreshBalances(changedAccounts, withRows).then(({ changed, failed }) => {
-			for (const id of changed) invalidateAccountDetail(id);
+			for (const id of changed) {
+				invalidateAccountDetail(id);
+			}
 			// Forgotten, so the next DOM change tries again.
-			for (const id of failed) lastBalanceTexts.delete(id);
+			for (const id of failed) {
+				lastBalanceTexts.delete(id);
+			}
 			if (failed.some((id) => !nowTexts.has(id))) {
 				lastTotalsText = "";
 			}
@@ -355,7 +381,9 @@
 	async function handleRenameAccount(accountId: string, name: string) {
 		await renameAccount(accountId, name);
 		const account = accounts.find((a) => a.id === accountId);
-		if (account) account.name = name;
+		if (account) {
+			account.name = name;
+		}
 	}
 
 	async function reloadAccounts() {
@@ -379,7 +407,9 @@
 				modalSeen = true;
 				return;
 			}
-			if (!modalSeen) return;
+			if (!modalSeen) {
+				return;
+			}
 			stop();
 			reloadAccounts();
 		});
@@ -418,7 +448,9 @@
 			await refreshUncategorizedCounts(accounts);
 		} catch (err) {
 			console.error("[ABT live sidebar] failed to load live data", err);
-			if (loading) failed = true;
+			if (loading) {
+				failed = true;
+			}
 		} finally {
 			loading = false;
 		}
@@ -428,7 +460,9 @@
 	let settingsMenu = $state<{ x: number; y: number } | null>(null);
 
 	function openSettingsMenu(e: MouseEvent) {
-		if ((e.target as Element).closest("input, textarea")) return;
+		if ((e.target as Element).closest("input, textarea")) {
+			return;
+		}
 		e.preventDefault();
 		settingsMenu = {
 			x: Math.min(e.clientX, window.innerWidth - 208),

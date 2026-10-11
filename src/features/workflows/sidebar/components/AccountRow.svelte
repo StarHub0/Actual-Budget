@@ -76,13 +76,7 @@
 		}
 	}
 
-	// Overrides the `icon` prop once the user changes it here, so this row
-	// reflects the change immediately without waiting for a full reload of
-	// the icon cache from the parent.
-	let iconOverride = $state<AccountIconData | null | undefined>(undefined);
-	const effectiveIcon = $derived(
-		!iconPicker ? undefined : iconOverride !== undefined ? iconOverride : icon,
-	);
+	const effectiveIcon = $derived(iconPicker ? icon : undefined);
 
 	// Reads `tick` so this recomputes on route change (see the watchDom effect
 	// above) without needing a `{#key}` block, which would tear down and
@@ -94,19 +88,25 @@
 	});
 
 	function open() {
-		if (isCalendarOpen()) closeCalendar();
+		if (isCalendarOpen()) {
+			closeCalendar();
+		}
 		navigate(`/accounts/${account.id}`);
 	}
 
 	function openIconPicker(anchorRect: DOMRect) {
-		if (document.querySelector('[data-abt-modal="experimental-icon-picker"]')) return;
+		if (document.querySelector('[data-abt-modal="experimental-icon-picker"]')) {
+			return;
+		}
 
 		const container = document.createElement("div");
 		container.dataset.abtModal = "experimental-icon-picker";
 
 		let done = false;
 		const cleanup = () => {
-			if (done) return;
+			if (done) {
+				return;
+			}
 			done = true;
 			unmount(instance);
 			container.remove();
@@ -121,12 +121,10 @@
 				anchorRect,
 				onSave: async (iconData: AccountIconData) => {
 					await setAccountIcon(account.id, iconData);
-					iconOverride = iconData;
 					cleanup();
 				},
 				onRemove: async () => {
 					await removeAccountIcon(account.id);
-					iconOverride = null;
 					cleanup();
 				},
 				onClose: cleanup,
