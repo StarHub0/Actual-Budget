@@ -1,11 +1,16 @@
 import { defineSetting } from "@features/types";
 
-// --abt-ink-5 is redeclared in the live sidebar and popovers, so each scroller tints for its surface.
-// No !important: scrollers that hide their bar (scrollbar-width: none) keep it hidden.
+// The colour inherits, so it's set only where ui.css redeclares --abt-ink-5, not resolved on every
+// element. No !important: scrollers that hide their bar keep it hidden.
 const CSS = `
+	:root,
+	.sidebar,
+	.abt-popover {
+		scrollbar-color: var(--abt-ink-5) transparent;
+	}
+
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: var(--abt-ink-5) transparent;
 	}
 `;
 
