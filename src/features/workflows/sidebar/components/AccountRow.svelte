@@ -9,21 +9,15 @@
 	import { closeCalendar, isCalendarOpen } from "@features/workflows/spending-calendar";
 	import { navigate } from "@lib/utilities/actual-api";
 	import { fmtMoney } from "@lib/utilities/currency";
-	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { Smile } from "@lucide/svelte";
 	import { mount, unmount } from "svelte";
 	import { autofocus } from "../actions/autofocus";
 	import { tooltip } from "../actions/tooltip.svelte";
 	import type { SidebarAccount } from "../lib/data";
 	import StatusIcon from "./StatusIcon.svelte";
+	import { route, trackRoute } from "../lib/route.svelte";
 
-	// See PrimaryNav.svelte for why this watches DOM mutations rather than
-	// `watchRoute`/history — cross-world navigation isn't observable there.
-	let tick = $state({});
-
-	$effect(() => {
-		return watchDom(() => (tick = {}));
-	});
+	$effect(() => trackRoute());
 
 	const {
 		account,
@@ -78,12 +72,9 @@
 
 	const effectiveIcon = $derived(iconPicker ? icon : undefined);
 
-	// Reads `tick` so this recomputes on route change (see the watchDom effect
-	// above) without needing a `{#key}` block, which would tear down and
-	// recreate this row's DOM on every tick — itself a mutation the shared
-	// watchDom observer would see, re-triggering forever.
+	// Reads the route so this recomputes on navigation.
 	const isSelected = $derived.by(() => {
-		void tick;
+		void route();
 		return location.pathname === `/accounts/${account.id}`;
 	});
 

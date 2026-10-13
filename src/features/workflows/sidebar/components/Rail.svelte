@@ -7,7 +7,6 @@
 	} from "@features/workflows/spending-calendar";
 	import IconPickerPopover from "@lib/components/IconPickerPopover.svelte";
 	import { dispatch, navigate } from "@lib/utilities/actual-api";
-	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { Page, matchesPage, pagePath } from "@lib/utilities/pages";
 	import { getValue } from "@lib/utilities/store";
 	import { CalendarDays, PanelLeftClose, PanelLeftOpen, Plus, Search } from "@lucide/svelte";
@@ -18,24 +17,17 @@
 	import { loadBudgetIcon, removeBudgetIcon, setBudgetIcon } from "../lib/budgets";
 	import type { SidebarAccount } from "../lib/data";
 	import { navItems, settingsItem, settingsMenu, settingsPages } from "../lib/nav";
+	import { route, trackRoute } from "../lib/route.svelte";
 
-	// See PrimaryNav.svelte for why this watches DOM mutations rather than
-	// `watchRoute`/history — cross-world navigation isn't observable there,
-	// and why `isActive` (not a sibling `{@const}`) is what makes the
-	// `class:active` binding itself depend on `tick`.
-	let tick = $state({});
-
-	$effect(() => {
-		return watchDom(() => (tick = {}));
-	});
+	$effect(() => trackRoute());
 
 	function isActive(page: Page): boolean {
-		return Boolean(tick) && matchesPage(page);
+		return Boolean(route()) && matchesPage(page);
 	}
 
 	// Same route check AccountRow.svelte uses for its own .selected state.
 	function isAccountSelected(id: string): boolean {
-		return Boolean(tick) && location.pathname === `/accounts/${id}`;
+		return Boolean(route()) && location.pathname === `/accounts/${id}`;
 	}
 
 	// See PrimaryNav.svelte for the full explanation of both of these.
@@ -142,7 +134,9 @@
 
 	let moreX = $state(0);
 	let moreY = $state(0);
-	const moreActive = $derived(Boolean(tick) && settingsMenu.some((item) => matchesPage(item.page)));
+	const moreActive = $derived(
+		Boolean(route()) && settingsMenu.some((item) => matchesPage(item.page)),
+	);
 
 	function toggleMore(e: MouseEvent) {
 		e.stopPropagation();

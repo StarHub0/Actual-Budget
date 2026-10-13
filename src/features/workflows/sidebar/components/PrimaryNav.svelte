@@ -5,11 +5,11 @@
 		openCalendar,
 	} from "@features/workflows/spending-calendar";
 	import { navigate } from "@lib/utilities/actual-api";
-	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { Page, matchesPage, pagePath } from "@lib/utilities/pages";
 	import { getValue, setValue } from "@lib/utilities/store";
 	import { CalendarDays, ChevronDown } from "@lucide/svelte";
 	import { navItems, settingsItem, settingsMenu } from "../lib/nav";
+	import { route, trackRoute } from "../lib/route.svelte";
 
 	// Only shown if the user has the Spending Calendar feature enabled — reads
 	// its checkbox setting directly (getValue/setValue is a flat 1:1 mapping
@@ -58,31 +58,11 @@
 		setValue(MORE_KEY, moreExpanded);
 	}
 
-	// Content scripts run in an isolated JS world — patching `history.pushState`
-	// there (what `watchRoute` relies on) never sees Actual's own React-Router
-	// navigation, which calls pushState in the main world. DOM mutations,
-	// though, are genuinely shared across both worlds, so watching for those
-	// is what actually catches route changes here (same pattern already used
-	// elsewhere in this extension, e.g. account-icon-picker).
-	//
-	// A fresh object each time, not a counter: a naive `tick += 1` would read
-	// `tick` during this same effect's synchronous execution (since the
-	// listener fires immediately on subscribe) — making the effect depend on
-	// the very value it writes, and re-triggering itself forever. Reassigning
-	// to a new object is a pure write, so the effect never tracks `tick`.
-	let tick = $state({});
+	$effect(() => trackRoute());
 
-	$effect(() => {
-		return watchDom(() => (tick = {}));
-	});
-
-	// Svelte 5 tracks dependencies per-expression, not per enclosing block —
-	// a sibling `{@const _ = tick}` doesn't make THIS expression re-run just
-	// because it's nearby. `tick` has to be read inside the same expression
-	// that's actually reactive here; `tick` is always truthy (a plain `{}`),
-	// so this reduces to `matchesPage(page)` while still tracking `tick`.
+	// `route()` is read in this expression so each binding calling it tracks navigation.
 	function isActive(page: Page): boolean {
-		return Boolean(tick) && matchesPage(page);
+		return Boolean(route()) && matchesPage(page);
 	}
 
 	const inSettings = $derived(settingsMenu.some((item) => isActive(item.page)));

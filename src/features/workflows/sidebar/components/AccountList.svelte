@@ -3,7 +3,6 @@
 	import { closeCalendar, isCalendarOpen } from "@features/workflows/spending-calendar";
 	import { dispatch, navigate } from "@lib/utilities/actual-api";
 	import RollingNumber from "@lib/components/RollingNumber.svelte";
-	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { getValue, setValue, watchValue } from "@lib/utilities/store";
 	import { sidebarGroupTotals } from "@features/appearance/sidebar-group-totals";
 	import { ChevronDown, List, ListTree, Plus } from "@lucide/svelte";
@@ -29,6 +28,7 @@
 	import AccountHoverCard from "./AccountHoverCard.svelte";
 	import AccountRow from "./AccountRow.svelte";
 	import GroupHeader from "./GroupHeader.svelte";
+	import { route, trackRoute } from "../lib/route.svelte";
 
 	const {
 		accounts,
@@ -113,14 +113,7 @@
 		Closed: null,
 	};
 
-	// See PrimaryNav.svelte for why this is DOM-mutation-driven rather than
-	// `watchRoute`/history, and why `tick` has to be read directly inside
-	// `isSectionActive` (the expression that's actually reactive here).
-	let tick = $state({});
-
-	$effect(() => {
-		return watchDom(() => (tick = {}));
-	});
+	$effect(() => trackRoute());
 
 	// See PrimaryNav.svelte for why any navigation elsewhere in this sidebar
 	// has to close the spending-calendar overlay itself, if open.
@@ -132,11 +125,11 @@
 	}
 
 	function isAllAccountsActive(): boolean {
-		return Boolean(tick) && location.pathname === "/accounts";
+		return Boolean(route()) && location.pathname === "/accounts";
 	}
 
 	function isSectionActive(kind: "onbudget" | "offbudget" | null): boolean {
-		return Boolean(tick) && !!kind && location.pathname === `/accounts/${kind}`;
+		return Boolean(route()) && !!kind && location.pathname === `/accounts/${kind}`;
 	}
 
 	const sections = $derived(
