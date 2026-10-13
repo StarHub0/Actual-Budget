@@ -2,6 +2,7 @@ import { isTrackingBudget, onBudgetType } from "@lib/utilities/budget-type";
 import { applyGlobalCSS } from "@lib/utilities/dom";
 import { createLogger } from "@lib/utilities/logger";
 import { getValue, setValue } from "@lib/utilities/store";
+import { labelWatchers } from "@lib/utilities/watch-timing";
 import { DESKTOP_QUERY, desktopOnly, mobileOnly } from "@lib/utilities/pages";
 import type { Platform, Setting, SettingContext } from "./types";
 
@@ -61,7 +62,8 @@ async function start(entry: Active): Promise<void> {
 	if (entry.setting.type === "core" || entry.setting.type === "custom") {
 		return;
 	}
-	const cleanup = await entry.setting.init?.(entry.ctx);
+	const { setting, ctx } = entry;
+	const cleanup = await labelWatchers(ctx.key, () => setting.init?.(ctx));
 	entry.stop = typeof cleanup === "function" ? cleanup : () => {};
 }
 
@@ -175,7 +177,7 @@ export async function reapplySetting(setting: Setting, value: unknown) {
 async function bootstrapOne(setting: Setting): Promise<void> {
 	if (setting.type === "core") {
 		try {
-			await setting.init();
+			await labelWatchers("core", () => setting.init());
 		} catch (err) {
 			log.error("core setting failed to init", err);
 		}
@@ -184,7 +186,7 @@ async function bootstrapOne(setting: Setting): Promise<void> {
 
 	if (setting.type === "custom") {
 		try {
-			await setting.init(setting.context);
+			await labelWatchers(setting.context.key, () => setting.init(setting.context));
 		} catch (err) {
 			log.error(`custom setting "${setting.context.key}" failed to init`, err);
 		}

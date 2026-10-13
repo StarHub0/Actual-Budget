@@ -1,4 +1,5 @@
 import { createDebouncedObserver } from "./dom";
+import { nameWatcher, runWatcher } from "./watch-timing";
 
 type Listener = () => void;
 
@@ -11,12 +12,13 @@ const bodyEntry: Entry = { observer: null, listeners: new Set() };
 
 function dispatch(entry: Entry) {
 	for (const listener of entry.listeners) {
-		listener();
+		runWatcher(listener);
 	}
 }
 
 function subscribe(entry: Entry, target: Node, listener: Listener, options?: MutationObserverInit) {
-	listener();
+	nameWatcher(listener);
+	runWatcher(listener);
 	entry.listeners.add(listener);
 	if (!entry.observer) {
 		entry.observer = createDebouncedObserver(() => dispatch(entry), options);
@@ -26,6 +28,21 @@ function subscribe(entry: Entry, target: Node, listener: Listener, options?: Mut
 
 const elementWatchers = new Map<string, { current: Element | null; listeners: Set<Listener> }>();
 let elementObserver: MutationObserver | null = null;
+
+// Runs on every mutation batch, before paint, so its own cost is timed too.
+function scanElements() {
+	for (const [sel, watcher] of elementWatchers) {
+		const el = document.querySelector(sel);
+		if (el === watcher.current) {
+			continue;
+		}
+		watcher.current = el;
+		for (const l of watcher.listeners) {
+			runWatcher(l);
+		}
+	}
+}
+nameWatcher(scanElements, "watchElement");
 
 /**
  * Calls `listener` whenever the first element matching `selector` appears, goes, or is replaced.
@@ -37,19 +54,9 @@ export function watchElement(selector: string, listener: Listener): () => void {
 		entry = { current: document.querySelector(selector), listeners: new Set() };
 		elementWatchers.set(selector, entry);
 	}
+	nameWatcher(listener);
 	entry.listeners.add(listener);
-	elementObserver ??= new MutationObserver(() => {
-		for (const [sel, watcher] of elementWatchers) {
-			const el = document.querySelector(sel);
-			if (el === watcher.current) {
-				continue;
-			}
-			watcher.current = el;
-			for (const l of watcher.listeners) {
-				l();
-			}
-		}
-	});
+	elementObserver ??= new MutationObserver(() => runWatcher(scanElements));
 	elementObserver.observe(document.body, { childList: true, subtree: true });
 	return () => {
 		entry!.listeners.delete(listener);
