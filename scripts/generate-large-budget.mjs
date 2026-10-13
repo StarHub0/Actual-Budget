@@ -3,7 +3,8 @@
  * Writes a large, made-up budget as a nYNAB export, for testing ABT on a budget the size of a
  * long-time user's. Import it in Actual with Import file → nYNAB, on a test server.
  *
- *   node scripts/generate-large-budget.mjs [--years=10] [--per-month=110] [--seed=1] [--out=path]
+ *   node scripts/generate-large-budget.mjs [--preset=huge] [--years=10] [--per-month=110]
+ *     [--accounts=35] [--categories=120] [--payees=300] [--seed=1] [--out=path]
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -14,9 +15,21 @@ const args = Object.fromEntries(
 		return [k, v ?? "true"];
 	}),
 );
-const YEARS = Number(args.years ?? 10);
-const PER_MONTH = Number(args["per-month"] ?? 110);
-const OUT = resolve(args.out ?? ".temp/large-budget.json");
+const PRESETS = {
+	large: { years: 10, "per-month": 110, accounts: 35, categories: 120, payees: 300 },
+	huge: { years: 20, "per-month": 300, accounts: 80, categories: 400, payees: 2000 },
+};
+const preset = PRESETS[args.preset ?? "large"];
+if (!preset) {
+	throw new Error(`Unknown preset "${args.preset}": use ${Object.keys(PRESETS).join(" or ")}.`);
+}
+const opt = (name) => Number(args[name] ?? preset[name]);
+const YEARS = opt("years");
+const PER_MONTH = opt("per-month");
+const ACCOUNTS = opt("accounts");
+const CATEGORIES = opt("categories");
+const PAYEES_COUNT = opt("payees");
+const OUT = resolve(args.out ?? `.temp/${args.preset ?? "large"}-budget.json`);
 
 // Seeded, so the same flags give the same budget.
 let seed = Number(args.seed ?? 1) >>> 0;
@@ -52,7 +65,7 @@ const dayIn = (month, day) => {
 	return d > today ? null : iso(d);
 };
 
-// ---- Accounts: 25 on budget (4 closed), 10 off budget.
+// ---- Accounts: 25 on budget (4 closed), 10 off budget, then extra cards and holdings to --accounts.
 const accounts = [];
 const account = (name, onBudget, kind, closed = false) => {
 	const a = { id: uuid(), name, on_budget: onBudget, closed, deleted: false, kind };
@@ -88,6 +101,13 @@ const offBudget = [
 	"Car",
 	"Crypto",
 ].map((n) => account(n, false, "tracking"));
+for (let i = 1; accounts.length < ACCOUNTS; i++) {
+	if (i % 3) {
+		cards.push(account(`Store Card ${i}`, true, "card"));
+	} else {
+		offBudget.push(account(`Holding ${i}`, false, "tracking"));
+	}
+}
 const spendFrom = [
 	...checking.slice(0, 3),
 	...cards,
@@ -95,7 +115,7 @@ const spendFrom = [
 	accounts.find((a) => a.kind === "cash"),
 ];
 
-// ---- Categories: 20 groups, 120 categories, with Actual's internal and income groups.
+// ---- Categories: 20 groups, then legacy groups up to --categories, with Actual's internal and income groups.
 const internal = { id: uuid(), name: "Internal Master Category", hidden: false, deleted: false };
 const groups = [internal];
 const categories = [];
@@ -175,10 +195,18 @@ for (const [groupName, names] of Object.entries(GROUPS)) {
 		});
 	}
 }
-// Pad to 120 with extra spending categories, as long-lived budgets accumulate them.
-const extra = { id: uuid(), name: "Legacy", hidden: false, deleted: false };
-groups.push(extra);
-for (let i = 1; catCount < 120; i++, catCount++) {
+// Pad with extra spending categories, as long-lived budgets accumulate them.
+let extra = null;
+for (let i = 1; catCount < CATEGORIES; i++, catCount++) {
+	if (i % 15 === 1) {
+		extra = {
+			id: uuid(),
+			name: i === 1 ? "Legacy" : `Legacy ${Math.ceil(i / 15)}`,
+			hidden: false,
+			deleted: false,
+		};
+		groups.push(extra);
+	}
 	categories.push({
 		id: uuid(),
 		category_group_id: extra.id,
@@ -233,7 +261,7 @@ const payee = (name) => {
 const employer = payee("Acme Corp Payroll");
 const startingBalance = payee("Starting Balance");
 const merchants = [];
-for (let i = 0; i < 300; i++) {
+for (let i = 0; i < PAYEES_COUNT; i++) {
 	merchants.push(payee(i < PAYEES.length ? PAYEES[i] : `${pick(PAYEES)} #${int(100, 9999)}`));
 }
 
@@ -396,7 +424,7 @@ const ynabMonths = months.map((month) => ({
 }));
 
 const budget = {
-	budget_name: `ABT large test (${YEARS}y)`,
+	budget_name: `ABT ${args.preset ?? "large"} test (${YEARS}y)`,
 	accounts: accounts.map(({ kind: _kind, ...a }) => a),
 	category_groups: groups,
 	categories: categories.map(({ monthly: _monthly, ...c }) => c),
