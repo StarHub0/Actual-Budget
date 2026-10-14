@@ -3,6 +3,8 @@
 	import { templatePlanState } from "@features/workflows/template-plan/state.svelte";
 	import MonthPicker from "@lib/components/MonthPicker.svelte";
 	import Icon from "@lib/components/Icon.svelte";
+	import { cubicOut } from "svelte/easing";
+	import { slide } from "svelte/transition";
 	import {
 		addMonths,
 		currentMonth,
@@ -18,6 +20,18 @@
 	import { budgetNav } from "./state.svelte";
 
 	let pickerOpen = $state(false);
+
+	// Counts come and go as the window narrows or the side panel opens; sliding them keeps the
+	// header from jumping. Not on the first render, which Svelte doesn't animate.
+	const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+	function reveal(node: Element) {
+		const base = slide(node, {
+			axis: "x",
+			duration: reducedMotion.matches ? 0 : 200,
+			easing: cubicOut,
+		});
+		return { ...base, css: (t: number, u: number) => `${base.css?.(t, u) ?? ""} opacity: ${t};` };
+	}
 
 	const start = $derived(budgetNav.months[0] ?? null);
 	// The month last asked for, so clicks made while a big budget is still rendering add up.
@@ -121,10 +135,11 @@
 		<!-- Other features (the category filter) mount their controls here. -->
 		<div class="bmh__slot" data-abt-month-header-slot></div>
 		{#if counts.length > 1}
-			<div class="abt-seg" role="group" aria-label="Months shown">
+			<div class="abt-seg" role="group" aria-label="Months shown" transition:reveal>
 				<span class="abt-seg__label">Months</span>
 				{#each counts as n (n)}
 					<button
+						transition:reveal
 						type="button"
 						aria-pressed={n === span}
 						title={n === 1 ? "Show 1 month" : `Show ${n} months`}
