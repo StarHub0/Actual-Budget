@@ -1,6 +1,47 @@
 # Changelog
 
 
+## v0.1.96
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.95...v0.1.96)
+
+### 🚀 Enhancements
+
+- Show collapsed account groups as folders in the sidebar rail ([2cb1937](https://github.com/aelxxs/actual-budget-tweaks/commit/2cb1937))
+- Slide month count options in and out as they change ([12a5a35](https://github.com/aelxxs/actual-budget-tweaks/commit/12a5a35))
+- List only the settings that run in the current view, and keep Privacy Style to desktop ([c9fc2dd](https://github.com/aelxxs/actual-budget-tweaks/commit/c9fc2dd))
+- Snap the side panel open ([6d8ca42](https://github.com/aelxxs/actual-budget-tweaks/commit/6d8ca42))
+- Keep each person's ABT look and feel to themselves on a shared budget ([a4f1003](https://github.com/aelxxs/actual-budget-tweaks/commit/a4f1003))
+
+### 🩹 Fixes
+
+- Set the scrollbar colour where its tint changes, not on every element ([8b63637](https://github.com/aelxxs/actual-budget-tweaks/commit/8b63637))
+- Re-read only the budget categories that changed, and don't let reads pile up while a large budget loads ([e2caa8e](https://github.com/aelxxs/actual-budget-tweaks/commit/e2caa8e))
+- Cut per-frame work on the budget and transaction pages ([57f9a7d](https://github.com/aelxxs/actual-budget-tweaks/commit/57f9a7d))
+- Keep the calendar day's balance right-aligned while privacy mode hides it ([54ef262](https://github.com/aelxxs/actual-budget-tweaks/commit/54ef262))
+- Keep each page's markers until Actual swaps the page, not when the path changes ([04ff23c](https://github.com/aelxxs/actual-budget-tweaks/commit/04ff23c))
+- Reopen Insights only once the budget page has rendered ([1ea7b17](https://github.com/aelxxs/actual-budget-tweaks/commit/1ea7b17))
+- Slide the sidebar over the budget and reports pages, so they re-lay out once ([0336ea4](https://github.com/aelxxs/actual-budget-tweaks/commit/0336ea4))
+- Size the budget table to the page in CSS, so it doesn't centre for a frame on resize ([934767e](https://github.com/aelxxs/actual-budget-tweaks/commit/934767e))
+- Separate the month count animation's fade from the slide's last declaration ([78a9977](https://github.com/aelxxs/actual-budget-tweaks/commit/78a9977))
+- Hide the sidebar tooltip outside Svelte's render when a focused button is removed ([942f7e0](https://github.com/aelxxs/actual-budget-tweaks/commit/942f7e0))
+- Refresh the sidecar's app shell in browsers that cached Actual without it ([804dda6](https://github.com/aelxxs/actual-budget-tweaks/commit/804dda6))
+
+### 💅 Refactors
+
+- Share one route signal across the sidebar instead of a DOM watcher per row ([d4bfd04](https://github.com/aelxxs/actual-budget-tweaks/commit/d4bfd04))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.95 ([71d6dc0](https://github.com/aelxxs/actual-budget-tweaks/commit/71d6dc0))
+- Add dev-only timings for DOM watchers and stylesheets ([386bd18](https://github.com/aelxxs/actual-budget-tweaks/commit/386bd18))
+- Add a huge preset to the test budget generator ([4948655](https://github.com/aelxxs/actual-budget-tweaks/commit/4948655))
+- Count bridge requests in the dev timings ([c3fdfe8](https://github.com/aelxxs/actual-budget-tweaks/commit/c3fdfe8))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.95
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.94...v0.1.95)
