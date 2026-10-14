@@ -1,6 +1,6 @@
+import { refreshBudgetType } from "@lib/utilities/budget-type";
 import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
-import { refreshBudgetType } from "@lib/utilities/budget-type";
 import { getCurrentPath, watchRoute } from "@lib/utilities/route-watcher";
 
 // Settings' sub-pages first, so /settings/payees reads as Payees.
@@ -69,12 +69,13 @@ export const nativeHooks = {
 				"[data-abt-content-grid] > div:nth-child(4)",
 			);
 			const path = getCurrentPath();
-			const page = COLUMN_PAGES.find((p) => path.includes(`/${p}`)) ?? "";
+			const shownPath = column ? pathOf(column, path) : path;
+			const page = COLUMN_PAGES.find((p) => shownPath.includes(`/${p}`)) ?? "";
 			if (column && column.dataset.abtPage !== page) {
 				column.dataset.abtPage = page;
 			}
 			const reports = document.querySelector(REPORTS);
-			const dashboard = DASHBOARD_PATH.test(path);
+			const dashboard = !!reports && DASHBOARD_PATH.test(pathOf(reports, path));
 			if (reports && reports.hasAttribute("data-abt-reports-dashboard") !== dashboard) {
 				reports.toggleAttribute("data-abt-reports-dashboard", dashboard);
 			}
@@ -86,6 +87,21 @@ export const nativeHooks = {
 		});
 	},
 };
+
+// The path each page's root was rendered for. Navigating changes the path a frame before Actual
+// swaps in the next page's root, which would otherwise take the next page's styles meanwhile.
+const rootPaths = new WeakMap<Element, string>();
+const topSegment = (path: string) => path.split("/")[1] ?? "";
+
+function pathOf(root: Element, path: string): string {
+	const known = rootPaths.get(root);
+	// Sub-pages of one route (Settings' own pages) may share a root, so those follow the path.
+	if (known === undefined || topSegment(known) === topSegment(path)) {
+		rootPaths.set(root, path);
+		return path;
+	}
+	return known;
+}
 
 function mark(el: Element | null, attr: string): void {
 	if (el && !el.hasAttribute(attr)) {
