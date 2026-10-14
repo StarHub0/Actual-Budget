@@ -352,7 +352,7 @@
 		font-size: var(--abt-text-sm);
 		font-variant-numeric: tabular-nums;
 		color: var(--abt-muted);
-		text-align: right;
+		align-self: flex-end;
 	}
 
 	.cal-cell__bars + .cal-cell__balance {
