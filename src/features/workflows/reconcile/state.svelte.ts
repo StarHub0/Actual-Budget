@@ -53,7 +53,7 @@ async function refreshAccountView(): Promise<void> {
 		reconcile.refreshing = false;
 		// The page change can take the panel with it; put back only what it took.
 		if (panelWasShowing && reconcile.target != null && reconcile.accountId && !isPanelShowing()) {
-			openPanel(reconcile.accountId, false);
+			openPanel(reconcile.accountId);
 		}
 	}
 }

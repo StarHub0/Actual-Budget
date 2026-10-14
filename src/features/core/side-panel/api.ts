@@ -13,8 +13,6 @@ export type OpenOptions = {
 	bodyNode?: unknown;
 	headerNode?: Node | null;
 	persist?: boolean;
-	/** False to show it without the slide-in, for a panel coming back rather than opening. */
-	animate?: boolean;
 	/** Opens over the current panel, which comes back when this one closes. */
 	stack?: boolean;
 	/** Names the panel, so opening the same one again replaces it instead of stacking. */

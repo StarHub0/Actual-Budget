@@ -84,10 +84,6 @@ function setPersistedRoute(route: string | null): void {
 }
 
 const CSS = `
-	@keyframes abt-side-drawer-enter {
-		from { opacity: 0; transform: translateX(14px); }
-		to { opacity: 1; transform: translateX(0); }
-	}
 	@keyframes abt-side-drawer-exit {
 		from { opacity: 1; transform: translateX(0); }
 		to { opacity: 0; transform: translateX(14px); }
@@ -137,7 +133,6 @@ const CSS = `
 		overflow: visible;
 		/* Derived, not --border: themes may omit tableBorder or set it to the page background. */
 		border-left: 1px solid var(--abt-panel-border);
-		animation: abt-side-drawer-enter 110ms cubic-bezier(0.2, 0.8, 0.2, 1);
 	}
 	.abt-side-drawer-sidebar.${SIDEBAR_CLOSING_CLASS} {
 		pointer-events: none;
@@ -187,7 +182,6 @@ export const sidePanel = {
 			currentKey = prev.key;
 			return true;
 		};
-		let animateNext = true;
 		let requestedWidth = DEFAULT_SIDEBAR_WIDTH;
 		let sidebarWidth = clamp(Math.round(storedWidth), MIN_SIDEBAR_WIDTH, MAX_SIDEBAR_WIDTH);
 
@@ -226,10 +220,6 @@ export const sidePanel = {
 
 			const sidebar = createElement("div", { className: "abt-side-drawer-sidebar" });
 			sidebar.setAttribute(SIDEBAR_ATTR, "true");
-			if (!animateNext) {
-				sidebar.style.animation = "none";
-			}
-			animateNext = true;
 			destroyContent();
 			const container = createElement("div", {
 				style: {
@@ -294,7 +284,6 @@ export const sidePanel = {
 			isOpen = true;
 
 			showingPersisted = !!detail.persist;
-			animateNext = detail.animate !== false;
 			if (detail.persist) {
 				setPersistedRoute(location.pathname);
 			}

@@ -153,7 +153,7 @@ export function openInsights(tab?: InsightsTab): void {
 let drawerOpen = false;
 let drawerMounted = false;
 
-function openPanel(animate = true): void {
+function openPanel(): void {
 	if (!session || !isBudgetPage()) {
 		return;
 	}
@@ -161,7 +161,7 @@ function openPanel(animate = true): void {
 	drawerMounted = false;
 	removeTriggerButton();
 	const bodyNode = ensurePanelMounted();
-	sidepanel.open({ bodyNode, persist: true, width: SIDE_PANEL_WIDTH, animate });
+	sidepanel.open({ bodyNode, persist: true, width: SIDE_PANEL_WIDTH });
 	if (
 		templatePlanState.activeTab === "overview" &&
 		!templatePlanState.overviewLoading &&
@@ -186,7 +186,7 @@ function reopenIfPersisted(): void {
 		}
 		if (persisted) {
 			if (!drawerOpen) {
-				openPanel(false);
+				openPanel();
 			}
 		} else if (!drawerOpen) {
 			ensureTriggerButton();
@@ -608,7 +608,7 @@ function tick(): void {
 			reopenIfPersisted();
 		} else if (!drawerOpen) {
 			if (persisted) {
-				openPanel(false);
+				openPanel();
 			} else {
 				ensureTriggerButton();
 			}

@@ -13,7 +13,7 @@ let current:
 	  })
 	| null = null;
 
-export function openPanel(accountId: string, animate = true): void {
+export function openPanel(accountId: string): void {
 	if (current?.accountId !== accountId) {
 		destroyPanel();
 	}
@@ -26,7 +26,7 @@ export function openPanel(accountId: string, animate = true): void {
 		reconcile.accountId === accountId && reconcile.accountName
 			? reconcile.accountName
 			: "Reconcile";
-	sidepanel.open({ title, bodyNode: current.node, width: PANEL_WIDTH, animate });
+	sidepanel.open({ title, bodyNode: current.node, width: PANEL_WIDTH });
 }
 
 export function isPanelShowing(): boolean {
