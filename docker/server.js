@@ -1,5 +1,6 @@
 // Sidecar: reverse-proxies to Actual, injecting the ABT bundle into the
 // served HTML. No dependencies beyond Node's stdlib.
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import path from "node:path";
@@ -72,6 +73,10 @@ const CSP = [
 	"form-action 'self'",
 	"frame-ancestors 'self'",
 ].join("; ");
+
+// Changes only when the injected shell does, so ABT releases don't trigger Actual's update prompt.
+const SHELL_HASH = createHash("sha1").update(INJECTION).update(CSP).digest("hex").slice(0, 8);
+const SW_SHELL_RE = /(\{url:["']\/?index\.html["'],revision:["'])([^"']+)(["']\})/;
 
 function serveStatic(req, res, urlPath) {
 	const rel = urlPath.slice("/abt/".length);
@@ -180,6 +185,26 @@ function proxyToActual(req, res) {
 	};
 	const upstreamReq = http.request(upstreamReqOpts, (upstreamRes) => {
 		const contentType = upstreamRes.headers["content-type"] || "";
+		// Actual's service worker precaches index.html; a new revision makes it refetch the
+		// shell through here, so a cache from before the sidecar (or an older injection) clears.
+		if (req.url.split("?")[0] === "/sw.js" && contentType.includes("javascript")) {
+			const chunks = [];
+			upstreamRes.on("data", (c) => chunks.push(c));
+			upstreamRes.on("end", () => {
+				const source = Buffer.concat(chunks).toString("utf8");
+				const body = source.replace(
+					SW_SHELL_RE,
+					(_, before, revision, after) => `${before}${revision}-abt-${SHELL_HASH}${after}`,
+				);
+				const headers = { ...upstreamRes.headers };
+				delete headers["content-length"];
+				delete headers["etag"];
+				delete headers["last-modified"];
+				res.writeHead(upstreamRes.statusCode, headers);
+				res.end(body);
+			});
+			return;
+		}
 		if (!contentType.includes("text/html")) {
 			const headers = { ...upstreamRes.headers };
 			res.writeHead(upstreamRes.statusCode, headers);
