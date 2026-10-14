@@ -16,9 +16,10 @@
 	import { loadCurrency } from "@lib/utilities/currency";
 	import { watchDom } from "@lib/utilities/dom-watcher";
 	import { createLogger } from "@lib/utilities/logger";
+	import { Page, matchesPage } from "@lib/utilities/pages";
 	import { getValue, setValue, watchValue } from "@lib/utilities/store";
 	import { FolderTree, LayoutGrid, Search, SlidersHorizontal } from "@lucide/svelte";
-	import { onMount } from "svelte";
+	import { onMount, untrack } from "svelte";
 	import ShortcutsBar from "../../appearance/sidebar-shortcuts/ShortcutsBar.svelte";
 	import { portal } from "./actions/portal";
 	import { tipState } from "./actions/tooltip.svelte";
@@ -46,6 +47,7 @@
 		renameAccount,
 	} from "./lib/data";
 	import { LAYOUT_KEY, toLayout, type SidebarLayout } from "./lib/layout";
+	import { route, trackRoute } from "./lib/route.svelte";
 	import { isMac } from "./lib/search";
 	import "./styles/layout.css";
 	import "./styles/shared.css";
@@ -86,6 +88,14 @@
 	// Gates .sidebar.transitions-ready (styles/layout.css) so hydrating a persisted
 	// collapsed/width value on mount doesn't itself animate.
 	let transitionsReady = $state(false);
+
+	// The budget table and the reports grid re-lay out at every width the sidebar passes through,
+	// which stutters. There it slides over the page instead: a negative margin keeps the page's
+	// width until the slide ends, so the page re-lays out once.
+	$effect(() => trackRoute());
+	const heavyPage = $derived(
+		Boolean(route()) && (matchesPage(Page.Budget) || matchesPage(Page.Reports)),
+	);
 
 	// Other features (Modern Reconcile) collapse it for a while and put it back.
 	$effect(() => watchValue<boolean>(COLLAPSED_KEY, (v) => (collapsed = !!v)));
@@ -154,6 +164,20 @@
 				: `${sidebarWidth}px`,
 	);
 	let resizing = $state(false);
+
+	// Two names for one animation, alternated so each change restarts it.
+	let settle = $state<{ from: string; flip: boolean } | null>(null);
+	let lastWidth: string | null = null;
+	// Before the DOM updates, so the new width and the margin that offsets it land together.
+	$effect.pre(() => {
+		const width = sidebarTotalWidth;
+		untrack(() => {
+			if (lastWidth !== null && width !== lastWidth && transitionsReady && heavyPage && !resizing) {
+				settle = { from: lastWidth, flip: !settle?.flip };
+			}
+		});
+		lastWidth = width;
+	});
 	let dragStartX = 0;
 	let dragStartWidth = 0;
 
@@ -472,6 +496,14 @@
 	class="sidebar"
 	class:resizing
 	class:transitions-ready={transitionsReady}
+	class:settle-a={settle && !settle.flip}
+	class:settle-b={settle?.flip}
+	style:--sb-settle={settle ? `calc(${settle.from} - ${sidebarTotalWidth})` : null}
+	onanimationend={(e) => {
+		if (e.target === e.currentTarget) {
+			settle = null;
+		}
+	}}
 	class:split={layoutMode === "split"}
 	class:collapsed={isCollapsed && layoutMode === "standard"}
 	bind:this={sidebarEl}

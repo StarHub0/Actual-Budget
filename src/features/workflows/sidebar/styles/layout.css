@@ -69,6 +69,18 @@
 	.sidebar.transitions-ready:not(.resizing) {
 		transition: width 0.12s cubic-bezier(0.4, 0, 0.2, 1);
 	}
+	/* Over the page while it slides, with the same timing as the width, so the two always add up
+	   to the old width; the page takes the new one when it ends (see Sidebar.svelte). */
+	.sidebar.settle-a,
+	.sidebar.settle-b {
+		z-index: 2;
+	}
+	.sidebar.settle-a {
+		animation: sidebar-settle-a 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.sidebar.settle-b {
+		animation: sidebar-settle-b 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+	}
 	.sidebar > .budget,
 	.sidebar > .body,
 	.sidebar .split-panel,
@@ -79,6 +91,22 @@
 	.sidebar.collapsed > .rail-list,
 	.sidebar.collapsed > .rail-foot {
 		animation: sidebar-content-in 0.12s ease;
+	}
+}
+@keyframes sidebar-settle-a {
+	from {
+		margin-right: 0;
+	}
+	to {
+		margin-right: var(--sb-settle);
+	}
+}
+@keyframes sidebar-settle-b {
+	from {
+		margin-right: 0;
+	}
+	to {
+		margin-right: var(--sb-settle);
 	}
 }
 @keyframes sidebar-content-in {
