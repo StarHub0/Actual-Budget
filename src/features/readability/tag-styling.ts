@@ -107,6 +107,12 @@ function splitHash(el: HTMLElement) {
 	el.prepend(hash);
 }
 
+/** Actual renders a tag as its button's own text; reading only that skips every other button's subtree. */
+function isTagButton(btn: HTMLButtonElement): boolean {
+	const first = btn.firstChild;
+	return first?.nodeType === Node.TEXT_NODE && !!first.textContent?.trimStart().startsWith("#");
+}
+
 function scanTags() {
 	const stale: HTMLElement[] = [];
 	for (const btn of document.querySelectorAll<HTMLButtonElement>(
@@ -116,7 +122,7 @@ function scanTags() {
 			if (needsColors(btn)) {
 				stale.push(btn);
 			}
-		} else if (btn.textContent?.trim().startsWith("#")) {
+		} else if (isTagButton(btn)) {
 			btn.setAttribute(ATTR, "");
 			splitHash(btn);
 			stale.push(btn);

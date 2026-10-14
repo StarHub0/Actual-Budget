@@ -57,6 +57,8 @@ interface FlowProps {
 
 // Each card's flow bar, by card; replaced when the card's numbers change.
 const flows = new Map<HTMLElement, Mounted>();
+// The card's shown amounts when its values were last read.
+const readFor = new WeakMap<HTMLElement, string>();
 
 function removeFlow(card: HTMLElement): void {
 	flows.get(card)?.destroy();
@@ -113,7 +115,16 @@ async function processCard(card: HTMLElement) {
 	if (!flows.get(card)?.node.isConnected) {
 		breakdown.classList.add("abt-flow-hidden");
 		mountFlow(card, breakdown, { available: 0, budgeted: 0, overspent: 0, forNext: 0 });
+		readFor.delete(card);
 	}
+
+	// The card shows the four amounts read below, so they're only re-read once its text changes;
+	// otherwise every DOM change anywhere asked the backend again.
+	const shown = [...card.querySelectorAll("[data-cellname]")].map((c) => c.textContent).join("|");
+	if (readFor.get(card) === shown) {
+		return;
+	}
+	readFor.set(card, shown);
 
 	try {
 		const [available, overspent, budgeted, forNext] = await Promise.all([
@@ -140,7 +151,8 @@ async function processCard(card: HTMLElement) {
 			fp,
 		);
 	} catch {
-		// Leave zeros visible if data fetch failed
+		// Leave zeros visible if data fetch failed, and try again on the next change.
+		readFor.delete(card);
 	}
 }
 

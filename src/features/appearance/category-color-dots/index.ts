@@ -14,7 +14,7 @@ import ColorPicker from "./ColorPicker.svelte";
 const STORAGE_KEY = "category-color-dots";
 const ATTR = "data-abt-color-dot";
 const TX_ATTR = "data-abt-tx-dot";
-const ROW_SELECTOR = '[data-testid="row"]:has([data-testid="category-name"])';
+const ROW = '[data-testid="row"]';
 
 let categoryNameToId = new Map<string, string>();
 let categoryMapLoaded = false;
@@ -104,6 +104,8 @@ function openColorPicker(anchor: HTMLElement, catId: string) {
 	stopOutsideClick = onOutsideClick([wrap, anchor], closePopover);
 }
 
+const dotColors = new WeakMap<HTMLElement, string>();
+
 function decorateRow(row: HTMLElement) {
 	const nameEl = row.querySelector<HTMLElement>('[data-testid="category-name"]');
 	if (!nameEl) {
@@ -117,8 +119,11 @@ function decorateRow(row: HTMLElement) {
 
 	if (row.getAttribute(ATTR) === catId) {
 		const existing = nameEl.parentElement?.querySelector<HTMLElement>(".abt-cat-dot");
-		if (existing) {
-			existing.style.background = getCategoryColor(catId);
+		const color = getCategoryColor(catId);
+		// This runs on every DOM change, so it writes only a colour that changed.
+		if (existing && dotColors.get(existing) !== color) {
+			existing.style.background = color;
+			dotColors.set(existing, color);
 		}
 		return;
 	}
@@ -128,7 +133,9 @@ function decorateRow(row: HTMLElement) {
 
 	const dot = document.createElement("button");
 	dot.className = "abt-cat-dot";
-	dot.style.background = getCategoryColor(catId);
+	const color = getCategoryColor(catId);
+	dot.style.background = color;
+	dotColors.set(dot, color);
 	dot.title = "Change category color";
 	dot.addEventListener("click", (e) => {
 		e.stopPropagation();
@@ -187,13 +194,17 @@ function decorateTransactionRow(row: HTMLElement) {
 }
 
 function scanRows() {
-	for (const row of document.querySelectorAll<HTMLElement>(ROW_SELECTOR)) {
-		decorateRow(row);
+	for (const name of document.querySelectorAll('[data-testid="category-name"]')) {
+		const row = name.closest<HTMLElement>(ROW);
+		if (row) {
+			decorateRow(row);
+		}
 	}
-	for (const row of document.querySelectorAll<HTMLElement>(
-		'[data-testid="row"]:has([data-testid="category"])',
-	)) {
-		decorateTransactionRow(row);
+	for (const cell of document.querySelectorAll('[data-testid="category"]')) {
+		const row = cell.closest<HTMLElement>(ROW);
+		if (row) {
+			decorateTransactionRow(row);
+		}
 	}
 }
 

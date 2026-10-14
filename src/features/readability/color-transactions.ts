@@ -2,54 +2,25 @@ import { defineSetting } from "@features/types";
 import ColorTransactionsPreview from "./previews/ColorTransactions.svelte";
 import { watchDom } from "@lib/utilities/dom-watcher";
 
-function colorUpcomingRows() {
-	document.querySelectorAll('*[data-testid="row"]').forEach((row) => {
-		const cat = row.querySelector('*[data-testid="category"]');
-		if (!cat) {
-			return;
+const UPCOMING_ATTR = "data-abt-upcoming";
+const ROW = '[data-testid="transaction-table"] [data-testid="row"]';
+
+// Marks rows only when their state changes; CSS colours them, so a row Actual reuses for
+// another transaction loses the colour with the mark.
+function markUpcomingRows() {
+	for (const row of document.querySelectorAll(ROW)) {
+		const upcoming =
+			row.querySelector('[data-testid="category"]')?.firstElementChild?.textContent === "Upcoming";
+		if (upcoming !== row.hasAttribute(UPCOMING_ATTR)) {
+			row.toggleAttribute(UPCOMING_ATTR, upcoming);
 		}
-		const firstChild = cat.firstElementChild;
-		if (firstChild && firstChild.textContent === "Upcoming") {
-			const date = row.querySelector<HTMLElement>('*[data-testid="date"]');
-			const account = row.querySelector<HTMLElement>('*[data-testid="account"]');
-			const payee = row.querySelector<HTMLElement>('*[data-testid="payee"]');
-			const notes = row.querySelector<HTMLElement>('*[data-testid="notes"]');
-			const upcoming = "var(--ctp-peach, var(--color-warningText))";
-			if (date) {
-				date.style.color = upcoming;
-			}
-			if (account) {
-				account.style.color = upcoming;
-			}
-			if (payee) {
-				payee.style.color = upcoming;
-			}
-			if (notes) {
-				notes.style.color = upcoming;
-			}
-		}
-	});
+	}
 }
 
 function cleanup() {
-	document.querySelectorAll('*[data-testid="row"]').forEach((row) => {
-		const date = row.querySelector<HTMLElement>('*[data-testid="date"]');
-		const account = row.querySelector<HTMLElement>('*[data-testid="account"]');
-		const payee = row.querySelector<HTMLElement>('*[data-testid="payee"]');
-		const notes = row.querySelector<HTMLElement>('*[data-testid="notes"]');
-		if (date) {
-			date.style.removeProperty("color");
-		}
-		if (account) {
-			account.style.removeProperty("color");
-		}
-		if (payee) {
-			payee.style.removeProperty("color");
-		}
-		if (notes) {
-			notes.style.removeProperty("color");
-		}
-	});
+	for (const row of document.querySelectorAll(`[${UPCOMING_ATTR}]`)) {
+		row.removeAttribute(UPCOMING_ATTR);
+	}
 }
 
 export const colorTransactions = defineSetting({
@@ -70,9 +41,12 @@ export const colorTransactions = defineSetting({
 		*[data-testid='debit'] {
 			color: var(--color-numberNegative) !important;
 		}
+		[${UPCOMING_ATTR}] :is([data-testid="date"], [data-testid="account"], [data-testid="payee"], [data-testid="notes"]) {
+			color: var(--ctp-peach, var(--color-warningText));
+		}
 	`,
 	init: () => {
-		const unwatch = watchDom(colorUpcomingRows);
+		const unwatch = watchDom(markUpcomingRows);
 
 		return () => {
 			unwatch();

@@ -13,13 +13,11 @@ const CSS = `
 `;
 
 function markRows() {
-	for (const row of document.querySelectorAll<HTMLElement>('[data-testid="row"]')) {
-		const catCell = row.querySelector('[data-testid="category"]');
-		if (!catCell) {
-			continue;
-		}
+	// From the category cells, so the budget table's rows (which have none) aren't visited.
+	for (const catCell of document.querySelectorAll('[data-testid="row"] [data-testid="category"]')) {
+		const row = catCell.closest('[data-testid="row"]');
 		const text = catCell.textContent?.trim() || "";
-		row.classList.toggle("abt-uncategorized", text === "Categorize" || text === "");
+		row?.classList.toggle("abt-uncategorized", text === "Categorize" || text === "");
 	}
 }
 
