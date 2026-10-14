@@ -39,7 +39,10 @@ function hideTip() {
 		clearTimeout(tipTimer);
 		tipTimer = null;
 	}
-	tipState.value = null;
+	// A focused button removed by a re-render fires focusout mid-render, where Svelte forbids writes.
+	if (tipState.value) {
+		queueMicrotask(() => (tipState.value = null));
+	}
 }
 
 function normalize(param: string | TipOpts): Required<TipOpts> {
