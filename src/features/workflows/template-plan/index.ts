@@ -597,7 +597,9 @@ function tick(): void {
 
 	watchCells();
 
-	if (!wasOnBudgetPage) {
+	// The path changes a frame before Actual swaps in the budget page; opening the panel then
+	// squeezed the page being left, so arriving waits for the budget table.
+	if (!wasOnBudgetPage && document.querySelector('[data-testid="budget-table"]')) {
 		wasOnBudgetPage = true;
 		invalidateCategoriesCache();
 		// Left open last time: refilled synchronously once known, so it's back before the page paints.
