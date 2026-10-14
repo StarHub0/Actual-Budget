@@ -30,7 +30,7 @@
 			duration: reducedMotion.matches ? 0 : 200,
 			easing: cubicOut,
 		});
-		return { ...base, css: (t: number, u: number) => `${base.css?.(t, u) ?? ""} opacity: ${t};` };
+		return { ...base, css: (t: number, u: number) => `${base.css?.(t, u) ?? ""}; opacity: ${t};` };
 	}
 
 	const start = $derived(budgetNav.months[0] ?? null);
