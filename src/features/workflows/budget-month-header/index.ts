@@ -17,6 +17,8 @@ import { budgetNav } from "./state.svelte";
 const NATIVE_HEADER_ATTR = "data-abt-native-month-header";
 const NATIVE_COUNT_ATTR = "data-abt-native-month-count";
 const FULL_WIDTH_ATTR = "data-abt-full-width";
+// Actual sizes the table's box to a measured pixel width, which lags a frame behind the page.
+const FILL_ATTR = "data-abt-fill-width";
 const BUDGET_TABLE = '[data-testid="budget-table"]';
 
 let host: HTMLElement | null = null;
@@ -35,7 +37,7 @@ function unmountHeader(): void {
 }
 
 function restoreNative(): void {
-	for (const attr of [NATIVE_HEADER_ATTR, NATIVE_COUNT_ATTR, FULL_WIDTH_ATTR]) {
+	for (const attr of [NATIVE_HEADER_ATTR, NATIVE_COUNT_ATTR, FULL_WIDTH_ATTR, FILL_ATTR]) {
 		for (const el of document.querySelectorAll(`[${attr}]`)) {
 			el.removeAttribute(attr);
 		}
@@ -95,6 +97,13 @@ function sync(): void {
 	}
 	native.setAttribute(NATIVE_HEADER_ATTR, "");
 	parent.setAttribute(FULL_WIDTH_ATTR, "");
+	// The sized box and the zero-size wrapper Actual measures from (AutoSizingBudgetTable).
+	const box = parent.parentElement;
+	for (const el of [box, box?.parentElement]) {
+		if (el && !el.hasAttribute(FILL_ATTR)) {
+			el.setAttribute(FILL_ATTR, "");
+		}
+	}
 
 	const months = readShownMonths(native);
 	if (!sameMonths(months, budgetNav.months)) {
@@ -138,6 +147,9 @@ export const budgetMonthHeader = defineSetting({
 
 		/* Actual caps the table at its columns' natural width (500px a month); fill the page instead. */
 		[${FULL_WIDTH_ATTR}] { max-width: none !important; }
+
+		/* Fills the page as it resizes; Actual's measured width would centre it for a frame first. */
+		[${FILL_ATTR}] { width: 100% !important; }
 	`,
 	init: () => {
 		fellBack = false;
