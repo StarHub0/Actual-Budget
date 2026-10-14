@@ -1,7 +1,7 @@
 import {
 	BALANCE_CELL_RE,
 	fetchCells,
-	markSheetsStale,
+	markCellsStale,
 } from "@features/readability/category-progress/cells";
 import { defineSetting } from "@features/types";
 import { isCalendarOpen } from "@features/workflows/spending-calendar";
@@ -206,11 +206,11 @@ function unmountControl(): void {
 }
 
 // Edits change the counts; the shown rows stay until another filter is picked.
-function onTableChange({ table, shown, changed }: BudgetTableChange): void {
+function onTableChange({ table, shown, changed, changedCells }: BudgetTableChange): void {
 	if (table !== tableShown) {
 		return;
 	}
-	markSheetsStale(changed);
+	markCellsStale(changedCells);
 	// Only edits to a shown month change the counts; navigating is handled by sync().
 	if ([...changed].some((sheet) => shown.includes(sheet))) {
 		changes?.add(changed);
@@ -343,11 +343,9 @@ export const budgetCategoryFilter = defineSetting({
 		[data-testid="budget-totals"] [${CONTROL_ATTR}] > * { margin-right: var(--abt-space-2); }
 	`,
 	init: () => {
-		changes = collectChanges(REFRESH_MS, () => {
-			if (tableShown) {
-				void refresh(tableShown, false);
-			}
-		});
+		changes = collectChanges(REFRESH_MS, () =>
+			tableShown ? refresh(tableShown, false) : undefined,
+		);
 		const unwatch = watchDom(sync);
 		const unwatchTable = watchElement('[data-testid="budget-table"]', sync);
 		const unwatchCells = watchBudgetTable(onTableChange);

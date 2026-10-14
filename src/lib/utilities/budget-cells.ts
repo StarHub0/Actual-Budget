@@ -12,6 +12,7 @@ const BUDGET_TABLE = '[data-testid="budget-table"]';
 // Actual's month header, which the month header feature hides but leaves mounted.
 const SHOWN_MONTH = '[data-testid="selected-budget-month"][data-month]';
 const SHEET_RE = /^(budget\d{6})!/;
+const CELL_CATEGORY_RE = new RegExp(`^(budget\\d{6})!.*?(${UUID})`);
 const ROW_CATEGORY_RE = new RegExp(`(${UUID})`);
 
 export interface BudgetTableChange {
@@ -22,6 +23,8 @@ export interface BudgetTableChange {
 	moved: boolean;
 	/** Months with a cell that changed value; navigating alone changes none. */
 	changed: Set<string>;
+	/** The same changes per category, as `sheet:categoryId`. */
+	changedCells: Set<string>;
 }
 
 type Listener = (change: BudgetTableChange) => void;
@@ -81,16 +84,25 @@ export function shownSheets(table: Element): string[] {
  * The months a batch touched: an edit rewrites its own and later months' balances, and
  * navigating adds the new months' cells.
  */
-function sheetsInMutations(records: MutationRecord[], movedFrom: string[] | null): Set<string> {
+function changesIn(
+	records: MutationRecord[],
+	movedFrom: string[] | null,
+): { sheets: Set<string>; cells: Set<string> } {
 	const sheets = new Set<string>();
+	const cells = new Set<string>();
 	const add = (el: Element | null | undefined) => {
 		// ABT's own overlays inside Actual's cells (the rolling To Budget) aren't data changes.
 		if (el?.closest("[data-abt-owned]")) {
 			return;
 		}
-		const match = el?.closest("[data-cellname]")?.getAttribute("data-cellname")?.match(SHEET_RE);
+		const name = el?.closest("[data-cellname]")?.getAttribute("data-cellname");
+		const match = name?.match(SHEET_RE);
 		if (match) {
 			sheets.add(match[1]);
+		}
+		const cell = name?.match(CELL_CATEGORY_RE);
+		if (cell) {
+			cells.add(`${cell[1]}:${cell[2]}`);
 		}
 	};
 	for (const record of records) {
@@ -112,8 +124,13 @@ function sheetsInMutations(records: MutationRecord[], movedFrom: string[] | null
 		for (const sheet of movedFrom) {
 			sheets.delete(sheet);
 		}
+		for (const key of cells) {
+			if (movedFrom.includes(key.slice(0, key.indexOf(":")))) {
+				cells.delete(key);
+			}
+		}
 	}
-	return sheets;
+	return { sheets, cells };
 }
 
 function emit(change: BudgetTableChange): void {
@@ -135,9 +152,9 @@ function attach(): void {
 		}
 		const shown = shownSheets(table);
 		const moved = shown.join() !== watched.shown.join();
-		const changed = sheetsInMutations(records, moved ? watched.shown : null);
+		const { sheets, cells } = changesIn(records, moved ? watched.shown : null);
 		watched.shown = shown;
-		emit({ table, shown, moved, changed });
+		emit({ table, shown, moved, changed: sheets, changedCells: cells });
 	});
 	// Navigating rewrites the cells' test ids and the header's months in place; edits rewrite text.
 	observer.observe(table.parentElement ?? table, {
@@ -149,7 +166,7 @@ function attach(): void {
 	});
 	const shown = shownSheets(table);
 	watched = { table, observer, shown };
-	emit({ table, shown, moved: true, changed: new Set() });
+	emit({ table, shown, moved: true, changed: new Set(), changedCells: new Set() });
 }
 
 /**
@@ -162,7 +179,13 @@ export function watchBudgetTable(listener: Listener): () => void {
 		stopFinding = watchElement(BUDGET_TABLE, attach);
 		attach();
 	} else if (watched?.table.isConnected) {
-		listener({ table: watched.table, shown: watched.shown, moved: true, changed: new Set() });
+		listener({
+			table: watched.table,
+			shown: watched.shown,
+			moved: true,
+			changed: new Set(),
+			changedCells: new Set(),
+		});
 	}
 	return () => {
 		listeners.delete(listener);
@@ -180,16 +203,30 @@ export function watchBudgetTable(listener: Listener): () => void {
  * Gathers changed months until edits pause for `ms`, then hands them over at once. A bulk edit
  * is handed over once, when it finishes.
  */
-export function collectChanges(ms: number, flush: (sheets: Set<string>) => void) {
+export function collectChanges(
+	ms: number,
+	flush: (sheets: Set<string>) => void | Promise<unknown>,
+) {
 	const pending = new Set<string>();
 	let timer: ReturnType<typeof setTimeout> | undefined;
+	// While Actual fills a large budget's cells, pauses come often; a flush that's still reading
+	// holds the next one back, so reads never pile up behind Actual's own.
+	let running = false;
+	let stopped = false;
 	const run = () => {
-		if (isBulkEditing() || !pending.size) {
+		if (isBulkEditing() || !pending.size || running || stopped) {
 			return;
 		}
 		const sheets = new Set(pending);
 		pending.clear();
-		flush(sheets);
+		running = true;
+		void Promise.resolve(flush(sheets)).finally(() => {
+			running = false;
+			if (pending.size && !stopped) {
+				clearTimeout(timer);
+				timer = setTimeout(run, ms);
+			}
+		});
 	};
 	const stopBulk = onBulkEditEnd(run);
 	return {
@@ -206,6 +243,7 @@ export function collectChanges(ms: number, flush: (sheets: Set<string>) => void)
 			pending.clear();
 		},
 		stop() {
+			stopped = true;
 			clearTimeout(timer);
 			pending.clear();
 			stopBulk();

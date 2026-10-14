@@ -1,4 +1,4 @@
-import { markSheetsStale } from "@features/readability/category-progress/cells";
+import { markCellsStale } from "@features/readability/category-progress/cells";
 import { defineSetting } from "@features/types";
 import { isCalendarOpen } from "@features/workflows/spending-calendar";
 import { iconMask } from "@lib/utilities/icons";
@@ -221,7 +221,7 @@ function carouselSettled(table: HTMLElement): boolean {
  * Re-marks the mode and mounts its parts before the browser paints, since Actual renders
  * the new month count a frame before the debounced sync() would; and refreshes the totals.
  */
-function onTableChange({ table, changed }: BudgetTableChange): void {
+function onTableChange({ table, changed, changedCells }: BudgetTableChange): void {
 	// Actual drops the table when the page is hidden (the calendar). Its cards are never
 	// kept once detached, so syncing them would remount them forever; sync() finds the new one.
 	if (!table.isConnected) {
@@ -234,7 +234,7 @@ function onTableChange({ table, changed }: BudgetTableChange): void {
 	syncParts(table);
 	// Only the months whose cells changed re-read; our own renders change none.
 	if (changed.size) {
-		markSheetsStale(changed);
+		markCellsStale(changedCells);
 		changes?.add(changed);
 	}
 }

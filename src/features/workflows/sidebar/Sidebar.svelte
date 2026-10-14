@@ -282,7 +282,16 @@
 	// totals re-reads them instead.
 	let lastTotalsText = "";
 
+	// While Actual fills a large budget's balances each one is a change; a check still reading
+	// holds the next back, which then runs once with everything that changed meanwhile.
+	let checking = false;
+	let recheck = false;
+
 	function checkBalances() {
+		if (checking) {
+			recheck = true;
+			return;
+		}
 		const nowTexts = readNativeAccountBalanceTexts();
 		const totals = readNativeTotalsText();
 		const totalsChanged = totals !== lastTotalsText;
@@ -304,18 +313,27 @@
 				lastBalanceTexts.set(a.id, text);
 			}
 		}
-		refreshBalances(changedAccounts, withRows).then(({ changed, failed }) => {
-			for (const id of changed) {
-				invalidateAccountDetail(id);
-			}
-			// Forgotten, so the next DOM change tries again.
-			for (const id of failed) {
-				lastBalanceTexts.delete(id);
-			}
-			if (failed.some((id) => !nowTexts.has(id))) {
-				lastTotalsText = "";
-			}
-		});
+		checking = true;
+		refreshBalances(changedAccounts, withRows)
+			.then(({ changed, failed }) => {
+				for (const id of changed) {
+					invalidateAccountDetail(id);
+				}
+				// Forgotten, so the next DOM change tries again.
+				for (const id of failed) {
+					lastBalanceTexts.delete(id);
+				}
+				if (failed.some((id) => !nowTexts.has(id))) {
+					lastTotalsText = "";
+				}
+			})
+			.finally(() => {
+				checking = false;
+				if (recheck) {
+					recheck = false;
+					checkBalances();
+				}
+			});
 	}
 
 	// Actual rewrites a balance's text in place, which the page-wide watcher (new elements only)

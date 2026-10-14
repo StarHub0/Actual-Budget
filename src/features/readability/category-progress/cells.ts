@@ -18,20 +18,24 @@ export interface CatCells {
 
 const cellCache = new Map<string, CatCells>();
 const inflight = new Map<string, { promise: Promise<CatCells>; startedAt: number }>();
-/** When each month's cells last changed; anything fetched before then is out of date. */
-const staleSince = new Map<string, number>();
+/**
+ * When each category's cells last changed, as `sheet:categoryId`; anything fetched before then is
+ * out of date. Per category, so one edit (or Actual filling a cell as the page loads) doesn't
+ * re-read the whole month.
+ */
+const cellStaleSince = new Map<string, number>();
 
-/** Marks months whose cells changed, so the next read of them fetches fresh values. */
-export function markSheetsStale(sheets: Iterable<string>): void {
+/** Marks categories whose cells changed, as `sheet:categoryId` (BudgetTableChange.changedCells). */
+export function markCellsStale(keys: Iterable<string>): void {
 	const now = Date.now();
-	for (const sheet of sheets) {
-		staleSince.set(sheet, now);
+	for (const key of keys) {
+		cellStaleSince.set(key, now);
 	}
 }
 
 export function fetchCells(sheet: string, catId: string, force?: boolean): Promise<CatCells> {
 	const key = `${sheet}:${catId}`;
-	const since = staleSince.get(sheet) ?? 0;
+	const since = cellStaleSince.get(key) ?? 0;
 	const cached = cellCache.get(key);
 	if (!force && cached && cached.fetchedAt >= since && Date.now() - cached.fetchedAt < CACHE_MS) {
 		return Promise.resolve(cached);
@@ -75,4 +79,5 @@ export function fetchCells(sheet: string, catId: string, force?: boolean): Promi
 
 export function clearCellCache(): void {
 	cellCache.clear();
+	cellStaleSince.clear();
 }

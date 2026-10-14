@@ -2,7 +2,7 @@ import { defineSetting } from "@features/types";
 import CategoryProgressPreview from "../previews/CategoryProgress.svelte";
 import { goalFunding } from "@features/workflows/goal-funding";
 import { icon } from "@lib/utilities/icons";
-import { readCell, watchBudgetTable } from "@lib/utilities/budget-cells";
+import { type BudgetTableChange, readCell, watchBudgetTable } from "@lib/utilities/budget-cells";
 import { loadCurrency } from "@lib/utilities/currency";
 import { addMonths, monthToSheet, sheetToMonth } from "@lib/utilities/months";
 import { watchDom } from "@lib/utilities/dom-watcher";
@@ -10,7 +10,13 @@ import { Page, matchesPage } from "@lib/utilities/pages";
 import { positionPopover } from "@lib/utilities/popover";
 import { getValue } from "@lib/utilities/store";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
-import { BALANCE_CELL_RE, clearCellCache, fetchCells, type CatCells } from "./cells";
+import {
+	BALANCE_CELL_RE,
+	clearCellCache,
+	fetchCells,
+	markCellsStale,
+	type CatCells,
+} from "./cells";
 import ProgressPopover from "./ProgressPopover.svelte";
 
 const RING_CLASS = "abt-catprog-ring";
@@ -88,7 +94,7 @@ export const categoryProgress = defineSetting({
 	init: () => {
 		loadCurrency();
 		// Balances only change inside the budget table; leaving the page takes the rings down.
-		const unwatchTable = watchBudgetTable(scanAndDecorate);
+		const unwatchTable = watchBudgetTable(onTableChange);
 		const unwatchPage = watchDom(() => {
 			if (!matchesPage(Page.Budget)) {
 				undecorateAll();
@@ -98,6 +104,8 @@ export const categoryProgress = defineSetting({
 		return () => {
 			unwatchTable();
 			unwatchPage();
+			cancelAnimationFrame(scanFrame);
+			scanFrame = 0;
 			undecorateAll();
 			closePopover(true);
 			clearCellCache();
@@ -182,6 +190,21 @@ function paintRing(ring: HTMLElement, data: CatCells) {
 	}
 }
 
+// While the page loads Actual fills its cells one by one, each a change; one scan a frame
+// covers them all, and only categories whose cells changed are read again.
+let scanFrame = 0;
+const painted = new WeakMap<HTMLElement, CatCells>();
+
+function onTableChange(change: BudgetTableChange) {
+	markCellsStale(change.changedCells);
+	if (!scanFrame) {
+		scanFrame = requestAnimationFrame(() => {
+			scanFrame = 0;
+			scanAndDecorate();
+		});
+	}
+}
+
 function scanAndDecorate() {
 	if (!matchesPage(Page.Budget)) {
 		undecorateAll();
@@ -214,18 +237,20 @@ function scanAndDecorate() {
 			host.appendChild(ring);
 		}
 
-		// React reuses these nodes when navigating months — rebind if the cell
-		// now shows a different sheet, and force-refresh when the rendered
-		// balance text changed (covers budget edits, where cached cell values
-		// would otherwise stay stale for the full cache TTL).
-		ring.dataset.sheet = sheet;
-		ring.dataset.catId = catId;
-		const txt = span.textContent || "";
-		const force = ring.dataset.txt !== undefined && ring.dataset.txt !== txt;
-		ring.dataset.txt = txt;
+		// React reuses these nodes when navigating months, so rebind to the cell shown now.
+		if (ring.dataset.sheet !== sheet || ring.dataset.catId !== catId) {
+			ring.dataset.sheet = sheet;
+			ring.dataset.catId = catId;
+		}
 
-		fetchCells(sheet, catId, force).then((data) => {
-			if (ring.isConnected && ring.dataset.sheet === sheet && ring.dataset.catId === catId) {
+		fetchCells(sheet, catId).then((data) => {
+			if (
+				ring.isConnected &&
+				ring.dataset.sheet === sheet &&
+				ring.dataset.catId === catId &&
+				painted.get(ring) !== data
+			) {
+				painted.set(ring, data);
 				paintRing(ring, data);
 			}
 		});

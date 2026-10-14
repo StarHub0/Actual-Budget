@@ -300,7 +300,7 @@ function onTableChange({ changed }: BudgetTableChange) {
 }
 
 function watchTable() {
-	changes ??= collectChanges(REFRESH_MS, () => void refresh());
+	changes ??= collectChanges(REFRESH_MS, () => refresh());
 	stopTable ??= watchBudgetTable(onTableChange);
 }
 

@@ -3,14 +3,14 @@ import BalancePillsPreview from "../previews/BalancePills.svelte";
 import {
 	BALANCE_CELL_RE,
 	fetchCells,
+	markCellsStale,
 	type CatCells,
 } from "@features/readability/category-progress/cells";
-import { watchBudgetTable } from "@lib/utilities/budget-cells";
+import { type BudgetTableChange, watchBudgetTable } from "@lib/utilities/budget-cells";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 
 const STATUS_ATTR = "data-abt-balance-status";
-const TEXT_ATTR = "data-abt-balance-text";
 
 type Status = "funded" | "underfunded" | "overspent";
 
@@ -73,6 +73,19 @@ function statusFor(data: CatCells): Status | null {
 	return data.goalShortfall > 0 ? "underfunded" : "funded";
 }
 
+// One scan a frame, reading again only the categories whose cells changed (see category-progress).
+let scanFrame = 0;
+
+function onTableChange(change: BudgetTableChange): void {
+	markCellsStale(change.changedCells);
+	if (!scanFrame) {
+		scanFrame = requestAnimationFrame(() => {
+			scanFrame = 0;
+			scan();
+		});
+	}
+}
+
 function scan(): void {
 	if (!matchesPage(Page.Budget)) {
 		clearAll();
@@ -88,20 +101,15 @@ function scan(): void {
 		const [, sheet, catId] = match;
 		const cellName = span.getAttribute("data-cellname");
 
-		// A changed balance means a budget edit or new spending; skip the cache then.
-		const text = span.textContent ?? "";
-		const force = span.hasAttribute(TEXT_ATTR) && span.getAttribute(TEXT_ATTR) !== text;
-		span.setAttribute(TEXT_ATTR, text);
-
-		void fetchCells(sheet, catId, force).then((data) => {
+		void fetchCells(sheet, catId).then((data) => {
 			// React reuses these nodes across months; only paint if it's still this cell.
 			if (!span.isConnected || span.getAttribute("data-cellname") !== cellName) {
 				return;
 			}
 			const status = statusFor(data);
-			if (status) {
+			if (status && span.getAttribute(STATUS_ATTR) !== status) {
 				span.setAttribute(STATUS_ATTR, status);
-			} else {
+			} else if (!status && span.hasAttribute(STATUS_ATTR)) {
 				span.removeAttribute(STATUS_ATTR);
 			}
 		});
@@ -109,9 +117,8 @@ function scan(): void {
 }
 
 function clearAll(): void {
-	for (const el of document.querySelectorAll(`[${STATUS_ATTR}], [${TEXT_ATTR}]`)) {
+	for (const el of document.querySelectorAll(`[${STATUS_ATTR}]`)) {
 		el.removeAttribute(STATUS_ATTR);
-		el.removeAttribute(TEXT_ATTR);
 	}
 }
 
@@ -129,7 +136,7 @@ export const balancePills = defineSetting({
 	css: () => CSS,
 	init: () => {
 		// Balances only change inside the budget table; leaving the page clears the marks.
-		const unwatchTable = watchBudgetTable(scan);
+		const unwatchTable = watchBudgetTable(onTableChange);
 		const unwatchPage = watchDom(() => {
 			if (!matchesPage(Page.Budget)) {
 				clearAll();
@@ -138,6 +145,8 @@ export const balancePills = defineSetting({
 		return () => {
 			unwatchTable();
 			unwatchPage();
+			cancelAnimationFrame(scanFrame);
+			scanFrame = 0;
 			clearAll();
 		};
 	},
