@@ -16,12 +16,15 @@
 		assignAccount,
 		createGroup,
 		loadAssignments,
+		loadCollapsedGroups,
 		loadGroups,
 		removeGroup,
 		renameGroup,
 		saveAssignments,
+		saveCollapsedGroups,
 		saveGroups,
 		watchAssignments,
+		watchCollapsedGroups,
 		watchGroups,
 	} from "../lib/groups";
 	import { applyOrder, loadAccountOrder, saveAccountOrder, watchAccountOrder } from "../lib/order";
@@ -57,7 +60,6 @@
 	);
 
 	const STORAGE_KEY = "experimental-sidebar-collapsed-sections";
-	const COLLAPSED_GROUPS_KEY = "experimental-sidebar-collapsed-groups";
 
 	let collapsed = $state<Record<string, boolean>>({});
 	let collapsedGroups = $state<Record<string, boolean>>({});
@@ -75,9 +77,8 @@
 		return watchValue<boolean>(TOTALS_KEY, (v) => (showGroupTotals = v ?? TOTALS_DEFAULT));
 	});
 	$effect(() => {
-		getValue<Record<string, boolean>>(COLLAPSED_GROUPS_KEY, {}).then(
-			(stored) => (collapsedGroups = stored),
-		);
+		loadCollapsedGroups().then((stored) => (collapsedGroups = stored));
+		return watchCollapsedGroups((stored) => (collapsedGroups = stored));
 	});
 	// Reading budgetId here (rather than capturing it once) makes these
 	// effects re-run whenever the open budget changes — otherwise this list
@@ -104,7 +105,7 @@
 
 	function toggleGroup(id: string) {
 		collapsedGroups = { ...collapsedGroups, [id]: !collapsedGroups[id] };
-		setValue(COLLAPSED_GROUPS_KEY, collapsedGroups);
+		saveCollapsedGroups(collapsedGroups);
 	}
 
 	const SECTION_KIND: Record<string, "onbudget" | "offbudget" | null> = {

@@ -490,6 +490,7 @@
 				onSearch={openPalette}
 				split
 				panelCollapsed={isCollapsed}
+				{groupAccounts}
 				onTogglePanel={() => (isCollapsed ? expandSidebar() : collapseSidebar())}
 			/>
 		</div>
@@ -546,6 +547,7 @@
 			icons={shownIcons}
 			onExpand={expandSidebar}
 			onSearch={openPalette}
+			{groupAccounts}
 		/>
 	{:else}
 		<BudgetHeader name={budgetName} onBudgetChange={refreshBudgetContext} />

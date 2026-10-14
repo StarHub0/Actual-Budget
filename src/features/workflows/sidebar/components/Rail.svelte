@@ -9,13 +9,31 @@
 	import { dispatch, navigate } from "@lib/utilities/actual-api";
 	import { Page, matchesPage, pagePath } from "@lib/utilities/pages";
 	import { getValue } from "@lib/utilities/store";
-	import { CalendarDays, PanelLeftClose, PanelLeftOpen, Plus, Search } from "@lucide/svelte";
+	import {
+		CalendarDays,
+		Folder,
+		PanelLeftClose,
+		PanelLeftOpen,
+		Plus,
+		Search,
+	} from "@lucide/svelte";
 	import { portal } from "../actions/portal";
 	import { scrollFade } from "../actions/scroll-fade";
 	import { tooltip } from "../actions/tooltip.svelte";
 	import type { BudgetIcon } from "../lib/budgets";
 	import { loadBudgetIcon, removeBudgetIcon, setBudgetIcon } from "../lib/budgets";
 	import type { SidebarAccount } from "../lib/data";
+	import {
+		type AccountGroup,
+		loadAssignments,
+		loadCollapsedGroups,
+		loadGroups,
+		saveCollapsedGroups,
+		watchAssignments,
+		watchCollapsedGroups,
+		watchGroups,
+	} from "../lib/groups";
+	import { applyOrder, loadAccountOrder, watchAccountOrder } from "../lib/order";
 	import { navItems, settingsItem, settingsMenu, settingsPages } from "../lib/nav";
 	import { route, trackRoute } from "../lib/route.svelte";
 
@@ -59,6 +77,7 @@
 		split = false,
 		panelCollapsed = false,
 		onTogglePanel,
+		groupAccounts = true,
 	}: {
 		budgetName: string;
 		budgetId?: string;
@@ -73,6 +92,7 @@
 		split?: boolean;
 		panelCollapsed?: boolean;
 		onTogglePanel?: () => void;
+		groupAccounts?: boolean;
 	} = $props();
 
 	// In split mode the panel's BudgetHeader hides its own icon, so this
@@ -171,18 +191,100 @@
 			.toUpperCase();
 	}
 
+	// The same groups, order and collapsed state as the account list.
+	let order = $state<string[]>([]);
+	let groups = $state<Record<string, AccountGroup>>({});
+	let assignments = $state<Record<string, string>>({});
+	let collapsedGroups = $state<Record<string, boolean>>({});
+
+	$effect(() => {
+		loadAccountOrder(budgetId).then((stored) => (order = stored));
+		return watchAccountOrder(budgetId, (stored) => (order = stored));
+	});
+	$effect(() => {
+		loadGroups(budgetId).then((stored) => (groups = stored));
+		return watchGroups(budgetId, (stored) => (groups = stored));
+	});
+	$effect(() => {
+		loadAssignments(budgetId).then((stored) => (assignments = stored));
+		return watchAssignments(budgetId, (stored) => (assignments = stored));
+	});
+	$effect(() => {
+		loadCollapsedGroups().then((stored) => (collapsedGroups = stored));
+		return watchCollapsedGroups((stored) => (collapsedGroups = stored));
+	});
+
+	function toggleGroup(id: string) {
+		collapsedGroups = { ...collapsedGroups, [id]: !collapsedGroups[id] };
+		saveCollapsedGroups(collapsedGroups);
+	}
+
 	const sections = $derived(
 		[
-			{ label: "On Budget", items: accounts.filter((a) => !a.offbudget && !a.closed) },
-			{ label: "Off Budget", items: accounts.filter((a) => a.offbudget && !a.closed) },
-			{ label: "Closed", items: accounts.filter((a) => a.closed) },
-		].filter((s) => s.items.length > 0),
+			{
+				label: "On Budget",
+				kind: "onbudget" as const,
+				items: accounts.filter((a) => !a.offbudget && !a.closed),
+			},
+			{
+				label: "Off Budget",
+				kind: "offbudget" as const,
+				items: accounts.filter((a) => a.offbudget && !a.closed),
+			},
+			{ label: "Closed", kind: null, items: accounts.filter((a) => a.closed) },
+		]
+			.filter((s) => s.items.length > 0)
+			.map((s) => ({ ...s, items: applyOrder(s.items, order) })),
 	);
+
+	function groupsIn(kind: "onbudget" | "offbudget", items: SidebarAccount[]) {
+		return Object.values(groups)
+			.filter((g) => g.section === kind)
+			.sort((a, b) => a.order - b.order)
+			.map((group) => ({ group, items: items.filter((a) => assignments[a.id] === group.id) }))
+			.filter((g) => g.items.length);
+	}
+
+	function isGrouped(account: SidebarAccount): boolean {
+		const id = assignments[account.id];
+		return !!id && !!groups[id];
+	}
+
+	function openAccount(id: string) {
+		if (isCalendarOpen()) {
+			closeCalendar();
+		}
+		navigate(`/accounts/${id}`);
+	}
 
 	async function addAccount() {
 		await dispatch("pushModal", { modal: { name: "add-account", options: {} } });
 	}
 </script>
+
+{#snippet face(account: SidebarAccount, mini = false)}
+	{@const icon = icons[account.id]}
+	{#if icon?.type === "emoji"}
+		<span class="rtile-emoji">{icon.value}</span>
+	{:else if icon}
+		<img class="rtile-img" src={icon.value} alt="" />
+	{:else}
+		{mini ? accountInitials(account.name).slice(0, 1) : accountInitials(account.name)}
+	{/if}
+{/snippet}
+
+{#snippet tile(account: SidebarAccount)}
+	<button
+		type="button"
+		class="rtile-wrap"
+		class:selected={isAccountSelected(account.id)}
+		aria-label={account.name}
+		use:tooltip={account.name}
+		onclick={() => openAccount(account.id)}
+	>
+		<span class="rtile">{@render face(account)}</span>
+	</button>
+{/snippet}
 
 <svelte:window
 	onclick={() => (moreOpen = false)}
@@ -314,32 +416,50 @@
 			<div class="rail-section" use:tooltip={section.label}>
 				{first}{#if rest.length}<small>{rest.join(" ")}</small>{/if}
 			</div>
-			{#each section.items as account (account.id)}
-				{@const icon = icons[account.id]}
-				<button
-					type="button"
-					class="rtile-wrap"
-					class:selected={isAccountSelected(account.id)}
-					aria-label={account.name}
-					use:tooltip={account.name}
-					onclick={() => {
-						if (isCalendarOpen()) {
-							closeCalendar();
-						}
-						navigate(`/accounts/${account.id}`);
-					}}
-				>
-					<span class="rtile">
-						{#if icon?.type === "emoji"}
-							<span class="rtile-emoji">{icon.value}</span>
-						{:else if icon}
-							<img class="rtile-img" src={icon.value} alt="" />
-						{:else}
-							{accountInitials(account.name)}
-						{/if}
-					</span>
-				</button>
-			{/each}
+			{#if !section.kind || !groupAccounts}
+				{#each section.items as account (account.id)}
+					{@render tile(account)}
+				{/each}
+			{:else}
+				{#each section.items.filter((a) => !isGrouped(a)) as account (account.id)}
+					{@render tile(account)}
+				{/each}
+				{#each groupsIn(section.kind, section.items) as { group, items } (group.id)}
+					{#if collapsedGroups[group.id]}
+						<button
+							type="button"
+							class="rfolder-wrap"
+							class:selected={items.some((a) => isAccountSelected(a.id))}
+							aria-label="{group.label}, {items.length} accounts"
+							aria-expanded="false"
+							use:tooltip={group.label.toUpperCase()}
+							onclick={() => toggleGroup(group.id)}
+						>
+							<span class="rfolder">
+								{#each items.slice(0, 4) as account (account.id)}
+									<span class="rmini">{@render face(account, true)}</span>
+								{/each}
+							</span>
+						</button>
+					{:else}
+						<div class="rfolder-open">
+							<button
+								type="button"
+								class="rfolder-head"
+								aria-label="Collapse {group.label}"
+								aria-expanded="true"
+								use:tooltip={group.label.toUpperCase()}
+								onclick={() => toggleGroup(group.id)}
+							>
+								<Folder strokeWidth={1.75} />
+							</button>
+							{#each items as account (account.id)}
+								{@render tile(account)}
+							{/each}
+						</div>
+					{/if}
+				{/each}
+			{/if}
 		{/each}
 	</div>
 {:else}
@@ -514,6 +634,79 @@
 		box-shadow:
 			0 0 0 2px var(--sb-bg),
 			0 0 0 4px var(--abt-accent);
+	}
+	/* A collapsed group: its first accounts in a 2×2 grid, like a Discord server folder. */
+	.rfolder-wrap {
+		position: relative;
+		width: 40px;
+		height: 40px;
+		flex-shrink: 0;
+		cursor: pointer;
+	}
+	.rfolder {
+		position: absolute;
+		inset: 3px;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-auto-rows: 1fr;
+		gap: 2px;
+		padding: 4px;
+		border-radius: var(--abt-radius);
+		background: var(--abt-ink-2);
+		transition: filter 0.12s ease;
+	}
+	.rfolder-wrap:hover .rfolder {
+		filter: brightness(1.2);
+	}
+	.rfolder-wrap.selected .rfolder {
+		box-shadow:
+			0 0 0 2px var(--sb-bg),
+			0 0 0 4px var(--abt-accent);
+	}
+	.rmini {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border-radius: var(--abt-radius-sm);
+		background: var(--abt-ink-3);
+		color: var(--abt-ink);
+		font-size: 7.5px;
+		font-weight: 800;
+	}
+	.rmini .rtile-emoji {
+		font-size: var(--abt-text-2xs);
+	}
+	.rmini .rtile-img {
+		border-radius: 0;
+	}
+	/* An open group: its accounts on one tinted column, under a folder button that closes it. */
+	.rfolder-open {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		flex-shrink: 0;
+		width: 40px;
+		padding-bottom: 2px;
+		border-radius: var(--abt-radius-lg);
+		background: var(--abt-ink-2);
+	}
+	.rfolder-head {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 30px;
+		color: var(--abt-soft);
+		cursor: pointer;
+	}
+	.rfolder-head:hover {
+		color: var(--abt-ink);
+	}
+	.rfolder-head :global(svg) {
+		width: 16px;
+		height: 16px;
 	}
 	.rail-foot {
 		display: flex;

@@ -11,6 +11,7 @@ export interface AccountGroup {
 
 const GROUPS_KEY = "experimental-sidebar-groups";
 const ASSIGNMENTS_KEY = "experimental-sidebar-account-groups";
+const COLLAPSED_KEY = "experimental-sidebar-collapsed-groups";
 
 // Account ids aren't unique across budget files, so this is scoped per
 // budget — otherwise switching budgets showed the previous one's
@@ -118,4 +119,19 @@ export function assignAccount(
 		delete next[accountId];
 	}
 	return next;
+}
+
+/** Which groups are collapsed, shared by the account list and the rail. */
+export async function loadCollapsedGroups(): Promise<Record<string, boolean>> {
+	return getValue<Record<string, boolean>>(COLLAPSED_KEY, {});
+}
+
+export function saveCollapsedGroups(collapsed: Record<string, boolean>): void {
+	setValue(COLLAPSED_KEY, collapsed);
+}
+
+export function watchCollapsedGroups(
+	callback: (collapsed: Record<string, boolean>) => void,
+): () => void {
+	return watchValue<Record<string, boolean>>(COLLAPSED_KEY, (v) => callback(v ?? {}));
 }
