@@ -20,6 +20,11 @@ const EXTRA_KEYS = [
 	"abt-account-icons",
 	"abt-category-icons",
 ];
+/**
+ * The budget's own data, shared by everyone who opens it. Every other synced key is a person's
+ * look and feel, kept per user when the server has several (see remoteKey).
+ */
+const BUDGET_DATA = new Set(["category-colors", "abt-account-icons", "abt-category-icons"]);
 
 /**
  * Data this browser keeps per budget, keyed by the budget's local id, which differs on every
@@ -75,6 +80,25 @@ let applying = false;
 let budgetId: string | undefined;
 const synced = new Set(EXTRA_KEYS);
 
+// The signed-in user, asked once per budget opened; null without a server or multi-user login.
+let user: Promise<string | null> | null = null;
+function currentUser(): Promise<string | null> {
+	user ??= send<{ userId?: string | null } | null>("subscribe-get-user").then(
+		(u) => u?.userId ?? null,
+		() => null,
+	);
+	return user;
+}
+
+/** Where a key lives in the budget: a person's settings under their user, budget data shared. */
+async function remoteKey(key: string): Promise<string> {
+	if (!synced.has(key) || BUDGET_DATA.has(key)) {
+		return PREFIX + key;
+	}
+	const id = await currentUser();
+	return id ? `${PREFIX}${id}:${key}` : PREFIX + key;
+}
+
 const isBudgetLoaded = () => !!document.querySelector(BUDGET_LOADED);
 
 // Chrome's storage hands objects back with their keys sorted, so key order can't count.
@@ -99,10 +123,11 @@ function sameValue(a: unknown, b: unknown): boolean {
 	);
 }
 
-function push(key: string, value: unknown): Promise<void> {
+async function push(key: string, value: unknown): Promise<void> {
 	log.info(`saving "${key}" to the budget`);
-	return send<void>("preferences/save", { id: PREFIX + key, value: JSON.stringify(value) }).catch(
-		(err) => log.error(`failed to save "${key}"`, err),
+	const id = await remoteKey(key);
+	return send<void>("preferences/save", { id, value: JSON.stringify(value) }).catch((err) =>
+		log.error(`failed to save "${key}"`, err),
 	);
 }
 
@@ -120,7 +145,9 @@ export async function pushStoredSettings(): Promise<void> {
 
 /**
  * Settings follow the open budget: its values win, and ones it doesn't have yet are seeded
- * from this browser. Browser storage stays the cache that every page paints from.
+ * from this browser. On a shared budget each person's look and feel is their own, while the
+ * budget's data (groups, colours, icons) is everyone's. Browser storage stays the cache that
+ * every page paints from.
  */
 export function startSettingsSync(settings: Setting[]): () => void {
 	const live = new Map<string, Setting>();
@@ -171,7 +198,11 @@ export function startSettingsSync(settings: Setting[]): () => void {
 		const prefs = await send<Record<string, string | null | undefined>>("preferences/get");
 		const needsReload: string[] = [];
 		for (const key of synced) {
-			const remote = prefs[PREFIX + key];
+			const own = await remoteKey(key);
+			// A person's first visit since settings are kept per user starts from what the budget
+			// shared; an emptied shared row counts as nothing to start from.
+			const firstVisit = own !== PREFIX + key && prefs[own] === undefined;
+			const remote = firstVisit ? (prefs[PREFIX + key] ?? undefined) : prefs[own];
 			if (remote === undefined) {
 				if (await hasValue(key)) {
 					void push(key, await getValue(key, null));
@@ -189,6 +220,10 @@ export function startSettingsSync(settings: Setting[]): () => void {
 				value = JSON.parse(remote);
 			} catch {
 				continue;
+			}
+			// Their own copy from now on, which their later changes update.
+			if (firstVisit) {
+				void push(key, value);
 			}
 			if (local !== undefined && sameValue(local, value)) {
 				continue;
@@ -269,8 +304,10 @@ export function startSettingsSync(settings: Setting[]): () => void {
 	const unwatch = watchDom(() => {
 		const now = isBudgetLoaded();
 		// Forgotten until the next pull reads it, so a switch can't file writes under the old one.
+		// The user too: closing a budget is where someone signs out or another signs in.
 		if (!now) {
 			budgetId = undefined;
+			user = null;
 		}
 		if (now && !loaded) {
 			schedulePull();
