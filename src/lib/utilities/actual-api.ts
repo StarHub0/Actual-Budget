@@ -1,4 +1,5 @@
 import type { ActualTable, SendMethodMap, TableName } from "@lib/types/actual-schema";
+import { timeRequest } from "./watch-timing";
 
 let reqId = 0;
 
@@ -74,30 +75,37 @@ function request<T>(
 	const id = `abt-api-${++reqId}-${Date.now()}`;
 	const message = JSON.stringify({ id, ...detail });
 	const dispatch = () => document.dispatchEvent(new CustomEvent(event, { detail: message }));
-	return new Promise((resolve, reject) => {
-		if (!pending.size) {
-			document.addEventListener("abt:api:response", onResponse);
-			document.addEventListener("abt:api:ack", onAck);
-		}
-		const entry: Pending = {
-			resolve: resolve as (data: unknown) => void,
-			reject,
-			retryTimer: null,
-		};
-		let retries = 0;
-		const retry = () => {
-			if (++retries >= maxRetries) {
-				settle(id, entry);
-				reject(new Error("API bridge timeout"));
-				return;
+	const kind = detail.method ?? detail.table ?? detail.action;
+	const name = `${event.replace("abt:api:", "")}${kind ? ` ${kind}` : ""}`;
+	const items = Array.isArray(detail.cells) ? detail.cells.length : 1;
+	return timeRequest(
+		name,
+		items,
+		new Promise<T>((resolve, reject) => {
+			if (!pending.size) {
+				document.addEventListener("abt:api:response", onResponse);
+				document.addEventListener("abt:api:ack", onAck);
 			}
-			dispatch();
+			const entry: Pending = {
+				resolve: resolve as (data: unknown) => void,
+				reject,
+				retryTimer: null,
+			};
+			let retries = 0;
+			const retry = () => {
+				if (++retries >= maxRetries) {
+					settle(id, entry);
+					reject(new Error("API bridge timeout"));
+					return;
+				}
+				dispatch();
+				entry.retryTimer = setTimeout(retry, RETRY_INTERVAL);
+			};
+			pending.set(id, entry);
 			entry.retryTimer = setTimeout(retry, RETRY_INTERVAL);
-		};
-		pending.set(id, entry);
-		entry.retryTimer = setTimeout(retry, RETRY_INTERVAL);
-		dispatch();
-	});
+			dispatch();
+		}),
+	);
 }
 
 /**

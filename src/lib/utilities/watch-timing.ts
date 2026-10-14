@@ -3,6 +3,7 @@
  * show as "abt:" marks in the browser's performance profile; for the totals, run
  * `document.dispatchEvent(new Event("abt:perf"))` in the page console (`abt:perf-reset` clears them).
  * `abt:perf-css` times restyling the open page with each of ABT's stylesheets switched off in turn.
+ * `abt:perf` also lists bridge requests: how many, how many cells they read, and how long they took.
  */
 type Listener = () => void;
 
@@ -18,6 +19,7 @@ const MARK_MS = 1;
 let current: string | null = null;
 const names = new WeakMap<Listener, string>();
 const stats = new Map<string, Stat>();
+const requests = new Map<string, Stat & { items: number; first: number; last: number }>();
 let listening = false;
 
 /** Names the watchers started while `fn` runs synchronously after `feature`. */
@@ -65,6 +67,34 @@ export function runWatcher(listener: Listener): void {
 	}
 }
 
+/** Counts a bridge request and times it until it settles; `items` is how many cells it reads. */
+export function timeRequest<T>(name: string, items: number, promise: Promise<T>): Promise<T> {
+	if (!import.meta.env.DEV) {
+		return promise;
+	}
+	listen();
+	const start = performance.now();
+	const done = () => {
+		const ms = performance.now() - start;
+		const r = requests.get(name) ?? {
+			runs: 0,
+			items: 0,
+			total: 0,
+			max: 0,
+			first: start,
+			last: start,
+		};
+		r.last = Math.max(r.last, start);
+		r.runs++;
+		r.items += items;
+		r.total += ms;
+		r.max = Math.max(r.max, ms);
+		requests.set(name, r);
+	};
+	promise.then(done, done);
+	return promise;
+}
+
 function listen(): void {
 	if (listening) {
 		return;
@@ -81,10 +111,25 @@ function listen(): void {
 				"max ms": +s.max.toFixed(1),
 			}));
 		console.table(rows);
+		console.table(
+			[...requests]
+				.sort(([, a], [, b]) => a.first - b.first)
+				.map(([request, r]) => ({
+					request,
+					count: r.runs,
+					items: r.items,
+					"total ms": +r.total.toFixed(1),
+					"max ms": +r.max.toFixed(1),
+					// Since the page started loading.
+					"first sent s": +(r.first / 1000).toFixed(2),
+					"last sent s": +(r.last / 1000).toFixed(2),
+				})),
+		);
 	});
 	document.addEventListener("abt:perf-css", () => console.table(timeStylesheets()));
 	document.addEventListener("abt:perf-reset", () => {
 		stats.clear();
+		requests.clear();
 		performance.clearMeasures();
 	});
 }
