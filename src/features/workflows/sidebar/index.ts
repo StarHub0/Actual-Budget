@@ -5,6 +5,7 @@ import LayoutPicker from "./LayoutPicker.svelte";
 import { SIDEBAR_MOUNT_ATTR as MOUNT_ATTR } from "./lib/collapse";
 import { NATIVE_ROOT_ATTR } from "./lib/data";
 import { LAYOUT_KEY } from "./lib/layout";
+import { NATIVE_ICON_ATTR, NAV_ICON_ATTR, swapSettingsNavIcons } from "./lib/settings-nav-icons";
 import Sidebar from "./Sidebar.svelte";
 
 const WRAP_ATTR = "data-abt-live-sidebar-wrap";
@@ -37,6 +38,12 @@ const CSS = `
 	   Its own z-index (above the titlebar) already keeps the grip over the page. */
 	[${WRAP_ATTR}] {
 		overflow: visible !important;
+	}
+	[${NATIVE_ICON_ATTR}] {
+		display: none !important;
+	}
+	[${NAV_ICON_ATTR}] {
+		display: contents;
 	}
 `;
 
@@ -73,9 +80,11 @@ export const experimentalSidebar = defineSetting({
 		};
 
 		const unwatch = watchDom(sync);
+		const unswapIcons = swapSettingsNavIcons();
 
 		return () => {
 			unwatch();
+			unswapIcons();
 			document.querySelector(`[${NATIVE_ROOT_ATTR}]`)?.removeAttribute(NATIVE_ROOT_ATTR);
 			document.querySelector(`[${WRAP_ATTR}]`)?.removeAttribute(WRAP_ATTR);
 			sidebar?.destroy();

@@ -3,7 +3,10 @@ import {
 	Banknote,
 	ChartColumn,
 	ClipboardList,
+	Cog,
+	FlaskConical,
 	LayoutGrid,
+	type LucideIcon,
 	Settings,
 	SlidersHorizontal,
 	Tag,
@@ -31,3 +34,15 @@ export const settingsMenu = [
 	{ label: "General", page: Page.Settings, icon: Wrench },
 	...settingsPages,
 ];
+
+/** Icons for Actual's settings nav (actualbudget/actual#9110), by its links' last path segment. */
+export const settingsNavIcons: Record<string, LucideIcon> = {
+	general: Wrench,
+	schedules: ClipboardList,
+	payees: Users,
+	tags: Tag,
+	rules: SlidersHorizontal,
+	"bank-sync": Banknote,
+	advanced: Cog,
+	experimental: FlaskConical,
+};
