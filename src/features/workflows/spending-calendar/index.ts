@@ -9,6 +9,8 @@ import Calendar from "./Calendar.svelte";
 
 const LINK_ATTR = "data-abt-calendar-link";
 const CALENDAR_ATTR = "data-abt-calendar";
+/** Marks the page's address while the calendar is open, so a reload brings it back. */
+const CALENDAR_HASH = "#calendar";
 
 const CALENDAR_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><rect x="7" y="13" width="3" height="3" rx="0.5"/><rect x="14" y="13" width="3" height="3" rx="0.5"/></svg>`;
 
@@ -16,6 +18,18 @@ let calendarInstance: ReturnType<typeof mount> | null = null;
 let calendarContainer: HTMLElement | null = null;
 let hiddenChildren: { el: HTMLElement; style: string }[] = [];
 let scrollLock: { el: HTMLElement; overflow: string } | null = null;
+
+// Replaced, not pushed: history entries Actual's router doesn't know about confuse its back button.
+function setHash(on: boolean): void {
+	if ((location.hash === CALENDAR_HASH) === on) {
+		return;
+	}
+	history.replaceState(
+		history.state,
+		"",
+		`${location.pathname}${location.search}${on ? CALENDAR_HASH : ""}`,
+	);
+}
 
 export function isCalendarOpen(): boolean {
 	return matchesPage(Page.Calendar);
@@ -90,9 +104,9 @@ export function openCalendar(): void {
 	calendarContainer.style.cssText =
 		"display: flex; position: absolute; inset: 0; z-index: 1; overflow: hidden;";
 	lastChild.appendChild(calendarContainer);
-	// No URL of its own: Actual's router would redirect it, and history entries it doesn't
-	// know about confuse its back navigation. ABT's page checks see the calendar instead.
+	// No route of its own, which Actual's router would redirect; ABT's page checks see the calendar.
 	setOverlayPage(Page.Calendar, calendarContainer);
+	setHash(true);
 
 	calendarInstance = mount(Calendar, {
 		target: calendarContainer,
@@ -126,6 +140,7 @@ export function closeCalendar(): void {
 	}
 
 	clearOverlayPage();
+	setHash(false);
 
 	updateActiveState();
 }
@@ -241,13 +256,21 @@ export const spendingCalendar = defineSetting({
 			if (calendarContainer && !isCalendarOpen()) {
 				closeCalendar();
 			}
+			// Reloaded (or returned) with the calendar open, once the page under it has rendered.
+			if (
+				!calendarContainer &&
+				location.hash === CALENDAR_HASH &&
+				document.querySelector("[data-abt-page]")?.childElementCount
+			) {
+				openCalendar();
+			}
 			attachCloseListeners();
 			updateActiveState();
 		});
 
-		// The calendar has no route, so any route change means Actual moved to another page.
+		// Any route change that drops the calendar's hash means Actual moved to another page.
 		const stopWatchingRoute = watchRoute(() => {
-			if (calendarContainer) {
+			if (calendarContainer && location.hash !== CALENDAR_HASH) {
 				closeCalendar();
 			}
 			updateActiveState();
