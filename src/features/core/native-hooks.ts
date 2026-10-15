@@ -2,6 +2,7 @@ import { refreshBudgetType } from "@lib/utilities/budget-type";
 import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { getCurrentPath, watchRoute } from "@lib/utilities/route-watcher";
+import { hasSettingsPages } from "@lib/utilities/settings-page";
 
 // Settings' sub-pages first, so /settings/payees reads as Payees.
 const COLUMN_PAGES = [
@@ -32,6 +33,14 @@ export const nativeHooks = {
 			const header = document.querySelector(HELP)?.parentElement?.parentElement?.parentElement;
 			if (header && header.parentElement?.firstElementChild === header) {
 				mark(header, "data-abt-header");
+			}
+		});
+		// Actual's settings nav came with cards grouped under headings; base.css styles each layout.
+		watchElement('[data-testid="settings"]', () => {
+			if (hasSettingsPages()) {
+				for (const list of document.querySelectorAll('[data-testid="settings"]')) {
+					mark(list, "data-abt-settings-grouped");
+				}
 			}
 		});
 		watchDom(() => {

@@ -14,6 +14,7 @@
 	import { watchDom } from "../utilities/dom-watcher";
 	import { isoDate } from "../utilities/months";
 	import { DESKTOP_QUERY } from "../utilities/pages";
+	import { TWEAKS_SECTIONS_ATTR } from "../utilities/settings-page";
 
 	const REPO_URL = "https://github.com/aelxxs/actual-budget-tweaks";
 	const version = browser.runtime.getManifest().version;
@@ -146,11 +147,14 @@
 		return !normalizedQuery && !changedOnly && !!collapsed[title];
 	}
 
-	// Actual's titlebar strip is sticky too, so the toolbar pins just below it.
+	// Actual's titlebar strip is sticky too, so the toolbar pins just below it; Actual's settings
+	// nav scrolls its pane under the titlebar instead, where the toolbar pins at the top.
 	let stickyTop = $state(0);
 	$effect(() => {
 		let strip: Element | null = null;
-		const observer = new ResizeObserver(() => (stickyTop = (strip as HTMLElement).offsetHeight));
+		const observer = new ResizeObserver(() => {
+			stickyTop = getScroller()?.contains(strip) ? (strip as HTMLElement).offsetHeight : 0;
+		});
 		// The titlebar can render after this page, so keep looking until it appears.
 		const stop = watchDom(() => {
 			const found = document.querySelector("[data-abt-header]");
@@ -170,6 +174,23 @@
 			observer.disconnect();
 		};
 	});
+
+	// In ABT's tab under Actual's settings nav, the nav lists the sections and the toolbar keeps to
+	// one row; elsewhere the toolbar carries the title and a row of section chips.
+	let sectionSlot = $state<Element | null>(null);
+	$effect(() =>
+		watchDom(() => {
+			const found = document.querySelector(`[${TWEAKS_SECTIONS_ATTR}]`);
+			if (found !== sectionSlot) {
+				sectionSlot = found;
+			}
+		}),
+	);
+
+	function moveInto(node: HTMLElement, target: Element) {
+		target.append(node);
+		return { update: (next: Element) => next.append(node) };
+	}
 
 	const sectionEls = $state<Record<string, HTMLElement>>({});
 
@@ -213,6 +234,8 @@
 	});
 	let scroller: HTMLElement | null = null;
 	let jumping = false;
+	// A click mid-scroll starts a new jump; only the latest one settles the position.
+	let jumpId = 0;
 
 	function getScroller(): HTMLElement | null {
 		if (scroller?.isConnected) {
@@ -241,12 +264,13 @@
 			return;
 		}
 		jumping = true;
+		const id = ++jumpId;
 		const done = () => {
-			if (!jumping) {
+			sc.removeEventListener("scrollend", done);
+			if (!jumping || id !== jumpId) {
 				return;
 			}
 			jumping = false;
-			sc.removeEventListener("scrollend", done);
 			// Content above can still resize mid-scroll; settle on the exact spot.
 			const off = el.getBoundingClientRect().top - pinnedBottom(sc);
 			if (Math.abs(off) > 2) {
@@ -402,98 +426,135 @@
 	}}
 />
 
-<div class="settings-page">
-	<header class="page-header">
-		<div class="page-title">
-			<img class="title-logo" src={logoUrl} alt="" />
-			<h2>Actual Budget Tweaks</h2>
-			<span class="version-tag">v{version}</span>
-		</div>
-		<div class="header-actions">
-			{#if importStatus === "success"}
-				<span class="import-status import-status--ok">Imported, reloading…</span>
-			{:else if importStatus === "error"}
-				<span class="import-status import-status--err">Invalid settings file</span>
-			{/if}
-			<button
-				type="button"
-				class="abt-btn abt-btn--icon abt-btn--sm"
-				onclick={exportSettings}
-				title="Export settings"
-				aria-label="Export settings"
-			>
-				<Icon name="upload" size={14} strokeWidth={1.5} />
-			</button>
-			<button
-				type="button"
-				class="abt-btn abt-btn--icon abt-btn--sm"
-				onclick={importSettings}
-				title="Import settings"
-				aria-label="Import settings"
-			>
-				<Icon name="download" size={14} strokeWidth={1.5} />
-			</button>
-			<button
-				type="button"
-				class="abt-btn abt-btn--icon abt-btn--sm"
-				onclick={() => (showResetDialog = true)}
-				title="Reset to defaults"
-				aria-label="Reset to defaults"
-			>
-				<Icon name="rotateCcw" size={14} strokeWidth={1.5} />
-			</button>
-			<button
-				type="button"
-				class="abt-btn abt-btn--icon abt-btn--sm bug-btn"
-				onclick={openBugReport}
-				title="Report a bug"
-				aria-label="Report a bug"
-			>
-				<Icon name="bug" size={14} />
-			</button>
-		</div>
-	</header>
+{#snippet headerActions()}
+	{#if importStatus === "success"}
+		<span class="import-status import-status--ok">Imported, reloading…</span>
+	{:else if importStatus === "error"}
+		<span class="import-status import-status--err">Invalid settings file</span>
+	{/if}
+	<button
+		type="button"
+		class="abt-btn abt-btn--icon abt-btn--sm"
+		onclick={exportSettings}
+		title="Export settings"
+		aria-label="Export settings"
+	>
+		<Icon name="upload" size={14} strokeWidth={1.5} />
+	</button>
+	<button
+		type="button"
+		class="abt-btn abt-btn--icon abt-btn--sm"
+		onclick={importSettings}
+		title="Import settings"
+		aria-label="Import settings"
+	>
+		<Icon name="download" size={14} strokeWidth={1.5} />
+	</button>
+	<button
+		type="button"
+		class="abt-btn abt-btn--icon abt-btn--sm"
+		onclick={() => (showResetDialog = true)}
+		title="Reset to defaults"
+		aria-label="Reset to defaults"
+	>
+		<Icon name="rotateCcw" size={14} strokeWidth={1.5} />
+	</button>
+	<button
+		type="button"
+		class="abt-btn abt-btn--icon abt-btn--sm bug-btn"
+		onclick={openBugReport}
+		title="Report a bug"
+		aria-label="Report a bug"
+	>
+		<Icon name="bug" size={14} />
+	</button>
+{/snippet}
 
-	<div class="settings-toolbar" bind:this={toolbarEl} style="top: {stickyTop}px;">
-		<div class="search-row">
-			<input
-				type="search"
-				class="abt-input search-input"
-				placeholder="Filter settings"
-				bind:value={query}
-				aria-label="Filter settings"
-			/>
-			<button
-				type="button"
-				class="abt-btn abt-btn--sm abt-btn--pill"
-				class:abt-tone-accent={changedOnly}
-				aria-pressed={changedOnly}
-				onclick={() => (changedOnly = !changedOnly)}
-			>
-				Changed
-			</button>
-			<span class="search-meta">{totalVisibleSettings} visible</span>
+{#snippet filterControls()}
+	<input
+		type="search"
+		class="abt-input search-input"
+		placeholder="Filter settings"
+		bind:value={query}
+		aria-label="Filter settings"
+	/>
+	<button
+		type="button"
+		class="abt-btn abt-btn--sm abt-btn--pill"
+		class:abt-tone-accent={changedOnly}
+		aria-pressed={changedOnly}
+		onclick={() => (changedOnly = !changedOnly)}
+	>
+		Changed
+	</button>
+	<span class="search-meta">{totalVisibleSettings} visible</span>
+{/snippet}
+
+{#snippet pageTitle()}
+	<div class="page-title">
+		<img class="title-logo" src={logoUrl} alt="" />
+		<h2>Actual Budget Tweaks</h2>
+		<span class="version-tag">v{version}</span>
+	</div>
+{/snippet}
+
+<div class="settings-page">
+	{#if sectionSlot}
+		<header class="page-header">
+			{@render pageTitle()}
+		</header>
+		<div class="settings-toolbar" bind:this={toolbarEl} style="top: {stickyTop}px;">
+			<div class="search-row">
+				{@render filterControls()}
+				<div class="header-actions">
+					{@render headerActions()}
+				</div>
+			</div>
 		</div>
-		<nav
-			class="section-nav"
-			class:overflows={navOverflows}
-			bind:this={navEl}
-			aria-label="Settings sections"
-		>
+		<nav class="nav-sections" use:moveInto={sectionSlot} aria-label="Settings sections">
 			{#each filteredSections as section (section.title)}
 				<button
 					type="button"
-					class="abt-btn abt-btn--sm abt-btn--pill abt-btn--ghost section-chip"
+					class="nav-section"
 					class:active={activeSection === section.title}
 					onclick={() => jumpTo(section.title)}
 				>
-					{section.title}
-					<span class="section-chip-count abt-num">{sectionItems(section).length}</span>
+					<span class="nav-section-label">{section.title}</span>
+					<span class="nav-section-count abt-num">{sectionItems(section).length}</span>
 				</button>
 			{/each}
 		</nav>
-	</div>
-
+	{:else}
+		<div class="settings-toolbar" bind:this={toolbarEl} style="top: {stickyTop}px;">
+			<header class="page-header">
+				{@render pageTitle()}
+				<div class="header-actions">
+					{@render headerActions()}
+				</div>
+			</header>
+			<div class="search-row">
+				{@render filterControls()}
+			</div>
+			<nav
+				class="section-nav"
+				class:overflows={navOverflows}
+				bind:this={navEl}
+				aria-label="Settings sections"
+			>
+				{#each filteredSections as section (section.title)}
+					<button
+						type="button"
+						class="abt-btn abt-btn--sm abt-btn--pill abt-btn--ghost section-chip"
+						class:active={activeSection === section.title}
+						onclick={() => jumpTo(section.title)}
+					>
+						{section.title}
+						<span class="section-chip-count abt-num">{sectionItems(section).length}</span>
+					</button>
+				{/each}
+			</nav>
+		</div>
+	{/if}
 	{#if filteredSections.length === 0}
 		<p class="empty">
 			{changedOnly && !normalizedQuery
@@ -756,7 +817,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--abt-space-4);
-		padding-block: var(--abt-space-3) var(--abt-space-4);
+		padding-block: var(--abt-space-3) var(--abt-space-5);
 		/* Its own bottom padding stands in for most of the page gap below it. */
 		margin-bottom: calc(-1 * var(--abt-space-4));
 		background: inherit;
@@ -777,6 +838,48 @@
 		white-space: nowrap;
 		font-size: var(--abt-text-sm);
 		color: var(--color-pageTextSubdued);
+	}
+
+	/* Listed under ABT's tab in Actual's settings nav, indented to the tab's label. */
+	.nav-sections {
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+	}
+
+	.nav-section {
+		display: flex;
+		align-items: center;
+		gap: var(--abt-space-3);
+		padding: 5px var(--abt-space-3) 5px var(--abt-space-6);
+		border: none;
+		border-radius: var(--abt-radius-sm);
+		background: transparent;
+		color: var(--color-settingsNavItemText);
+		font: inherit;
+		font-size: var(--abt-text-base);
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.nav-section:hover {
+		background: var(--color-settingsNavItemBackgroundHover);
+	}
+
+	.nav-section.active {
+		color: var(--color-settingsNavItemTextSelected);
+		font-weight: 600;
+	}
+
+	.nav-section-label {
+		flex: 1;
+		min-width: 0;
+		line-height: 1.3;
+	}
+
+	.nav-section-count {
+		font-size: var(--abt-text-sm);
+		color: var(--abt-muted);
 	}
 
 	/* One row that scrolls sideways, so the pinned bar stays short. */

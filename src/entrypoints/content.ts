@@ -1,4 +1,5 @@
 import "@lib/styles/ui.css";
+import { settingsAnchor } from "@lib/utilities/settings-page";
 import { getBaseUrl } from "@lib/utilities/store";
 import type { PublicPath } from "wxt/browser";
 
@@ -93,7 +94,7 @@ export default defineContentScript({
 			ctx.onInvalidated(startSettingsSync(all));
 			const ui = createIntegratedUi(ctx, {
 				position: "inline",
-				anchor: "[data-testid='settings'] > :nth-child(2)",
+				anchor: settingsAnchor,
 				onMount: (container) => {
 					const parent = container.parentElement;
 					if (parent) {

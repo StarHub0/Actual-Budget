@@ -16,6 +16,7 @@ import { nativeHooks } from "./core/native-hooks";
 import { privacyMode } from "./core/privacy-mode";
 import { releaseNotification } from "./core/release-notification";
 import { scheduleHighlight } from "./core/schedule-highlight";
+import { settingsTab } from "./core/settings-tab";
 import { sidePanel } from "./core/side-panel";
 import { tooltipStyling } from "./core/tooltip";
 import { backgroundPattern } from "./layout/background-pattern";
@@ -216,6 +217,7 @@ export function sectionItems(section: SettingsSection): PageSetting[] {
 export const coreScripts = [
 	sidePanel,
 	nativeHooks,
+	settingsTab,
 	scheduleHighlight,
 	tooltipStyling,
 	releaseNotification,
