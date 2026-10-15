@@ -1,6 +1,24 @@
 # Changelog
 
 
+## v0.1.97
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.96...v0.1.97)
+
+### 🚀 Enhancements
+
+- Keep the spending calendar open across reloads with a #calendar address ([3fff459](https://github.com/aelxxs/actual-budget-tweaks/commit/3fff459))
+- Give Actual's settings nav the live sidebar's icons ([6074d99](https://github.com/aelxxs/actual-budget-tweaks/commit/6074d99))
+- Move ABT's settings into a Tweaks tab on Actual's paged settings ([b32a0a6](https://github.com/aelxxs/actual-budget-tweaks/commit/b32a0a6))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.96 ([695fb3a](https://github.com/aelxxs/actual-budget-tweaks/commit/695fb3a))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.96
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.95...v0.1.96)
