@@ -3,14 +3,13 @@ import { isBulkEditing, onBulkEditEnd } from "./bulk-edit";
 import { watchElement } from "./dom-watcher";
 import { UUID } from "./ids";
 import { monthToSheet } from "./months";
-import { BUDGET_TABLE, CATEGORY_AMOUNT_CELL, SELECTED_MONTH } from "@lib/actual-dom";
+import { BUDGET_TABLE, CATEGORY_AMOUNT_CELL, CELL, SHOWN_MONTH } from "@lib/actual-dom";
 
 /*
  * One observer on the budget table for every feature that follows its cells. Each batch says
  * which months are shown and which months' cells changed, from the cells' names (`budget202609!...`).
  */
 // Actual's month header, which the month header feature hides but leaves mounted.
-const SHOWN_MONTH = `${SELECTED_MONTH}[data-month]`;
 const SHEET_RE = /^(budget\d{6})!/;
 const CELL_CATEGORY_RE = new RegExp(`^(budget\\d{6})!.*?(${UUID})`);
 const ROW_CATEGORY_RE = new RegExp(`(${UUID})`);
@@ -95,7 +94,7 @@ function changesIn(
 		if (el?.closest("[data-abt-owned]")) {
 			return;
 		}
-		const name = el?.closest("[data-cellname]")?.getAttribute("data-cellname");
+		const name = el?.closest(CELL)?.getAttribute("data-cellname");
 		const match = name?.match(SHEET_RE);
 		if (match) {
 			sheets.add(match[1]);
@@ -113,7 +112,7 @@ function changesIn(
 				continue;
 			}
 			add(node);
-			for (const cell of node.querySelectorAll("[data-cellname]")) {
+			for (const cell of node.querySelectorAll(CELL)) {
 				add(cell);
 			}
 		}

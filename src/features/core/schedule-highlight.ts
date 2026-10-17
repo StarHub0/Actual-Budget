@@ -1,5 +1,5 @@
 import { watchRoute } from "@lib/utilities/route-watcher";
-import { ROW } from "@lib/actual-dom";
+import { ROW, byFocusKey } from "@lib/actual-dom";
 
 export const scheduleHighlight = {
 	type: "core" as const,
@@ -9,7 +9,7 @@ export const scheduleHighlight = {
 		function openSchedule(schedId: string) {
 			let tries = 0;
 			const step = () => {
-				const row = document.querySelector<HTMLElement>(`[data-focus-key="${schedId}"] ${ROW}`);
+				const row = document.querySelector<HTMLElement>(`${byFocusKey(schedId)} ${ROW}`);
 				if (row) {
 					row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 					return;

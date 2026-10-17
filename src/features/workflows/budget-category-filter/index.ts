@@ -22,6 +22,7 @@ import {
 	BUDGET_TABLE,
 	BUDGET_TOTALS,
 	CATEGORY_NAME,
+	LEFTOVER_CELL,
 	ROW,
 } from "@lib/actual-dom";
 
@@ -50,7 +51,7 @@ interface Status {
 
 /** The id of a category row, from its balance cell; null for groups, income, and headers. */
 function rowCategory(row: Element): string | null {
-	const cell = row.querySelector('[data-cellname*="!leftover-"]');
+	const cell = row.querySelector(LEFTOVER_CELL);
 	return cell?.getAttribute("data-cellname")?.match(BALANCE_CELL_RE)?.[2] ?? null;
 }
 

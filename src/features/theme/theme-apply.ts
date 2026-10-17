@@ -2,7 +2,7 @@ import { getTheme, themes } from "@lib/design";
 import { applyGlobalCSS } from "@lib/utilities/dom";
 import { editorState } from "./editor-state.svelte";
 import { isUserTheme, userThemeState } from "./user-themes.svelte";
-import { BANK_SYNC_PROVIDER } from "@lib/actual-dom";
+import { ACCOUNTS_LINKS, BANK_SYNC_PROVIDER } from "@lib/actual-dom";
 
 export type RemoteTheme = {
 	name: string;
@@ -343,7 +343,7 @@ export const BUILTIN_CSS = `:root {
 }
 
 /* Actual's sidebar colours negative balances with the page's errorText; follow the sidebar's. */
-a[href^="/accounts"] {
+${ACCOUNTS_LINKS} {
 	--color-errorText: var(--color-sidebarTextFailed);
 }
 

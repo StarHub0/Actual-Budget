@@ -1,6 +1,4 @@
-import { SETTINGS } from "@lib/actual-dom";
-/** Actual's settings nav (actualbudget/actual#9110); older Actual lists every setting on one page. */
-export const SETTINGS_NAV_LINK = '[role="navigation"] > a[href="/settings/general"]';
+import { SETTINGS, SETTINGS_NAV_LINK } from "@lib/actual-dom";
 export const TWEAKS_HASH = "#tweaks";
 /** Where ABT's settings mount while its tab is open. */
 export const TWEAKS_HOST_ATTR = "data-abt-tweaks-host";

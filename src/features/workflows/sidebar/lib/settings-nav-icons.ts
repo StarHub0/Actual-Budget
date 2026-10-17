@@ -4,6 +4,7 @@ import { settingsNav } from "@lib/utilities/settings-page";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import NavIcon from "../components/NavIcon.svelte";
 import { settingsNavIcons } from "./nav";
+import { SETTINGS_PAGE_LINK } from "@lib/actual-dom";
 
 export const NATIVE_ICON_ATTR = "data-abt-native-icon";
 export const NAV_ICON_ATTR = "data-abt-nav-icon";
@@ -21,7 +22,7 @@ function sync(): void {
 	if (!nav) {
 		return;
 	}
-	for (const link of nav.querySelectorAll<HTMLAnchorElement>(':scope > a[href^="/settings/"]')) {
+	for (const link of nav.querySelectorAll<HTMLAnchorElement>(`:scope > ${SETTINGS_PAGE_LINK}`)) {
 		const native = link.querySelector(":scope > svg");
 		const icon = settingsNavIcons[link.pathname.split("/").pop() ?? ""];
 		if (!native || !icon || mounted.has(link)) {

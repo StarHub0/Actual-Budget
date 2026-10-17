@@ -1,7 +1,7 @@
 import { defineSetting } from "@features/types";
 import { mountToNodeWithReturn } from "@lib/utilities/svelte";
-import { NATIVE_NAV } from "./nav";
 import TabBar from "./TabBar.svelte";
+import { MOBILE_NAV } from "@lib/actual-dom";
 
 export const mobileTabBar = defineSetting({
 	type: "checkbox",
@@ -15,7 +15,7 @@ export const mobileTabBar = defineSetting({
 		defaultValue: false,
 	},
 	css: () => `
-		${NATIVE_NAV} {
+		${MOBILE_NAV} {
 			display: none !important;
 		}
 	`,

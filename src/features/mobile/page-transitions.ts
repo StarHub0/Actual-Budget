@@ -1,4 +1,5 @@
 import { defineSetting } from "@features/types";
+import { MAIN } from "@lib/actual-dom";
 
 // Each page renders its own role="main" body (the header stays mounted), so an animation on it
 // plays as each new page appears. A slide or zoom moves the page's fixed bars with it while it runs.
@@ -31,7 +32,7 @@ export const mobilePageTransitions = defineSetting({
 			return "";
 		}
 		return `
-			[role="main"] {
+			${MAIN} {
 				animation: abt-page-in ${value === "fade" ? "160ms ease-out" : "220ms cubic-bezier(0.2, 0.8, 0.2, 1)"};
 			}
 
@@ -42,7 +43,7 @@ export const mobilePageTransitions = defineSetting({
 			}
 
 			@media (prefers-reduced-motion: reduce) {
-				[role="main"] {
+				${MAIN} {
 					animation: none;
 				}
 			}

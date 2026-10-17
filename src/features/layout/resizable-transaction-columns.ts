@@ -6,6 +6,7 @@ import { watchRoute } from "@lib/utilities/route-watcher";
 import { getValue, setValue } from "@lib/utilities/store";
 import {
 	ACCOUNT_CELL,
+	AUTO_SIZER,
 	BALANCE_CELL,
 	CATEGORY_CELL,
 	CLEARED_CELL,
@@ -911,7 +912,7 @@ export const resizableTransactionColumns = defineSetting({
 				overscroll-behavior-x: none;
 				overscroll-behavior-y: none;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] ${TRANSACTION_TABLE} [data-auto-sizer] > .animated {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${TRANSACTION_TABLE} ${AUTO_SIZER} > .animated {
 				overflow-y: auto !important;
 				overflow-x: hidden !important;
 				overscroll-behavior-y: contain;

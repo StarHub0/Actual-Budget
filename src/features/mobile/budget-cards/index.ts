@@ -2,6 +2,7 @@ import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import {
 	ACCOUNT_NAME,
+	LISTBOX,
 	MOBILE_ACCOUNT_ROW,
 	MOBILE_BUDGET_GROUPS,
 	MOBILE_BUDGET_HEADER,
@@ -32,7 +33,7 @@ function markBudgetCards() {
 
 /** Joins each accounts heading to the list under it, as the budget's group cards do. */
 function markAccountCards() {
-	const list = document.querySelector(MOBILE_ACCOUNT_ROW)?.closest('[role="listbox"]');
+	const list = document.querySelector(MOBILE_ACCOUNT_ROW)?.closest(LISTBOX);
 	const page = list?.parentElement;
 	if (!page) {
 		return;

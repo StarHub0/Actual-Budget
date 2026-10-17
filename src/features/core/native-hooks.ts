@@ -3,7 +3,16 @@ import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { getCurrentPath, watchRoute } from "@lib/utilities/route-watcher";
 import { hasSettingsPages } from "@lib/utilities/settings-page";
-import { HELP_BUTTON, REPORTS_PAGE, ROW, SETTINGS, TABLE } from "@lib/actual-dom";
+import {
+	DIALOG,
+	HELP_BUTTON,
+	MAIN,
+	PAGE_COLUMN,
+	REPORTS_PAGE,
+	ROW,
+	SETTINGS,
+	TABLE,
+} from "@lib/actual-dom";
 
 // Settings' sub-pages first, so /settings/payees reads as Payees.
 const COLUMN_PAGES = [
@@ -48,7 +57,7 @@ export const nativeHooks = {
 			// pages nest in a single-child div.
 			if (!location.pathname.startsWith("/accounts")) {
 				for (const table of document.querySelectorAll(TABLE)) {
-					if (table.closest('[role="dialog"]')) {
+					if (table.closest(DIALOG)) {
 						continue;
 					}
 					let el: Element = table;
@@ -63,9 +72,9 @@ export const nativeHooks = {
 			}
 			// Bank sync's and some modals' tables have no table test id; the header row sits two
 			// levels under the frame.
-			const frames = [...document.querySelectorAll('[role="dialog"]')];
+			const frames = [...document.querySelectorAll(DIALOG)];
 			if (matchesPage(Page.BankSync)) {
-				frames.push(...document.querySelectorAll('[role="main"]'));
+				frames.push(...document.querySelectorAll(MAIN));
 			}
 			for (const frame of frames) {
 				const header = frame.querySelector(ROW);
@@ -74,9 +83,7 @@ export const nativeHooks = {
 				}
 			}
 			// The page's column, named so base.css can give each page's layout the same gutter.
-			const column = document.querySelector<HTMLElement>(
-				"[data-abt-content-grid] > div:nth-child(4)",
-			);
+			const column = document.querySelector<HTMLElement>(PAGE_COLUMN);
 			const path = getCurrentPath();
 			const shownPath = column ? pathOf(column, path) : path;
 			const page = COLUMN_PAGES.find((p) => shownPath.includes(`/${p}`)) ?? "";

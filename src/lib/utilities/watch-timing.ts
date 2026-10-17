@@ -1,4 +1,4 @@
-import { BUDGET_TABLE, TRANSACTION_TABLE } from "@lib/actual-dom";
+import { BUDGET_TABLE, MAIN, TRANSACTION_TABLE } from "@lib/actual-dom";
 /*
  * Dev builds only: times each DOM watcher run, named by the feature that started it. Slow runs
  * show as "abt:" marks in the browser's performance profile; for the totals, run
@@ -135,7 +135,7 @@ function listen(): void {
 	});
 }
 
-const PAGE = `${TRANSACTION_TABLE}, ${BUDGET_TABLE}, [role="main"]`;
+const PAGE = `${TRANSACTION_TABLE}, ${BUDGET_TABLE}, ${MAIN}`;
 
 /** Median time to restyle `el` from scratch: hidden then shown, then a style-only flush. */
 function restyle(el: HTMLElement): number {

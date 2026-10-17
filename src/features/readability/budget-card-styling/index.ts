@@ -6,7 +6,7 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { watchRoute } from "@lib/utilities/route-watcher";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import FlowBar from "./FlowBar.svelte";
-import { BUDGET_SUMMARY } from "@lib/actual-dom";
+import { AVAILABLE_FUNDS_CELL, BUDGET_SUMMARY, CELL, TO_BUDGET_CELL } from "@lib/actual-dom";
 
 const CSS = `
 	${BUDGET_SUMMARY} {
@@ -21,7 +21,7 @@ const CSS = `
 
 	/* ── "To Budget" section styling ─────────────────────────────── */
 
-	${BUDGET_SUMMARY} [data-cellname*="object Object"] span {
+	${BUDGET_SUMMARY} ${TO_BUDGET_CELL} span {
 		font-weight: 600 !important;
 	}
 
@@ -40,7 +40,7 @@ const CSS = `
 const SHEET_RE = /budget(\d{6})/;
 
 function getSheetName(card: HTMLElement): string | null {
-	for (const el of card.querySelectorAll("[data-cellname]")) {
+	for (const el of card.querySelectorAll(CELL)) {
 		const m = (el.getAttribute("data-cellname") || "").match(SHEET_RE);
 		if (m) {
 			return `budget${m[1]}`;
@@ -88,11 +88,11 @@ async function processCard(card: HTMLElement) {
 	}
 
 	// Style the "To Budget:" label
-	const toBudgetCell = card.querySelector<HTMLElement>('[data-cellname*="object Object"]');
+	const toBudgetCell = card.querySelector<HTMLElement>(TO_BUDGET_CELL);
 	if (toBudgetCell) {
 		const toBudgetSection = toBudgetCell.closest<HTMLElement>(`${BUDGET_SUMMARY} > div`);
 		if (toBudgetSection) {
-			const label = toBudgetSection.querySelector<HTMLElement>("div:not([data-cellname])");
+			const label = toBudgetSection.querySelector<HTMLElement>(`div:not(${CELL})`);
 			if (
 				label &&
 				label.textContent?.includes("To Budget") &&
@@ -104,7 +104,7 @@ async function processCard(card: HTMLElement) {
 	}
 
 	const breakdown = card
-		.querySelector<HTMLElement>('[data-cellname*="!available-funds"]')
+		.querySelector<HTMLElement>(AVAILABLE_FUNDS_CELL)
 		?.closest<HTMLElement>(`${BUDGET_SUMMARY} > div`);
 	if (!breakdown) {
 		return;
@@ -119,7 +119,7 @@ async function processCard(card: HTMLElement) {
 
 	// The card shows the four amounts read below, so they're only re-read once its text changes;
 	// otherwise every DOM change anywhere asked the backend again.
-	const shown = [...card.querySelectorAll("[data-cellname]")].map((c) => c.textContent).join("|");
+	const shown = [...card.querySelectorAll(CELL)].map((c) => c.textContent).join("|");
 	if (readFor.get(card) === shown) {
 		return;
 	}

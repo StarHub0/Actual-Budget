@@ -1,4 +1,3 @@
-import { CONTENT_GRID } from "@features/core/side-panel/api";
 import { dockInsightsTrigger } from "@features/workflows/template-plan";
 import { defineSetting } from "@features/types";
 import { isCalendarOpen } from "@features/workflows/spending-calendar";
@@ -13,7 +12,7 @@ import {
 	readShownMonths,
 } from "./native";
 import { budgetNav } from "./state.svelte";
-import { BUDGET_TABLE, SELECTED_MONTH } from "@lib/actual-dom";
+import { BUDGET_TABLE, CONTENT_GRID, SELECTED_MONTH } from "@lib/actual-dom";
 
 const NATIVE_HEADER_ATTR = "data-abt-native-month-header";
 const NATIVE_COUNT_ATTR = "data-abt-native-month-count";

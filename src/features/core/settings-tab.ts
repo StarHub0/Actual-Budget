@@ -2,13 +2,12 @@ import { navigate } from "@lib/utilities/actual-api";
 import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { isMobileView } from "@lib/utilities/pages";
 import {
-	SETTINGS_NAV_LINK,
 	TWEAKS_HASH,
 	TWEAKS_HOST_ATTR,
 	TWEAKS_SECTIONS_ATTR,
 	settingsNav,
 } from "@lib/utilities/settings-page";
-import { SETTINGS } from "@lib/actual-dom";
+import { SETTINGS, SETTINGS_NAV_LINK } from "@lib/actual-dom";
 
 const LINK_ATTR = "data-abt-tweaks-link";
 /** On Actual's settings nav, widened so the tab's section names fit on one line. */

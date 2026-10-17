@@ -1,13 +1,13 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { TAB_BAR_ATTR } from "../tab-bar/nav";
+import { TOAST } from "@lib/actual-dom";
 
 /*
  * Actual's toasts: a fixed stack holding one role="alert" per toast, each a card whose first
  * button closes it and whose next child holds the rows. The alert's text colour is the kind's.
  */
 const STACK_ATTR = "data-abt-m-toasts";
-const TOAST = '[role="alert"]';
 const CARD = `${TOAST} > div`;
 const CLOSE = `${CARD} > button:first-child`;
 const CONTENT = `${CARD} > div`;

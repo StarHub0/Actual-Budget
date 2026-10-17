@@ -1,6 +1,7 @@
 import { send } from "@lib/utilities/actual-api";
 import { readCell } from "@lib/utilities/budget-cells";
 import { getCurrencyCode } from "@lib/utilities/currency";
+import { CELL } from "@lib/actual-dom";
 
 /** What an action changed, so its toast can describe and undo it. */
 export interface ActionResult {
@@ -96,7 +97,7 @@ export async function undoSteps(steps: number): Promise<void> {
 
 /** Opens Actual's own To Budget menu, which is where over-assigning gets fixed. */
 export function openToBudgetMenu(toBudgetCard: Element | null | undefined): void {
-	const target = toBudgetCard?.querySelector<HTMLElement>("[data-cellname]") ?? toBudgetCard;
+	const target = toBudgetCard?.querySelector<HTMLElement>(CELL) ?? toBudgetCard;
 	// That menu closes when focus is outside it, and the clicked card button still holds focus.
 	(document.activeElement as HTMLElement | null)?.blur();
 	(target as HTMLElement | null)?.click();

@@ -1,6 +1,6 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
-import { MOBILE_BUDGET_HEADER } from "@lib/actual-dom";
+import { GRID, GRID_ROW, MOBILE_BUDGET_HEADER } from "@lib/actual-dom";
 
 // The budget's banners (uncategorized, overspent, over-budgeted) are a list above the table's
 // header. Each is a card whose content row holds the message and one action button.
@@ -23,12 +23,12 @@ function markBanners() {
 		return;
 	}
 	// Lists above the table's header; the category groups are lists too, but below it.
-	const lists = [...document.querySelectorAll('[role="grid"]')].filter(
+	const lists = [...document.querySelectorAll(GRID)].filter(
 		(grid) => header.compareDocumentPosition(grid) & Node.DOCUMENT_POSITION_PRECEDING,
 	);
 	let probe: HTMLElement | null = null;
 	for (const button of lists.flatMap((list) => [
-		...list.querySelectorAll<HTMLElement>('[role="row"] button'),
+		...list.querySelectorAll<HTMLElement>(`${GRID_ROW} button`),
 	])) {
 		const card = button.parentElement?.parentElement?.parentElement;
 		if (!card || card.hasAttribute(BANNER_ATTR)) {

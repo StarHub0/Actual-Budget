@@ -3,7 +3,7 @@ import { onListChange, query } from "@lib/utilities/actual-api";
 import { createElement } from "@lib/utilities/dom";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { getValue, setValue, watchValue } from "@lib/utilities/store";
-import { ACCOUNT_NAME, MOBILE_ACCOUNT_ROW } from "@lib/actual-dom";
+import { ACCOUNT_LINK, ACCOUNT_NAME, MOBILE_ACCOUNT_ROW } from "@lib/actual-dom";
 
 const ROOT_TOGGLE_ATTR = "data-abt-account-icons";
 const STORAGE_KEY_PREFIX = "abt-account-icons";
@@ -100,7 +100,7 @@ export async function removeAccountIcon(accountId: string): Promise<void> {
 /** The account page's title; the live sidebar draws its own icons. */
 function titleEls(): HTMLElement[] {
 	return [...document.querySelectorAll<HTMLElement>(ACCOUNT_NAME)].filter(
-		(el) => !el.closest("a[href^='/accounts/']"),
+		(el) => !el.closest(ACCOUNT_LINK),
 	);
 }
 

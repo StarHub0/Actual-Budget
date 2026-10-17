@@ -3,9 +3,9 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import FundingSection from "./FundingSection.svelte";
 import { loadGoalState, type GoalState } from "./goal-state";
+import { LEFTOVER_CELL, MENU } from "@lib/actual-dom";
 
 const SECTION_ATTR = "data-abt-goal-funding";
-const BALANCE_CELL = '[data-cellname*="!leftover-"]';
 /** How long after pressing a balance its popover may still appear. */
 const PENDING_MS = 3000;
 /** How long Actual's popover stays hidden waiting for goal data before showing anyway. */
@@ -27,7 +27,7 @@ let popoverObserver: MutationObserver | null = null;
 
 // Actual swaps the menu for a non-menu form when you pick Transfer or Cover.
 function showsMenu(popover: Element): boolean {
-	return !!popover.querySelector('[role="menu"]');
+	return !!popover.querySelector(MENU);
 }
 
 function stopObserving(): void {
@@ -40,7 +40,7 @@ function onPress(e: Event): void {
 	if (e instanceof KeyboardEvent && e.key !== "Enter" && e.key !== " ") {
 		return;
 	}
-	const cell = (e.target as Element | null)?.closest("button")?.querySelector(BALANCE_CELL);
+	const cell = (e.target as Element | null)?.closest("button")?.querySelector(LEFTOVER_CELL);
 	const match = cell?.getAttribute("data-cellname")?.match(/^(budget\d{6})!leftover-(.+)$/);
 	if (!match) {
 		return;

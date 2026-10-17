@@ -1,5 +1,6 @@
 import type { ActualTable, SendMethodMap, TableName } from "@lib/types/actual-schema";
 import { timeRequest } from "./watch-timing";
+import { BUDGET_LINK } from "@lib/actual-dom";
 
 let reqId = 0;
 
@@ -372,7 +373,7 @@ let budgetReadyPromise: Promise<void> | null = null;
  * to call it directly.
  */
 export function waitForBudget(): Promise<void> {
-	if (document.querySelector('a[href="/budget"]')) {
+	if (document.querySelector(BUDGET_LINK)) {
 		return Promise.resolve();
 	}
 	if (budgetReadyPromise) {
@@ -380,7 +381,7 @@ export function waitForBudget(): Promise<void> {
 	}
 	budgetReadyPromise = new Promise((resolve) => {
 		const obs = new MutationObserver(() => {
-			if (document.querySelector('a[href="/budget"]')) {
+			if (document.querySelector(BUDGET_LINK)) {
 				obs.disconnect();
 				budgetReadyPromise = null;
 				resolve();

@@ -1,6 +1,7 @@
 // Flags hand-written values that have a token in src/lib/styles/ui.css, so the scales don't
 // drift apart again, and Actual's hashed class names, which change with every Actual release.
-// Test-id selectors live in src/lib/actual-dom.ts, which the smoke test checks against Actual.
+// Selectors for Actual's DOM (test ids, roles, its links, cell names) live in
+// src/lib/actual-dom.ts, which the smoke test checks against Actual.
 // A deliberate exception carries a `raw:` comment on the same line,
 // e.g. `border-radius: 11px; /* raw: fixed to match the shortcut tiles */`.
 
@@ -25,7 +26,7 @@ const HASHED = {
 
 const REGISTRY = "src/lib/actual-dom.ts";
 const TEST_ID = {
-	re: /\[data-testid[\^*$]?=/g,
+	re: /\[data-testid[\^*$]?=|\[role=|\[data-(?:cellname|focus-key)\b|a\[href[\^*$]?=["']\/\w/g,
 	hint: `import the selector from ${REGISTRY}, adding it there if it's new`,
 };
 

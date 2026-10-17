@@ -1,3 +1,4 @@
+import { PAGE_COLUMN } from "@lib/actual-dom";
 export const bgPatterns: Record<string, string> = {
 	"Polka Dots":
 		"background-color: var(--ctp-crust, var(--color-pageBackground)); background-image: radial-gradient(var(--ctp-surface0, var(--color-tableBorder)) 0.5px, var(--ctp-crust, var(--color-pageBackground)) 0.5px); background-size: 10px 10px;",
@@ -12,5 +13,5 @@ export const bgPatterns: Record<string, string> = {
 
 export const BG_PATTERN_SELECTORS = `
 [data-abt-content-grid],
-[data-abt-content-grid] > div:nth-child(4)
+${PAGE_COLUMN}
 `;

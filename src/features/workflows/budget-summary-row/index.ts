@@ -17,9 +17,8 @@ import { summaryState } from "./state.svelte";
 import SummaryRow from "./SummaryRow.svelte";
 import TrackingMeta from "./TrackingMeta.svelte";
 import TrackingRow from "./TrackingRow.svelte";
-import { BUDGET_SUMMARY, BUDGET_TABLE, SELECTED_MONTH } from "@lib/actual-dom";
+import { BUDGET_SUMMARY, BUDGET_TABLE, CELL, SHOWN_MONTH } from "@lib/actual-dom";
 
-const SELECTED_CELL = `${SELECTED_MONTH}[data-month]`;
 const SINGLE_MONTH_ATTR = "data-abt-single-month";
 const MULTI_MONTH_ATTR = "data-abt-multi-month";
 const FULL_WIDTH_ATTR = "data-abt-summary-full-width";
@@ -105,7 +104,7 @@ function restoreNative(): void {
 
 function shownMonths(table: HTMLElement): string[] {
 	// Actual's month header (hidden by the month header feature, but still mounted).
-	return [...(table.parentElement?.querySelectorAll<HTMLElement>(SELECTED_CELL) ?? [])].map(
+	return [...(table.parentElement?.querySelectorAll<HTMLElement>(SHOWN_MONTH) ?? [])].map(
 		(cell) => cell.dataset.month!,
 	);
 }
@@ -143,7 +142,7 @@ function applyMode(table: HTMLElement): { months: string[]; cards: HTMLElement[]
 			continue;
 		}
 		for (const part of card.querySelectorAll(":scope > :last-child > * > * > :first-child")) {
-			part.toggleAttribute(MONTH_LABEL_ATTR, !single && !part.querySelector("[data-cellname]"));
+			part.toggleAttribute(MONTH_LABEL_ATTR, !single && !part.querySelector(CELL));
 		}
 	}
 	return { months, cards };
@@ -599,8 +598,8 @@ export const budgetSummaryRow = defineSetting({
 				display: none !important;
 			}
 		}
-		${ENVELOPE} ${MONTH_CARD} > :last-child [data-cellname],
-		${ENVELOPE} ${MONTH_CARD} > :last-child [data-cellname] * {
+		${ENVELOPE} ${MONTH_CARD} > :last-child ${CELL},
+		${ENVELOPE} ${MONTH_CARD} > :last-child ${CELL} * {
 			font-size: var(--abt-text-lg) !important;
 			font-weight: 650;
 			letter-spacing: 0;
@@ -608,8 +607,8 @@ export const budgetSummaryRow = defineSetting({
 			font-variant-numeric: tabular-nums;
 			color: var(--color-noticeTextLight) !important;
 		}
-		${ENVELOPE} ${MONTH_CARD}[data-abt-to-budget-negative] > :last-child [data-cellname],
-		${ENVELOPE} ${MONTH_CARD}[data-abt-to-budget-negative] > :last-child [data-cellname] * {
+		${ENVELOPE} ${MONTH_CARD}[data-abt-to-budget-negative] > :last-child ${CELL},
+		${ENVELOPE} ${MONTH_CARD}[data-abt-to-budget-negative] > :last-child ${CELL} * {
 			color: var(--color-errorText) !important;
 		}
 	`,

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CELL } from "@lib/actual-dom";
 	import { openInsights } from "@features/workflows/template-plan";
 	import { templatePlanState } from "@features/workflows/template-plan/state.svelte";
 	import Icon from "@lib/components/Icon.svelte";
@@ -69,7 +70,7 @@
 		}
 		let current: HTMLElement | null = null;
 		const find = () => {
-			const el = card.querySelector<HTMLElement>("[data-cellname] > span");
+			const el = card.querySelector<HTMLElement>(`${CELL} > span`);
 			if (el !== current) {
 				toBudgetAmount = current = el;
 			}

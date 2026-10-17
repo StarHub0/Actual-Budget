@@ -1,11 +1,12 @@
 import { sidepanel } from "@features/core/side-panel";
-import { CONTENT_GRID, SIDEBAR_ATTR } from "@features/core/side-panel/api";
+import { SIDEBAR_ATTR } from "@features/core/side-panel/api";
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, clearOverlayPage, matchesPage, setOverlayPage } from "@lib/utilities/pages";
 import { watchRoute } from "@lib/utilities/route-watcher";
 import { mount, unmount } from "svelte";
 import Calendar from "./Calendar.svelte";
+import { CONTENT_GRID, SCHEDULES_LINK } from "@lib/actual-dom";
 
 const LINK_ATTR = "data-abt-calendar-link";
 const CALENDAR_ATTR = "data-abt-calendar";
@@ -150,7 +151,7 @@ function injectSidebarLink(): void {
 		return;
 	}
 
-	const schedulesLink = document.querySelector('a[href="/schedules"]') as HTMLAnchorElement;
+	const schedulesLink = document.querySelector(SCHEDULES_LINK) as HTMLAnchorElement;
 	if (!schedulesLink) {
 		return;
 	}
@@ -218,7 +219,7 @@ function cleanup(unwatch: () => void, stopWatchingRoute: () => void): void {
 	document.body.classList.remove("abt-calendar-open");
 	document.querySelectorAll(`[${LINK_ATTR}]`).forEach((el) => {
 		const parent = el.parentElement;
-		if (parent && !parent.querySelector('a[href="/schedules"]')) {
+		if (parent && !parent.querySelector(SCHEDULES_LINK)) {
 			parent.remove();
 		} else {
 			el.remove();
@@ -241,10 +242,7 @@ export const spendingCalendar = defineSetting({
 		let injectedOnce = false;
 
 		const unwatch = watchDom(() => {
-			if (
-				!document.querySelector(`[${LINK_ATTR}]`) &&
-				document.querySelector('a[href="/schedules"]')
-			) {
+			if (!document.querySelector(`[${LINK_ATTR}]`) && document.querySelector(SCHEDULES_LINK)) {
 				if (!injectedOnce) {
 					injectedOnce = true;
 					injectSidebarLink();

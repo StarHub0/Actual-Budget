@@ -1,15 +1,13 @@
 import { defineSetting } from "@features/types";
 import PrivacyPicker from "./Picker.svelte";
-import { ACCOUNT_BALANCE } from "@lib/actual-dom";
+import { ACCOUNT_BALANCE, PRIVACY_COPY } from "@lib/actual-dom";
 
 /*
  * How hidden amounts look in privacy mode, for ABT's numbers and Actual's own. Actual's privacy
  * filter overlays a copy of each amount in a redacted script, revealed on hover; the copy is its
  * wrapper's second, aria-hidden child.
  */
-const REDACTED_COPY = `.abt-privacy-enabled
-	div:has(> div:first-child + div[aria-hidden="true"]:last-child)
-	> div[aria-hidden="true"]`;
+const REDACTED_COPY = `.abt-privacy-enabled ${PRIVACY_COPY}`;
 
 const ABT_AMOUNTS = `.abt-privacy-enabled .abt-privacy-number`;
 

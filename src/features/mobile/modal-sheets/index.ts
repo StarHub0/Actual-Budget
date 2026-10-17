@@ -1,11 +1,11 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
-import { AMOUNT_INPUT, MODAL } from "@lib/actual-dom";
+import { AMOUNT_INPUT, DIALOG, MODAL } from "@lib/actual-dom";
 
 // Every Actual modal: an overlay with a `<name>-modal` test id, a wrapper sized to the visible
 // viewport (so it clears the keyboard), react-aria's modal, the dialog, then the content box.
-const DIALOG = `${MODAL} [role="dialog"]`;
-const BOX = `${DIALOG} > div:first-of-type`;
+const MODAL_DIALOG = `${MODAL} ${DIALOG}`;
+const BOX = `${MODAL_DIALOG} > div:first-of-type`;
 // Actual's calculator field (no system keyboard); its keypad, fixed to the screen's bottom but
 // rendered inside the modal, comes right after it.
 const CALCULATOR_INPUT = `input${AMOUNT_INPUT}[inputmode="none"]`;
@@ -176,11 +176,11 @@ export const mobileModalSheets = defineSetting({
 		}
 
 		${MODAL} > div > div,
-		${DIALOG} {
+		${MODAL_DIALOG} {
 			width: 100%;
 		}
 
-		${DIALOG} {
+		${MODAL_DIALOG} {
 			animation: abt-sheet-up ${SHEET_MS}ms ${SHEET_EASE};
 		}
 
@@ -215,7 +215,7 @@ export const mobileModalSheets = defineSetting({
 		}
 
 		@media (prefers-reduced-motion: reduce) {
-			${DIALOG} {
+			${MODAL_DIALOG} {
 				animation: none;
 			}
 		}

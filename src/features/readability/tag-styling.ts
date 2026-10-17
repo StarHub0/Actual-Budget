@@ -1,11 +1,12 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import TagStylingPreview from "./previews/TagStyling.svelte";
+import { OPTION } from "@lib/actual-dom";
 
 const STORAGE_KEY = "tag-styling";
 const ATTR = "data-abt-tag";
 // Mobile draws a tag as a coloured span in the transaction list's rows, not a button.
-const MOBILE_TAG = '[role="option"] span[class]';
+const MOBILE_TAG = `${OPTION} span[class]`;
 
 const CSS = `
 	button[data-react-aria-pressable][data-abt-tag] {

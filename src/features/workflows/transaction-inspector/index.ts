@@ -11,7 +11,7 @@ import { type Mounted, mountToNodeWithReturn, mountToPanelBody } from "@lib/util
 import InspectButton from "./InspectButton.svelte";
 import Inspector from "./Inspector.svelte";
 import { inspector } from "./state.svelte";
-import { SELECT_CELL, TRANSACTION_TABLE } from "@lib/actual-dom";
+import { FOCUS_KEY, SELECT_CELL, TRANSACTION_TABLE } from "@lib/actual-dom";
 
 /*
  * A side panel that follows the transaction you select on an account page. Actual keys each row's
@@ -20,7 +20,7 @@ import { SELECT_CELL, TRANSACTION_TABLE } from "@lib/actual-dom";
 const OURS = "data-abt-inspect";
 const PANEL_KEY = "transaction-inspector";
 const PANEL_WIDTH = 340;
-const ROW = `${TRANSACTION_TABLE} [data-focus-key]`;
+const ROW = `${TRANSACTION_TABLE} ${FOCUS_KEY}`;
 const CHECKED = `${SELECT_CELL} svg`;
 
 let button: Mounted | null = null;

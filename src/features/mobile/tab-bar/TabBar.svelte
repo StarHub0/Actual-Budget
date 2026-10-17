@@ -1,26 +1,19 @@
 <script lang="ts">
+	import { MOBILE_NAV } from "@lib/actual-dom";
 	import { navigate } from "@lib/utilities/actual-api";
 	import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 	import { Ellipsis, Plus } from "@lucide/svelte";
 	import MoreSheet from "./MoreSheet.svelte";
-	import {
-		ADD_PATH,
-		isActive,
-		NATIVE_NAV,
-		type NavLink,
-		PRIMARY,
-		readLinks,
-		TAB_BAR_ATTR,
-	} from "./nav";
+	import { ADD_PATH, isActive, type NavLink, PRIMARY, readLinks, TAB_BAR_ATTR } from "./nav";
 
-	let native = $state<HTMLElement | null>(document.querySelector<HTMLElement>(NATIVE_NAV));
+	let native = $state<HTMLElement | null>(document.querySelector<HTMLElement>(MOBILE_NAV));
 	let links = $state<NavLink[]>([]);
 	let hidden = $state(false);
 	let path = $state(location.pathname);
 	let moreOpen = $state(false);
 
 	$effect(() =>
-		watchElement(NATIVE_NAV, () => (native = document.querySelector<HTMLElement>(NATIVE_NAV))),
+		watchElement(MOBILE_NAV, () => (native = document.querySelector<HTMLElement>(MOBILE_NAV))),
 	);
 	// Actual's own navigation slips past history watching, but always re-renders the page.
 	$effect(() =>

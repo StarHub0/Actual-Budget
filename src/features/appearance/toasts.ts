@@ -1,12 +1,12 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { TOAST } from "@lib/actual-dom";
 
 /*
  * Adapter CSS for Actual's notification toasts. role="alert" is unique to them; the card is its
  * child, the close button the card's first button. Actual colours the wrapper's text by kind
  * (success, error, warning), so the card's currentColor carries the kind's accent.
  */
-const TOAST = '[role="alert"]';
 const CARD = `${TOAST} > div`;
 const CLOSE = `${CARD} > button:first-child`;
 const CONTENT = `${CARD} > div`;

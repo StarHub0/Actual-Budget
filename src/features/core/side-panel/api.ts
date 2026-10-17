@@ -1,8 +1,4 @@
-import { ACCOUNT_NAME, BUDGET_TABLE } from "@lib/actual-dom";
 export const SIDEBAR_ATTR = "data-abt-side-drawer-sidebar";
-
-/** The app's main grid: nav sidebar, content column, and the side panel once opened. */
-export const CONTENT_GRID = `div:has(> div:nth-child(4)):has(${BUDGET_TABLE}, [role='main'], ${ACCOUNT_NAME})`;
 
 export const PANEL_OPEN_EVENT = "abt:sidepanel:open";
 export const PANEL_CLOSE_EVENT = "abt:sidepanel:close";

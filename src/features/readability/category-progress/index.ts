@@ -18,7 +18,7 @@ import {
 	type CatCells,
 } from "./cells";
 import ProgressPopover from "./ProgressPopover.svelte";
-import { BALANCE_CELL, CATEGORY_NAME, ROW } from "@lib/actual-dom";
+import { BALANCE_CELL, CATEGORY_NAME, CELL, ROW } from "@lib/actual-dom";
 
 const RING_CLASS = "abt-catprog-ring";
 const POPOVER_CLASS = "abt-catprog-popover";
@@ -213,9 +213,7 @@ function scanAndDecorate() {
 		return;
 	}
 
-	for (const span of document.querySelectorAll<HTMLElement>(
-		`${BALANCE_CELL} span[data-cellname]`,
-	)) {
+	for (const span of document.querySelectorAll<HTMLElement>(`${BALANCE_CELL} span${CELL}`)) {
 		const m = (span.getAttribute("data-cellname") || "").match(BALANCE_CELL_RE);
 		if (!m) {
 			continue;

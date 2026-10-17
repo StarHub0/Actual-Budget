@@ -56,7 +56,7 @@ import {
 } from "./state.svelte";
 import TemplatePlanPanel from "./TemplatePlanPanel.svelte";
 import { createLogger } from "@lib/utilities/logger";
-import { BUDGET_TABLE } from "@lib/actual-dom";
+import { BUDGET_LINK, BUDGET_TABLE } from "@lib/actual-dom";
 
 const log = createLogger("template-plan");
 
@@ -578,7 +578,7 @@ let wasOnBudgetPage = false;
 
 function tick(): void {
 	// Actual's own link to the budget exists only while a budget is open, so this catches every switch.
-	const loaded = !!document.querySelector('a[href="/budget"]');
+	const loaded = !!document.querySelector(BUDGET_LINK);
 	if (loaded && !budgetLoaded) {
 		void loadBudgetBreakdown();
 	}

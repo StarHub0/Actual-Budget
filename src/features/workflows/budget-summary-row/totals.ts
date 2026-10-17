@@ -3,6 +3,7 @@ import { readCell } from "@lib/utilities/budget-cells";
 import { loadCurrency } from "@lib/utilities/currency";
 import { addMonths, monthToSheet, sheetToMonth } from "@lib/utilities/months";
 import type { Shortfall } from "./actions";
+import { LEFTOVER_CELL } from "@lib/actual-dom";
 
 export interface MonthTotals {
 	toBudget: number;
@@ -49,7 +50,7 @@ function rememberTargets(has: boolean): void {
  */
 function categoryIds(): string[] {
 	const ids = new Set<string>();
-	for (const el of document.querySelectorAll('[data-cellname*="!leftover-"]')) {
+	for (const el of document.querySelectorAll(LEFTOVER_CELL)) {
 		const match = el.getAttribute("data-cellname")?.match(BALANCE_CELL_RE);
 		if (match) {
 			ids.add(match[2]);

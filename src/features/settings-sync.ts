@@ -4,12 +4,12 @@ import { createLogger } from "@lib/utilities/logger";
 import { getValue, hasValue, onSetValue, setValue } from "@lib/utilities/store";
 import { reapplySetting } from "./runtime";
 import type { Setting } from "./types";
+import { BUDGET_LINK } from "@lib/actual-dom";
 
 const log = createLogger("sync");
 
 /** Actual's synced prefs are one table shared with its own keys; ours never collide. */
 const PREFIX = "abt:";
-const BUDGET_LOADED = 'a[href="/budget"]';
 /** Settings kept outside a setting's own key: theme customisations and per-category/account looks. */
 const EXTRA_KEYS = [
 	"theme-auto-switch",
@@ -99,7 +99,7 @@ async function remoteKey(key: string): Promise<string> {
 	return id ? `${PREFIX}${id}:${key}` : PREFIX + key;
 }
 
-const isBudgetLoaded = () => !!document.querySelector(BUDGET_LOADED);
+const isBudgetLoaded = () => !!document.querySelector(BUDGET_LINK);
 
 // Chrome's storage hands objects back with their keys sorted, so key order can't count.
 function sameValue(a: unknown, b: unknown): boolean {

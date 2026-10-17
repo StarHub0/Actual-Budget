@@ -6,7 +6,7 @@ import type { Category } from "./priority-plan";
 import { templateEntriesFromGoalDef } from "./templates";
 import type { TemplateEntry } from "./templates";
 import { createLogger } from "@lib/utilities/logger";
-import { ENVELOPE_AMOUNT } from "@lib/actual-dom";
+import { BUDGET_LINK, ENVELOPE_AMOUNT } from "@lib/actual-dom";
 
 const log = createLogger("template-plan");
 
@@ -31,7 +31,7 @@ let categoriesPromise: Promise<Category[]> | null = null;
 // query()/send() already wait on the API bridge internally (waitForBudget),
 // so readiness here just needs to confirm the budget page has rendered.
 export function isBackendReady(): boolean {
-	if (!document.querySelector('a[href="/budget"]')) {
+	if (!document.querySelector(BUDGET_LINK)) {
 		return false;
 	}
 	return !!document.querySelector(ENVELOPE_AMOUNT);

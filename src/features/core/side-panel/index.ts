@@ -3,8 +3,8 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { clamp } from "@lib/utilities/math";
 import { getValue, hasValue, setValue } from "@lib/utilities/store";
 import { mount, unmount } from "svelte";
+import { CONTENT_GRID } from "@lib/actual-dom";
 import {
-	CONTENT_GRID,
 	PANEL_CLOSE_EVENT,
 	PANEL_DISMISS_EVENT,
 	PANEL_OPEN_EVENT,

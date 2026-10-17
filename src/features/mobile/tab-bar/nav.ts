@@ -13,7 +13,6 @@ import {
 } from "@lucide/svelte";
 
 /** Actual's slide-up drawer of page links, shown on its main mobile pages. */
-export const NATIVE_NAV = '[role="navigation"][data-navbar-state]';
 /** On <html> while the tab bar shows, for other tweaks that sit above it. */
 export const TAB_BAR_ATTR = "data-abt-m-tabbar";
 export const ADD_PATH = "/transactions/new";

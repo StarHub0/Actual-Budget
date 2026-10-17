@@ -3,11 +3,10 @@ import { dispatch, send, setLocalPref } from "@lib/utilities/actual-api";
 import { readCell } from "@lib/utilities/budget-cells";
 import { createLogger } from "@lib/utilities/logger";
 import { addMonths, currentMonth, monthKey, monthToSheet, parseMonth } from "@lib/utilities/months";
-import { SELECTED_MONTH } from "@lib/actual-dom";
+import { SHOWN_MONTH } from "@lib/actual-dom";
 
 const log = createLogger("month-header");
 
-const SELECTED_CELL = `${SELECTED_MONTH}[data-month]`;
 const SETTLE_MS = 1000;
 
 /** Actual's v2 calendar icon, used by its titlebar month-count selector. */
@@ -50,7 +49,7 @@ export function validStart(key: string, span: number, bounds: MonthBounds): stri
 
 /** The months Actual is showing, from its (hidden) month picker's selected cells. */
 export function readShownMonths(nativeHeader: Element): string[] {
-	return [...nativeHeader.querySelectorAll<HTMLElement>(SELECTED_CELL)].map(
+	return [...nativeHeader.querySelectorAll<HTMLElement>(SHOWN_MONTH)].map(
 		(cell) => cell.dataset.month!,
 	);
 }
@@ -99,8 +98,8 @@ function giveUp(reason: string): void {
 	fallbackHandler?.();
 }
 
-const shownStart = () => document.querySelector<HTMLElement>(SELECTED_CELL)?.dataset.month ?? null;
-const shownCount = () => document.querySelectorAll(SELECTED_CELL).length;
+const shownStart = () => document.querySelector<HTMLElement>(SHOWN_MONTH)?.dataset.month ?? null;
+const shownCount = () => document.querySelectorAll(SHOWN_MONTH).length;
 
 /**
  * Resolves once Actual's month picker shows the change. The deadline isn't polling: it's how
@@ -139,7 +138,7 @@ function monthsBetween(from: string, to: string): number {
 
 /** Clicks Actual's hidden picker cell for `key`, or its farthest cell toward it when out of range. */
 function clickNativeCell(key: string): boolean {
-	const first = document.querySelector<HTMLElement>(SELECTED_CELL);
+	const first = document.querySelector<HTMLElement>(SHOWN_MONTH);
 	const from = first?.dataset.month;
 	if (!first?.parentElement || !from) {
 		return false;

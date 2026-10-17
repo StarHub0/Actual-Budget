@@ -1,6 +1,7 @@
 /**
  * The hooks into Actual's DOM that ABT relies on, in one place: when an Actual update moves one,
- * this is the file to fix. Prefer test ids and structure over hashed classes and translated text.
+ * this is the file to fix. Prefer test ids, roles, links and structure over hashed classes and
+ * translated text.
  * No imports, so the smoke test (tests/smoke) can check these against a real Actual.
  */
 export const byTestId = (id: string) => `[data-testid="${id}"]`;
@@ -13,6 +14,39 @@ export const CELL = "[data-cellname]";
 export const TABLE = byTestId("table");
 /** Any modal, e.g. "schedule-edit-modal". */
 export const MODAL = '[data-testid$="-modal"]';
+/** Lets a cell name a row, e.g. a schedule's in the schedules table. */
+export const byFocusKey = (id: string) => `[data-focus-key="${id}"]`;
+export const FOCUS_KEY = "[data-focus-key]";
+
+// ── Roles ───────────────────────────────────────────────────────────────
+
+/** The page's own content, inside the content grid. */
+export const MAIN = '[role="main"]';
+export const DIALOG = '[role="dialog"]';
+export const MENU = '[role="menu"]';
+export const TOAST = '[role="alert"]';
+export const NAVIGATION = '[role="navigation"]';
+/** Mobile lists: transactions and accounts are listboxes of options, the budget a grid of rows. */
+export const LISTBOX = '[role="listbox"]';
+export const OPTION = '[role="option"]';
+export const GRID = '[role="grid"]';
+export const GRID_ROW = '[role="row"]';
+
+// ── Links ───────────────────────────────────────────────────────────────
+
+/** The sidebar's Budget link, rendered once a budget is open. */
+export const BUDGET_LINK = 'a[href="/budget"]';
+export const SCHEDULES_LINK = 'a[href="/schedules"]';
+export const SETTINGS_LINK = 'a[href="/settings"]';
+export const PAYEES_LINK = 'a[href="/payees"]';
+/** All accounts and each account. */
+export const ACCOUNTS_LINKS = 'a[href^="/accounts"]';
+/** Each account, not All accounts. */
+export const ACCOUNT_LINK = 'a[href^="/accounts/"]';
+/** Newer Actual's settings pages (actualbudget/actual#9110). */
+export const SETTINGS_PAGE_LINK = 'a[href^="/settings/"]';
+/** Its settings nav; older Actual lists every setting on one page. */
+export const SETTINGS_NAV_LINK = `${NAVIGATION} > a[href="/settings/general"]`;
 
 // ── Titlebar and sidebar ────────────────────────────────────────────────
 
@@ -53,6 +87,14 @@ export const SHEET_BALANCES =
 	"span[data-testid^='__global!balance-']:not([data-testid^='__global!balance-query']), span[data-testid$='-balance']";
 /** Envelope budgets' per-category amounts, e.g. "budget202610!sum-amount-<id>". */
 export const ENVELOPE_AMOUNT = '[data-testid^="budget2"][data-testid*="!sum-amount-"]';
+/** Spreadsheet cells by name: a category's leftover, envelope budgets' Available funds. */
+export const LEFTOVER_CELL = '[data-cellname*="!leftover-"]';
+export const AVAILABLE_FUNDS_CELL = '[data-cellname*="!available-funds"]';
+/** To Budget's cell, whose name Actual builds from an object, so it reads "[object Object]". */
+export const TO_BUDGET_CELL = '[data-cellname*="object Object"]';
+/** An account's balance cell, "__global!balance-<id>". */
+export const ACCOUNT_BALANCE_PREFIX = "__global!balance-";
+export const ACCOUNT_BALANCE_CELL = `[data-cellname^="${ACCOUNT_BALANCE_PREFIX}"]`;
 
 // ── Accounts and transaction tables ─────────────────────────────────────
 
@@ -75,6 +117,18 @@ export const SELECT_CELL = byTestId("select");
 export const GROUP_CELL = byTestId("group");
 export const PAYMENT_CELL = byTestId("payment");
 export const DEPOSIT_CELL = byTestId("deposit");
+/** The transaction table's virtualized list. */
+export const AUTO_SIZER = "[data-auto-sizer]";
+
+// ── Layout ──────────────────────────────────────────────────────────────
+
+/** The app's main grid: nav sidebar, titlebar, page column; only once a page has rendered. */
+export const CONTENT_GRID = `div:has(> div:nth-child(4)):has(${BUDGET_TABLE}, ${MAIN}, ${ACCOUNT_NAME})`;
+/** The page's column, under the grid native-hooks marks. */
+export const PAGE_COLUMN = "[data-abt-content-grid] > div:nth-child(4)";
+/** Actual's privacy filter: the real value, then a redacted copy over it, shown until hover. */
+export const PRIVACY_WRAPPER = 'div:has(> div:first-child + div[aria-hidden="true"]:last-child)';
+export const PRIVACY_COPY = `${PRIVACY_WRAPPER} > div[aria-hidden="true"]`;
 
 // ── Other pages ─────────────────────────────────────────────────────────
 
@@ -95,6 +149,7 @@ export const MOBILE_CATEGORY_ROW = byTestId("category-row");
 export const MOBILE_ACCOUNT_ROW = byTestId("account-list-item");
 /** A budget card's heading text. */
 export const MOBILE_HEADING_NAME = byTestId("name");
+export const MOBILE_NAV = `${NAVIGATION}[data-navbar-state]`;
 
 /**
  * What each page should have on a budget with a few accounts and Actual's default categories,
@@ -102,6 +157,12 @@ export const MOBILE_HEADING_NAME = byTestId("name");
  */
 export const PAGE_ANCHORS: Record<string, Record<string, string>> = {
 	"/budget": {
+		CONTENT_GRID,
+		PAGE_COLUMN,
+		BUDGET_LINK,
+		SCHEDULES_LINK,
+		ACCOUNT_LINK,
+		ACCOUNT_BALANCE_CELL,
 		HELP_BUTTON,
 		SIDEBAR_NAV,
 		ALL_ACCOUNTS_BALANCE,
@@ -114,12 +175,16 @@ export const PAGE_ANCHORS: Record<string, Record<string, string>> = {
 		BALANCE_CELL,
 		SHOWN_MONTH,
 		CELL,
+		LEFTOVER_CELL,
+		TO_BUDGET_CELL,
 	},
 	"/accounts": {
 		ACCOUNT_NAME,
 		ACCOUNT_BALANCE,
 		TRANSACTION_TABLE,
 		TRANSACTION_ROW,
+		FOCUS_KEY,
+		AUTO_SIZER,
 		DATE_CELL,
 		ACCOUNT_CELL,
 		PAYEE_CELL,
@@ -128,15 +193,24 @@ export const PAGE_ANCHORS: Record<string, Record<string, string>> = {
 		CLEARED_CELL,
 		SELECT_CELL,
 	},
-	"/reports": { REPORTS_PAGE },
+	"/reports": { REPORTS_PAGE, MAIN },
 	"/schedules": { TABLE },
 	"/payees": { TABLE },
 	"/rules": { TABLE },
-	"/settings": { SETTINGS },
+	"/settings": { SETTINGS, MAIN },
 };
 
 /** The same, below Actual's mobile breakpoint. */
 export const MOBILE_PAGE_ANCHORS: Record<string, Record<string, string>> = {
-	"/budget": { MOBILE_BUDGET_HEADER, MOBILE_BUDGET_GROUPS, MOBILE_GROUP_ROW, MOBILE_CATEGORY_ROW },
-	"/accounts": { MOBILE_ACCOUNT_ROW, ACCOUNT_NAME },
+	"/budget": {
+		MOBILE_NAV,
+		MAIN,
+		MOBILE_BUDGET_HEADER,
+		MOBILE_BUDGET_GROUPS,
+		MOBILE_GROUP_ROW,
+		MOBILE_CATEGORY_ROW,
+		GRID,
+		GRID_ROW,
+	},
+	"/accounts": { MOBILE_ACCOUNT_ROW, ACCOUNT_NAME, LISTBOX, OPTION },
 };

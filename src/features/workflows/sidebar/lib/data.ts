@@ -2,6 +2,13 @@ import type { Account, Transaction } from "@lib/types/actual-schema";
 import { calculate, dispatch, query, send } from "@lib/utilities/actual-api";
 import { readCell } from "@lib/utilities/budget-cells";
 import { findUncategorizedButton } from "@lib/utilities/native-ui";
+import {
+	ACCOUNT_BALANCE_CELL,
+	ACCOUNT_BALANCE_PREFIX,
+	ACCOUNT_LINK,
+	CELL,
+	GRID_ROW,
+} from "@lib/actual-dom";
 
 export type SyncStatus = "synced" | "syncing" | "error" | "manual";
 
@@ -144,7 +151,6 @@ export async function refreshSyncStatuses(accounts: SidebarAccount[]): Promise<s
 
 /** Set on the hidden native sidebar's root by index.ts; scopes reads away from the rest of the page. */
 export const NATIVE_ROOT_ATTR = "data-abt-native-sidebar-root";
-const BALANCE_CELL_PREFIX = "__global!balance-";
 
 /**
  * Native account balance cells keyed by account id, for both the classic sidebar (one `<a>`
@@ -153,11 +159,9 @@ const BALANCE_CELL_PREFIX = "__global!balance-";
 function readNativeBalanceCells(): Map<string, HTMLElement> {
 	const root = document.querySelector(`[${NATIVE_ROOT_ATTR}]`) ?? document;
 	const cells = new Map<string, HTMLElement>();
-	for (const cell of root.querySelectorAll<HTMLElement>(
-		`[data-cellname^="${BALANCE_CELL_PREFIX}"]`,
-	)) {
-		const id = cell.dataset.cellname?.slice(BALANCE_CELL_PREFIX.length);
-		if (id && cell.closest('a[href^="/accounts/"], [role="row"]')) {
+	for (const cell of root.querySelectorAll<HTMLElement>(ACCOUNT_BALANCE_CELL)) {
+		const id = cell.dataset.cellname?.slice(ACCOUNT_BALANCE_PREFIX.length);
+		if (id && cell.closest(`${ACCOUNT_LINK}, ${GRID_ROW}`)) {
 			cells.set(id, cell);
 		}
 	}
@@ -171,8 +175,8 @@ export function readNativeTotalsText(): string {
 	if (!root) {
 		return "";
 	}
-	return [...root.querySelectorAll<HTMLElement>("[data-cellname]")]
-		.filter((el) => !el.dataset.cellname?.startsWith(BALANCE_CELL_PREFIX))
+	return [...root.querySelectorAll<HTMLElement>(CELL)]
+		.filter((el) => !el.dataset.cellname?.startsWith(ACCOUNT_BALANCE_PREFIX))
 		.map((el) => `${el.dataset.cellname}=${el.textContent}`)
 		.join("|");
 }
