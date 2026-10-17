@@ -1,4 +1,5 @@
 import { defineSetting } from "@features/types";
+import { BUDGET_SCROLLER, BUDGET_SUMMARY, BUDGET_TOTALS } from "@lib/actual-dom";
 
 export const budgetPageBorders = defineSetting({
 	type: "checkbox",
@@ -12,17 +13,17 @@ export const budgetPageBorders = defineSetting({
 	},
 	css: () => `
 		/* /budget -- budget cards */
-		[data-testid="budget-summary"] {
+		${BUDGET_SUMMARY} {
 			border: var(--border);
 		}
 
 		/* /budget -- table header */
-		[data-testid="budget-totals"] {
+		${BUDGET_TOTALS} {
 			border: var(--border);
 		}
 
 		/* /budget -- table body. */
-		[data-testid="budget-table-scroll-container"] > div > div {
+		${BUDGET_SCROLLER} > div > div {
 			border: var(--border);
 			border-top: 0px;
 		}

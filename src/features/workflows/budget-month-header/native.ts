@@ -3,10 +3,11 @@ import { dispatch, send, setLocalPref } from "@lib/utilities/actual-api";
 import { readCell } from "@lib/utilities/budget-cells";
 import { createLogger } from "@lib/utilities/logger";
 import { addMonths, currentMonth, monthKey, monthToSheet, parseMonth } from "@lib/utilities/months";
+import { SELECTED_MONTH } from "@lib/actual-dom";
 
 const log = createLogger("month-header");
 
-const SELECTED_CELL = '[data-testid="selected-budget-month"][data-month]';
+const SELECTED_CELL = `${SELECTED_MONTH}[data-month]`;
 const SETTLE_MS = 1000;
 
 /** Actual's v2 calendar icon, used by its titlebar month-count selector. */

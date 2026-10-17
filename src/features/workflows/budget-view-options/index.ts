@@ -7,6 +7,7 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { getValue } from "@lib/utilities/store";
 import { openBudgetSettings } from "./settings";
+import { BUDGET_TOTALS } from "@lib/actual-dom";
 
 const GROUP_CLASS = "abt-view-options";
 
@@ -44,7 +45,7 @@ let insightsOn = categoryTemplateInsights.context.defaultValue;
 
 /** Bullseye toggles insight bars in one click; the sliders button opens Budget settings. */
 function injectControl(): void {
-	const bar = document.querySelector<HTMLElement>('[data-testid="budget-totals"]')
+	const bar = document.querySelector<HTMLElement>(BUDGET_TOTALS)
 		?.firstElementChild as HTMLElement | null;
 	const menuBtn = bar?.lastElementChild as HTMLElement | null;
 	if (!bar || !menuBtn || (group && bar.contains(group))) {

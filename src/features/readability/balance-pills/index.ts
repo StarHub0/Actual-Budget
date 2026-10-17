@@ -9,6 +9,7 @@ import {
 import { type BudgetTableChange, watchBudgetTable } from "@lib/utilities/budget-cells";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
+import { BALANCE_CELL } from "@lib/actual-dom";
 
 const STATUS_ATTR = "data-abt-balance-status";
 
@@ -92,7 +93,7 @@ function scan(): void {
 		return;
 	}
 	for (const span of document.querySelectorAll<HTMLElement>(
-		'[data-testid="balance"] span[data-cellname]',
+		`${BALANCE_CELL} span[data-cellname]`,
 	)) {
 		const match = span.getAttribute("data-cellname")?.match(BALANCE_CELL_RE);
 		if (!match) {

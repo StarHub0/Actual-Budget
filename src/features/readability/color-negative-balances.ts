@@ -1,21 +1,19 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
-
-const BALANCE_SELECTOR =
-	"span[data-testid^='__global!balance-']:not([data-testid^='__global!balance-query']), span[data-testid$='-balance']";
+import { SHEET_BALANCES } from "@lib/actual-dom";
 
 // Match both ASCII hyphen-minus (-) and Unicode minus sign (−, U+2212),
 // optionally followed by non-digit chars (currency symbols, spaces) before a digit.
 const SEARCH_PATTERN = /[-\u2212][^\d]*\d/;
 
 function setAccountBalanceColors() {
-	for (const el of document.querySelectorAll(BALANCE_SELECTOR)) {
+	for (const el of document.querySelectorAll(SHEET_BALANCES)) {
 		el.classList.toggle("error", SEARCH_PATTERN.test(el.textContent));
 	}
 }
 
 function cleanup() {
-	for (const el of document.querySelectorAll(BALANCE_SELECTOR)) {
+	for (const el of document.querySelectorAll(SHEET_BALANCES)) {
 		el.classList.remove("error");
 	}
 }

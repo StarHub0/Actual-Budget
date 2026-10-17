@@ -4,6 +4,26 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { watchRoute } from "@lib/utilities/route-watcher";
 import { getValue, setValue } from "@lib/utilities/store";
+import {
+	ACCOUNT_CELL,
+	BALANCE_CELL,
+	CATEGORY_CELL,
+	CLEARED_CELL,
+	CREDIT_CELL,
+	DATE_CELL,
+	DEBIT_CELL,
+	DEPOSIT_CELL,
+	GROUP_CELL,
+	NOTES_CELL,
+	PAYEE_CELL,
+	PAYMENT_CELL,
+	ROW,
+	SELECT_CELL,
+	TABLE,
+	TRANSACTION_HEADER,
+	TRANSACTION_TABLE,
+	byTestId,
+} from "@lib/actual-dom";
 
 type HeaderColumn =
 	"date" | "account" | "payee" | "notes" | "group" | "category" | "payment" | "deposit" | "balance";
@@ -379,7 +399,7 @@ function removeHandles(): void {
 }
 
 function getColumnCell(row: HTMLElement, testId: string): HTMLElement | null {
-	return row.querySelector<HTMLElement>(`[data-testid='${testId}']`);
+	return row.querySelector<HTMLElement>(byTestId(testId));
 }
 
 function isVisibleCell(cell: HTMLElement | null): cell is HTMLElement {
@@ -438,13 +458,13 @@ function findHeaderRow(): HTMLElement | null {
 		return ids.includes("date") && ids.some((id) => amountIds.has(id));
 	};
 
-	const header = document.querySelector<HTMLElement>("[data-testid='transaction-table-header']");
+	const header = document.querySelector<HTMLElement>(TRANSACTION_HEADER);
 	if (header && isHeaderLike(header)) {
 		return header;
 	}
 
 	// Older Actual versions render the header as a plain row.
-	const rows = document.querySelectorAll<HTMLElement>("[data-testid='row']");
+	const rows = document.querySelectorAll<HTMLElement>(ROW);
 	for (const row of rows) {
 		if (isHeaderLike(row)) {
 			return row;
@@ -454,7 +474,7 @@ function findHeaderRow(): HTMLElement | null {
 	// Fallback: derive a header-like container from known cell parents even when
 	// the row wrapper no longer exposes data-testid='row'.
 	const anchorCells = document.querySelectorAll<HTMLElement>(
-		"[data-testid='date'], [data-testid='payee'], [data-testid='account'], [data-testid='category']",
+		`${DATE_CELL}, ${PAYEE_CELL}, ${ACCOUNT_CELL}, ${CATEGORY_CELL}`,
 	);
 	const visited = new Set<HTMLElement>();
 	for (const cell of anchorCells) {
@@ -476,7 +496,7 @@ function findHeaderRow(): HTMLElement | null {
 }
 
 function getCellWidth(row: HTMLElement, testId: string): number {
-	const cell = row.querySelector<HTMLElement>(`[data-testid='${testId}']`);
+	const cell = row.querySelector<HTMLElement>(byTestId(testId));
 	return cell ? cell.getBoundingClientRect().width : 0;
 }
 
@@ -780,7 +800,7 @@ function stopObserving(): void {
 function amountColumnCss(column: AmountColumn, testIds: string[], rootSuffix = ""): string {
 	const root = `:root[${ROOT_TOGGLE_ATTR}="on"][${ROOT_FIXED_AMOUNTS_ATTR}~="${column}"]${rootSuffix}`;
 	return `
-		${testIds.map((id) => `${root} [data-testid="${id}"]`).join(",\n\t\t")} {
+		${testIds.map((id) => `${root} ${byTestId(id)}`).join(",\n\t\t")} {
 			width: var(--abt-col-${column}) !important;
 			min-width: var(--abt-col-${column}-min) !important;
 			max-width: var(--abt-col-${column}-max) !important;
@@ -799,27 +819,27 @@ export const resizableTransactionColumns = defineSetting({
 		defaultValue: true,
 	},
 	css: () => `
-			:root[${ROOT_TOGGLE_ATTR}="on"]:not([${ROOT_BUDGET_ATTR}]) [data-testid="row"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"]:not([${ROOT_BUDGET_ATTR}]) ${ROW} {
 				position: relative;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="account"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="payee"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="notes"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="group"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="category"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="payment"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="debit"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="deposit"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="credit"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="balance"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${ACCOUNT_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${PAYEE_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${NOTES_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${GROUP_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${CATEGORY_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${PAYMENT_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${DEBIT_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${DEPOSIT_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${CREDIT_CELL},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${BALANCE_CELL} {
 				position: relative;
 				padding-right: 8px;
 			}
 			/* Group isn't sortable, so Actual renders bare text without the 5px button padding the other headers get. */
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="transaction-table-header"] [data-testid="group"] span {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${TRANSACTION_HEADER} ${GROUP_CELL} span {
 				padding: 0 5px;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="select"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${SELECT_CELL} {
 				width: var(--abt-col-select, 20px) !important;
 				min-width: var(--abt-col-select-min, 20px) !important;
 				max-width: var(--abt-col-select-max, 20px) !important;
@@ -830,37 +850,37 @@ export const resizableTransactionColumns = defineSetting({
 				background-clip: padding-box;
                 overflow: hidden;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="date"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${DATE_CELL} {
 				width: var(--abt-col-date, 110px) !important;
 				min-width: var(--abt-col-date-min, 110px) !important;
 				max-width: var(--abt-col-date-max, 110px) !important;
 				flex: var(--abt-col-date-flex, 0 0 110px) !important;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="account"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${ACCOUNT_CELL} {
 				width: var(--abt-col-account, auto) !important;
 				min-width: var(--abt-col-account-min, 80px) !important;
 				max-width: var(--abt-col-account-max, none) !important;
 				flex: var(--abt-col-account-flex, 1 1 0px) !important;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="payee"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${PAYEE_CELL} {
 				width: var(--abt-col-payee, auto) !important;
 				min-width: var(--abt-col-payee-min, 80px) !important;
 				max-width: var(--abt-col-payee-max, none) !important;
 				flex: var(--abt-col-payee-flex, 1 1 0px) !important;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="notes"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${NOTES_CELL} {
 				width: var(--abt-col-notes, auto) !important;
 				min-width: var(--abt-col-notes-min, 80px) !important;
 				max-width: var(--abt-col-notes-max, none) !important;
 				flex: var(--abt-col-notes-flex, 1 1 0px) !important;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="group"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${GROUP_CELL} {
 				width: var(--abt-col-group, auto) !important;
 				min-width: var(--abt-col-group-min, 80px) !important;
 				max-width: var(--abt-col-group-max, none) !important;
 				flex: var(--abt-col-group-flex, 1 1 0px) !important;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="category"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${CATEGORY_CELL} {
 				width: var(--abt-col-category, auto) !important;
 				min-width: var(--abt-col-category-min, 80px) !important;
 				max-width: var(--abt-col-category-max, none) !important;
@@ -870,7 +890,7 @@ export const resizableTransactionColumns = defineSetting({
 			${amountColumnCss("payment", ["payment", "debit"])}
 			${amountColumnCss("deposit", ["deposit", "credit"])}
 			${amountColumnCss("balance", ["balance"], `:not([${ROOT_BUDGET_ATTR}])`)}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="cleared"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${CLEARED_CELL} {
 				width: var(--abt-col-cleared, 38px) !important;
 				min-width: var(--abt-col-cleared-min, 38px) !important;
 				max-width: var(--abt-col-cleared-max, 38px) !important;
@@ -881,17 +901,17 @@ export const resizableTransactionColumns = defineSetting({
 				z-index: 9;
 				background-clip: padding-box;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="transaction-table"] [data-testid="row"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${TRANSACTION_TABLE} ${ROW} {
 				overflow-x: hidden;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="transaction-table"],
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="table"] {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${TRANSACTION_TABLE},
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${TABLE} {
 				overflow-x: hidden !important;
 				overflow-y: hidden !important;
 				overscroll-behavior-x: none;
 				overscroll-behavior-y: none;
 			}
-			:root[${ROOT_TOGGLE_ATTR}="on"] [data-testid="transaction-table"] [data-auto-sizer] > .animated {
+			:root[${ROOT_TOGGLE_ATTR}="on"] ${TRANSACTION_TABLE} [data-auto-sizer] > .animated {
 				overflow-y: auto !important;
 				overflow-x: hidden !important;
 				overscroll-behavior-y: contain;

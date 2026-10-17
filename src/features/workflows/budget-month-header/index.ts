@@ -13,13 +13,13 @@ import {
 	readShownMonths,
 } from "./native";
 import { budgetNav } from "./state.svelte";
+import { BUDGET_TABLE, SELECTED_MONTH } from "@lib/actual-dom";
 
 const NATIVE_HEADER_ATTR = "data-abt-native-month-header";
 const NATIVE_COUNT_ATTR = "data-abt-native-month-count";
 const FULL_WIDTH_ATTR = "data-abt-full-width";
 // Actual sizes the table's box to a measured pixel width, which lags a frame behind the page.
 const FILL_ATTR = "data-abt-fill-width";
-const BUDGET_TABLE = '[data-testid="budget-table"]';
 
 let host: HTMLElement | null = null;
 let instance: ReturnType<typeof mount> | null = null;
@@ -89,9 +89,7 @@ function sync(): void {
 		return;
 	}
 	// Actual's own header stays mounted (hidden) as the source of truth for the shown months.
-	const native = [...parent.children].find((el) =>
-		el.querySelector('[data-testid="selected-budget-month"]'),
-	);
+	const native = [...parent.children].find((el) => el.querySelector(SELECTED_MONTH));
 	if (!native) {
 		return;
 	}

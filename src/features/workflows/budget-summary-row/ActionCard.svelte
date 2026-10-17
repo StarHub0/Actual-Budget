@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { BUDGET_SUMMARY } from "@lib/actual-dom";
 	import Icon from "@lib/components/Icon.svelte";
 	import { notify } from "@lib/utilities/actual-api";
 	import { bulkEdit } from "@lib/utilities/bulk-edit";
@@ -106,8 +107,7 @@
 				short: "Fix",
 				amount: -toBudget,
 				sub: "more than you have",
-				run: () =>
-					openToBudgetMenu(root?.closest('[data-testid="budget-summary"]')?.lastElementChild),
+				run: () => openToBudgetMenu(root?.closest(BUDGET_SUMMARY)?.lastElementChild),
 			};
 		}
 		if (coverable > 0) {

@@ -1,6 +1,7 @@
 import { defineSetting } from "@features/types";
 import { type IconName, iconMask } from "@lib/utilities/icons";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { HELP_BUTTON, NOTIFICATIONS_BUTTON, NOTIFICATIONS_COUNT } from "@lib/actual-dom";
 
 /*
  * Adapter CSS for Actual's titlebar cluster (uncategorized, privacy, notifications, sync,
@@ -13,11 +14,11 @@ const BAR_ATTR = "data-abt-titlebar";
 // Marked in JS: as a :has() anchor, Firefox tested it up the tree from every button with an svg
 // in the transaction rows, and blanked the table while restyling on fast scroll.
 const BAR = `[${BAR_ATTR}]`;
-const HELP = `${BAR} > div > [data-testid="help-menu-button"]`;
+const HELP = `${BAR} > div > ${HELP_BUTTON}`;
 const UNCATEGORIZED = `${BAR} > button:not(:has(svg))`;
 const STATUS = `${BAR} > div > div > button:not(:has(svg))`;
 // :has() can't nest, so the status's wrapper is told apart as the one with a button two levels down.
-const STATUS_SLOT = `${BAR} > div:has(> div > button):not(:has([data-testid="notifications-button"]))`;
+const STATUS_SLOT = `${BAR} > div:has(> div > button):not(:has(${NOTIFICATIONS_BUTTON}))`;
 // While syncing, Actual swaps the status for a bare "Connecting…" that fades in after a delay.
 const CONNECTING = `${BAR} > span`;
 const SYNC = `${BAR} > div > button:has(> div > svg)`;
@@ -52,8 +53,8 @@ const CSS = `
 		background: var(--abt-line);
 	}
 
-	${BAR} > div:has([data-testid="notifications-button"]),
-	${BAR} > div:has(> [data-testid="help-menu-button"]) {
+	${BAR} > div:has(${NOTIFICATIONS_BUTTON}),
+	${BAR} > div:has(> ${HELP_BUTTON}) {
 		order: 2;
 	}
 
@@ -91,11 +92,11 @@ const CSS = `
 
 	${swap(`${BAR} button:has(path[d^="M.2 10a11"])`, "eye")}
 	${swap(`${BAR} button:has(path[d^="m12.81 4.36"])`, "eyeOff")}
-	${swap(`${BAR} [data-testid="notifications-button"]`, "bell")}
+	${swap(`${BAR} ${NOTIFICATIONS_BUTTON}`, "bell")}
 	${swap(SYNC, "refreshCw")}
 	${swap(HELP, "helpCircle")}
 
-	[data-testid="notifications-unseen-count"] {
+	${NOTIFICATIONS_COUNT} {
 		top: 1px !important;
 		right: 0 !important;
 		min-width: 14px !important;
@@ -227,9 +228,7 @@ export const modernTitlebar = defineSetting({
 		let bar: Element | null = null;
 
 		const unwatch = watchDom(() => {
-			const next =
-				document.querySelector('[data-testid="help-menu-button"]')?.parentElement?.parentElement ??
-				null;
+			const next = document.querySelector(HELP_BUTTON)?.parentElement?.parentElement ?? null;
 			if (next === bar) {
 				return;
 			}

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { createLogger } from "@lib/utilities/logger";
+import { ROW, TRANSACTION_TABLE } from "@lib/actual-dom";
 
 const log = createLogger("bridge");
 
@@ -278,7 +279,7 @@ export default defineUnlistedScript(async () => {
 	// Marks the transaction rows Actual shows as new from a sync or import. That's its rows'
 	// `added` prop, which lives in React, out of content scripts' reach; its styling is a generated class.
 	document.addEventListener("abt:api:mark-new-rows", () => {
-		const rows = document.querySelectorAll('[data-testid="transaction-table"] [data-testid="row"]');
+		const rows = document.querySelectorAll(`${TRANSACTION_TABLE} ${ROW}`);
 		for (const row of rows) {
 			const key = Object.keys(row).find((k) => k.startsWith("__reactFiber$"));
 			let fiber = key ? row[key] : null;

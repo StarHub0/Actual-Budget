@@ -1,17 +1,17 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { matchesPage, Page } from "@lib/utilities/pages";
+import { REPORTS_PAGE } from "@lib/actual-dom";
 
 /*
  * The Reports page's title and dashboard buttons, held at the top while the widgets scroll under
  * them, with the border and height of ABT's other page headers. The page wrapper's top padding
  * moves into the header, so the header can stick flush under Actual's top bar.
  */
-const REPORTS = '[data-testid="reports-page"]';
 // Only a dashboard gets this header (marked in native-hooks), not a single report.
 const DASHBOARD_ATTR = "data-abt-reports-dashboard";
 // Not the spending calendar, which mounts over this page as another child of it.
-const PAGE = `${REPORTS}[${DASHBOARD_ATTR}] > div:not([data-abt-calendar])`;
+const PAGE = `${REPORTS_PAGE}[${DASHBOARD_ATTR}] > div:not([data-abt-calendar])`;
 const HEADER = `${PAGE} > div:first-of-type`;
 // Actual's "Reports:" ahead of the dashboard name, its own element.
 const TITLE = `${HEADER} > div:first-of-type`;
@@ -23,7 +23,7 @@ function measureTop() {
 	if (!matchesPage(Page.Reports)) {
 		return;
 	}
-	const reports = document.querySelector<HTMLElement>(REPORTS);
+	const reports = document.querySelector<HTMLElement>(REPORTS_PAGE);
 	const grid = reports?.closest<HTMLElement>("[data-abt-content-grid]");
 	if (!reports || !grid) {
 		return;
@@ -106,7 +106,7 @@ export const reportsHeader = defineSetting({
 		const stop = watchDom(measureTop);
 		return () => {
 			stop();
-			document.querySelector<HTMLElement>(REPORTS)?.style.removeProperty(TOP_VAR);
+			document.querySelector<HTMLElement>(REPORTS_PAGE)?.style.removeProperty(TOP_VAR);
 		};
 	},
 });

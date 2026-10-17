@@ -1,6 +1,7 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
+import { BUDGET_TABLE, BUDGET_TOTALS } from "@lib/actual-dom";
 
 export const hideMonthOnScroll = defineSetting({
 	type: "checkbox",
@@ -94,10 +95,8 @@ export const hideMonthOnScroll = defineSetting({
 				return;
 			}
 
-			const budgetTable = document.querySelector(
-				'[data-testid="budget-totals"]',
-			)?.nextElementSibling;
-			const monthSelection = document.querySelector('[data-testid="budget-table"]')
+			const budgetTable = document.querySelector(BUDGET_TOTALS)?.nextElementSibling;
+			const monthSelection = document.querySelector(BUDGET_TABLE)
 				?.previousElementSibling as HTMLElement | null;
 
 			if (budgetTable && monthSelection && !monthSelection.dataset.tmInitialized) {

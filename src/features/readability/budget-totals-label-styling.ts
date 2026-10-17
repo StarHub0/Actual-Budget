@@ -1,10 +1,9 @@
 import { defineSetting } from "@features/types";
+import { BUDGET_TOTAL_LABELS } from "@lib/actual-dom";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 
 const LABEL_ATTR = "data-abt-budget-total-label";
-const VALUE_SELECTOR =
-	'[data-testid*="!total-budgeted"], [data-testid*="!total-spent"], [data-testid*="!total-leftover"]';
 
 const CSS = `
 	[${LABEL_ATTR}] {
@@ -22,7 +21,7 @@ function styleLabels() {
 		return;
 	}
 
-	for (const value of document.querySelectorAll<HTMLElement>(VALUE_SELECTOR)) {
+	for (const value of document.querySelectorAll<HTMLElement>(BUDGET_TOTAL_LABELS)) {
 		const label = value.previousElementSibling;
 		if (label instanceof HTMLElement && label.tagName === "SPAN") {
 			label.setAttribute(LABEL_ATTR, "1");

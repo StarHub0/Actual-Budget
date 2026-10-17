@@ -16,7 +16,7 @@
 	import { cubicOut } from "svelte/easing";
 	import { fly } from "svelte/transition";
 	import CalendarFilters from "./CalendarFilters.svelte";
-	import { SCHEDULE_EDITOR } from "./schedules";
+	import { SCHEDULE_EDITOR } from "@lib/actual-dom";
 	import { loadFilters, saveFilters, type CalendarFilters as Filters } from "./filters";
 	import CalendarSkeleton from "./CalendarSkeleton.svelte";
 	import DayCell from "./DayCell.svelte";

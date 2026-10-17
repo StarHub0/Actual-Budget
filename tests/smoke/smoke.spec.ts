@@ -1,55 +1,85 @@
 import { type Page, expect, test } from "@playwright/test";
 
+import {
+	BUDGET_TABLE,
+	MOBILE_PAGE_ANCHORS,
+	PAGE_ANCHORS,
+	REPORTS_PAGE,
+} from "../../src/lib/actual-dom";
+import sections from "../../website/src/data/features.json" with { type: "json" };
+
 /**
- * Opens every page Actual has with every ABT tweak on, and fails on ABT errors or on a marker ABT
- * should have set. Catches the breakage type checks can't: an Actual release that moves an anchor.
+ * Opens every page Actual has with every ABT tweak on, and fails on ABT errors, on a marker ABT
+ * should have set, or on an Actual anchor ABT relies on. Catches the breakage type checks can't:
+ * an Actual release that moves an anchor.
+ *
+ * One test with a step per page, and soft checks, so a run lists everything that broke.
+ * Expects a fresh server: it sets the password and creates the budget.
  */
 
+interface ManifestSetting {
+	key: string;
+	type: string;
+	label: string;
+	platform: string;
+}
+
 const PASSWORD = "abt-smoke-test";
+const SETTINGS = (sections as { items: ManifestSetting[] }[]).flatMap((section) => section.items);
 const ABT_SCRIPT = "/abt/";
 
-let page: Page;
 const errors: string[] = [];
 
-function watchErrors(p: Page): void {
-	p.on("pageerror", (error) => {
+function watchErrors(page: Page): void {
+	page.on("pageerror", (error) => {
 		if (error.stack?.includes(ABT_SCRIPT)) {
 			errors.push(`uncaught: ${error.message}`);
 		}
 	});
-	p.on("console", (message) => {
+	page.on("console", (message) => {
 		if (message.type() === "error" && message.text().includes("ABT")) {
 			errors.push(`console: ${message.text()}`);
 		}
 	});
 }
 
-function expectNoErrors(): void {
-	expect(errors.splice(0), "ABT errors on this page").toEqual([]);
+/** A page's checks, as a step with its screenshot attached. */
+async function visit(page: Page, name: string, checks: () => Promise<void>): Promise<void> {
+	await test.step(name, async () => {
+		errors.length = 0;
+		await checks();
+		expect.soft(errors.splice(0), `ABT errors on ${name}`).toEqual([]);
+		await test.info().attach(name, { body: await page.screenshot(), contentType: "image/png" });
+	});
 }
 
-/** Sets the server password the first time, then signs in. */
-async function signIn(p: Page): Promise<void> {
-	await p.goto("/");
-	const confirm = p.getByRole("textbox", { name: "Confirm password" });
-	const signInBox = p.locator('input[type="password"]');
-	await expect(confirm.or(p.getByRole("button", { name: "Sign in" }))).toBeVisible();
-	if (await confirm.isVisible()) {
-		await p.getByRole("textbox", { name: "Password", exact: true }).fill(PASSWORD);
-		await confirm.fill(PASSWORD);
-		await confirm.press("Enter");
+async function expectAttached(page: Page, selector: string, what = selector): Promise<void> {
+	await expect.soft(page.locator(selector).first(), what).toBeAttached();
+}
+
+async function expectAnchors(page: Page, anchors: Record<string, string> = {}): Promise<void> {
+	for (const [name, selector] of Object.entries(anchors)) {
+		await expectAttached(page, selector, `Actual's ${name}: ${selector}`);
 	}
-	await expect(p.getByRole("button", { name: "Sign in" })).toBeVisible();
-	await signInBox.fill(PASSWORD);
-	await signInBox.press("Enter");
 }
 
-/** A fresh budget with an on-budget and an off-budget account, so the sidebar has both sections. */
-async function openBudget(p: Page): Promise<void> {
-	await p.getByRole("button", { name: "Start budgeting" }).click();
-	await expect(p.locator('[data-testid="budget-table"]')).toBeVisible();
-	await p.waitForFunction(() => typeof (window as { $send?: unknown }).$send === "function");
-	await p.evaluate(async () => {
+/** Sets the server password, signs in, and creates a budget with an on- and an off-budget account. */
+async function createBudget(page: Page): Promise<void> {
+	await page.goto("/");
+	const confirm = page.getByRole("textbox", { name: "Confirm password" });
+	await expect(confirm).toBeVisible();
+	await page.getByRole("textbox", { name: "Password", exact: true }).fill(PASSWORD);
+	await confirm.fill(PASSWORD);
+	await confirm.press("Enter");
+	const signIn = page.locator('input[type="password"]');
+	await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+	await signIn.fill(PASSWORD);
+	await signIn.press("Enter");
+
+	await page.getByRole("button", { name: "Start budgeting" }).click();
+	await expect(page.locator(BUDGET_TABLE)).toBeVisible({ timeout: 30_000 });
+	await page.waitForFunction(() => typeof (window as { $send?: unknown }).$send === "function");
+	await page.evaluate(async () => {
 		const send = (
 			window as unknown as { $send: (name: string, args?: unknown) => Promise<unknown> }
 		).$send;
@@ -59,10 +89,10 @@ async function openBudget(p: Page): Promise<void> {
 }
 
 /** ABT's settings: their own tab where Actual's settings have pages, else a card on the one page. */
-async function openTweaks(p: Page): Promise<void> {
-	await p.goto("/settings");
-	const tab = p.locator("[data-abt-tweaks-link]");
-	const panel = p.locator(".settings-page");
+async function openTweaks(page: Page): Promise<void> {
+	await page.goto("/settings");
+	const tab = page.locator("[data-abt-tweaks-link]");
+	const panel = page.locator(".settings-page");
 	await expect(tab.or(panel).first()).toBeVisible();
 	if (await tab.isVisible()) {
 		await tab.click();
@@ -70,14 +100,22 @@ async function openTweaks(p: Page): Promise<void> {
 	await expect(panel).toBeVisible();
 }
 
-/**
- * Turns on every switch in ABT's settings, one at a time so each feature starts on its own. A
- * setting that needs another one on sits in an inert row until that one is on.
- */
-async function enableEverything(p: Page): Promise<void> {
-	for (let guard = 0; guard < 200; guard++) {
-		// Marked as tried, so a switch that stays off (a sub-option of a picker, say) isn't retried.
-		const clicked = await p.evaluate(() => {
+/** Every checkbox setting on, stored the way the sidecar keeps it, then the rest by clicking. */
+async function enableEverything(page: Page): Promise<void> {
+	const keys = SETTINGS.filter((setting) => setting.type === "checkbox").map(
+		(setting) => setting.key,
+	);
+	await page.evaluate((keys) => {
+		for (const key of keys) {
+			localStorage.setItem(`local:${key}`, "true");
+		}
+	}, keys);
+	await page.reload();
+	await openTweaks(page);
+	// Switches inside custom settings aren't in the manifest. Each is marked as tried, so one that
+	// stays off (a sub-option of a picker, say) isn't retried.
+	for (let guard = 0; guard < 100; guard++) {
+		const clicked = await page.evaluate(() => {
 			const next = document.querySelector<HTMLInputElement>(
 				'.settings-page input[type="checkbox"]:not(:checked):not(:disabled):not([inert] input):not([data-smoke-tried])',
 			);
@@ -88,82 +126,73 @@ async function enableEverything(p: Page): Promise<void> {
 		if (!clicked) {
 			return;
 		}
-		// Lets the row it unlocks (a setting that needs this one) leave its inert state.
-		await p.waitForTimeout(50);
+		await page.waitForTimeout(50);
 	}
 	throw new Error("More switches than expected; the settings list may be re-rendering");
 }
 
-test.describe.serial("ABT on every page", () => {
-	test.beforeAll(async ({ browser }) => {
-		test.setTimeout(180_000);
-		page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-		watchErrors(page);
-		await signIn(page);
-		await openBudget(page);
-		await openTweaks(page);
+test("ABT on every page", async ({ page }) => {
+	test.setTimeout(300_000);
+	await page.setViewportSize({ width: 1400, height: 900 });
+	watchErrors(page);
+	await test.step("set up", async () => {
+		await createBudget(page);
 		await enableEverything(page);
-		errors.length = 0;
 	});
 
-	test.afterAll(async () => {
-		await page.close();
-	});
-
-	test.afterEach(async () => {
-		await test.info().attach("page", { body: await page.screenshot(), contentType: "image/png" });
-	});
-
-	test("budget", async () => {
+	await visit(page, "budget", async () => {
 		await page.goto("/budget");
-		await expect(page.locator('[data-testid="budget-table"]')).toBeVisible();
-		await expect(page.locator("[data-abt-live-sidebar]")).toBeAttached();
-		await expect(page.locator("[data-abt-header]")).toBeAttached();
-		await expect(page.locator("[data-abt-content-grid]")).toBeAttached();
-		expectNoErrors();
+		await expect(page.locator(BUDGET_TABLE)).toBeVisible();
+		await expectAttached(page, "[data-abt-live-sidebar]");
+		await expectAttached(page, "[data-abt-header]");
+		await expectAttached(page, "[data-abt-content-grid]");
+		await expectAnchors(page, PAGE_ANCHORS["/budget"]);
 	});
 
-	test("accounts", async () => {
+	await visit(page, "accounts", async () => {
 		await page.goto("/accounts");
-		await expect(page.locator('[data-abt-page="accounts"]')).toBeAttached();
-		await expect(page.locator("[data-abt-live-sidebar]")).toContainText("House");
-		expectNoErrors();
+		await expectAttached(page, '[data-abt-page="accounts"]');
+		await expect.soft(page.locator("[data-abt-live-sidebar]")).toContainText("House");
+		await expectAnchors(page, PAGE_ANCHORS["/accounts"]);
 	});
 
-	test("reports", async () => {
+	await visit(page, "reports", async () => {
 		await page.goto("/reports");
-		await expect(page.locator('[data-testid="reports-page"]')).toBeVisible();
-		await expect(page.locator("[data-abt-reports-dashboard]")).toBeAttached();
-		expectNoErrors();
+		await expect(page.locator(REPORTS_PAGE)).toBeVisible();
+		await expectAttached(page, "[data-abt-reports-dashboard]");
+		await expectAnchors(page, PAGE_ANCHORS["/reports"]);
 	});
 
-	test("schedules", async () => {
-		await page.goto("/schedules");
-		await expect(page.locator('[data-abt-page="schedules"]')).toBeAttached();
-		expectNoErrors();
-	});
-
-	// Newer Actual moves these under /settings/ and redirects the old addresses there.
-	for (const name of ["payees", "rules", "tags"]) {
-		test(name, async () => {
+	// Newer Actual moves payees, rules and tags under /settings/ and redirects the old addresses.
+	for (const name of ["schedules", "payees", "rules", "tags"]) {
+		await visit(page, name, async () => {
 			await page.goto(`/${name}`);
-			await expect(page.locator(`[data-abt-page="${name}"]`)).toBeAttached();
-			expectNoErrors();
+			await expectAttached(page, `[data-abt-page="${name}"]`);
+			await expectAnchors(page, PAGE_ANCHORS[`/${name}`]);
 		});
 	}
 
-	test("settings", async () => {
+	await visit(page, "settings", async () => {
 		await openTweaks(page);
-		await expect(page.locator(".settings-page .settings-section").first()).toBeVisible();
-		expectNoErrors();
+		await expectAnchors(page, PAGE_ANCHORS["/settings"]);
+		for (const setting of SETTINGS.filter((setting) => setting.platform !== "mobile")) {
+			const row = page.locator(`.settings-page [data-testid="${setting.key}"]`);
+			await expect.soft(row, `${setting.label} (${setting.key}) has a row`).toBeAttached();
+			if (setting.type === "checkbox") {
+				await expect
+					.soft(row.locator('input[type="checkbox"]'), `${setting.key} is on`)
+					.toBeChecked();
+			}
+		}
 	});
 
-	test("mobile", async () => {
-		await page.setViewportSize({ width: 420, height: 850 });
+	await page.setViewportSize({ width: 420, height: 850 });
+	await visit(page, "mobile", async () => {
 		await page.goto("/budget");
-		await expect(page.locator("[data-abt-content-grid]")).toBeAttached();
+		await expectAttached(page, "[data-abt-content-grid]");
+		await expectAnchors(page, MOBILE_PAGE_ANCHORS["/budget"]);
+		await page.goto("/accounts");
+		await expectAnchors(page, MOBILE_PAGE_ANCHORS["/accounts"]);
 		await openTweaks(page);
-		expectNoErrors();
-		await page.setViewportSize({ width: 1400, height: 900 });
 	});
 });

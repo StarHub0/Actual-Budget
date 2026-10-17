@@ -18,6 +18,7 @@ import {
 	type CatCells,
 } from "./cells";
 import ProgressPopover from "./ProgressPopover.svelte";
+import { BALANCE_CELL, CATEGORY_NAME, ROW } from "@lib/actual-dom";
 
 const RING_CLASS = "abt-catprog-ring";
 const POPOVER_CLASS = "abt-catprog-popover";
@@ -213,7 +214,7 @@ function scanAndDecorate() {
 	}
 
 	for (const span of document.querySelectorAll<HTMLElement>(
-		'[data-testid="balance"] span[data-cellname]',
+		`${BALANCE_CELL} span[data-cellname]`,
 	)) {
 		const m = (span.getAttribute("data-cellname") || "").match(BALANCE_CELL_RE);
 		if (!m) {
@@ -221,7 +222,7 @@ function scanAndDecorate() {
 		}
 		const [, sheet, catId] = m;
 
-		const host = span.closest("button") || span.closest<HTMLElement>('[data-testid="balance"]');
+		const host = span.closest("button") || span.closest<HTMLElement>(BALANCE_CELL);
 		if (!host) {
 			continue;
 		}
@@ -307,9 +308,8 @@ async function openPopover(ring: HTMLElement) {
 		return;
 	}
 
-	const row = ring.closest<HTMLElement>('[data-testid="row"]');
-	const name =
-		row?.querySelector('[data-testid="category-name"]')?.textContent?.trim() || "Category";
+	const row = ring.closest<HTMLElement>(ROW);
+	const name = row?.querySelector(CATEGORY_NAME)?.textContent?.trim() || "Category";
 
 	const [data, avgSpent, canFund] = await Promise.all([
 		fetchCells(sheet, catId, true),

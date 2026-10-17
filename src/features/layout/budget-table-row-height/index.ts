@@ -3,6 +3,7 @@ import { applyGlobalCSS } from "@lib/utilities/dom";
 import { desktopOnly } from "@lib/utilities/pages";
 import { getValue } from "@lib/utilities/store";
 import RowHeightPicker from "./Picker.svelte";
+import { BUDGET_TOTALS, ROW } from "@lib/actual-dom";
 
 export const budgetTableRowHeight = defineSetting({
 	type: "custom",
@@ -14,7 +15,7 @@ export const budgetTableRowHeight = defineSetting({
 		defaultValue: "2.25rem",
 		css: (value: string) =>
 			desktopOnly(`
-			div[data-testid="budget-totals"] + div div[data-testid="row"] {
+			div${BUDGET_TOTALS} + div div${ROW} {
 				height: ${value};
 				flex: 0 0 ${value};
 			}

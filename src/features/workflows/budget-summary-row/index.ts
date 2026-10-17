@@ -17,9 +17,9 @@ import { summaryState } from "./state.svelte";
 import SummaryRow from "./SummaryRow.svelte";
 import TrackingMeta from "./TrackingMeta.svelte";
 import TrackingRow from "./TrackingRow.svelte";
+import { BUDGET_SUMMARY, BUDGET_TABLE, SELECTED_MONTH } from "@lib/actual-dom";
 
-const BUDGET_TABLE = '[data-testid="budget-table"]';
-const SELECTED_CELL = '[data-testid="selected-budget-month"][data-month]';
+const SELECTED_CELL = `${SELECTED_MONTH}[data-month]`;
 const SINGLE_MONTH_ATTR = "data-abt-single-month";
 const MULTI_MONTH_ATTR = "data-abt-multi-month";
 const FULL_WIDTH_ATTR = "data-abt-summary-full-width";
@@ -43,8 +43,8 @@ const NOTE_MASK = iconMask("note");
  * Keyed to the table rather than each card: Actual renders a new month's card a frame
  * before sync() could mark it, and that frame would show the tall native card.
  */
-const SUMMARY_CARD = `[${SINGLE_MONTH_ATTR}] [data-testid="budget-summary"]`;
-const MONTH_CARD = `[${MULTI_MONTH_ATTR}] [data-testid="budget-summary"]`;
+const SUMMARY_CARD = `[${SINGLE_MONTH_ATTR}] ${BUDGET_SUMMARY}`;
+const MONTH_CARD = `[${MULTI_MONTH_ATTR}] ${BUDGET_SUMMARY}`;
 /*
  * Envelope cards end in Actual's To Budget, which the row keeps as its lead; tracking cards end
  * in Actual's totals and savings, which ABT's own cards replace. Set on <html> from the first frame.
@@ -84,9 +84,7 @@ function unmountAll(): void {
 function restoreNative(): void {
 	unmountAll();
 	releaseCarousel();
-	document
-		.querySelector<HTMLElement>('[data-testid="budget-table"]')
-		?.style.removeProperty("--abt-months");
+	document.querySelector<HTMLElement>(BUDGET_TABLE)?.style.removeProperty("--abt-months");
 	for (const attr of [
 		SINGLE_MONTH_ATTR,
 		MULTI_MONTH_ATTR,
@@ -134,7 +132,7 @@ function applyMode(table: HTMLElement): { months: string[]; cards: HTMLElement[]
 	table.toggleAttribute(SINGLE_MONTH_ATTR, single);
 	table.toggleAttribute(MULTI_MONTH_ATTR, months.length > 1);
 	table.parentElement?.toggleAttribute(FULL_WIDTH_ATTR, single);
-	const cards = [...table.querySelectorAll<HTMLElement>('[data-testid="budget-summary"]')];
+	const cards = [...table.querySelectorAll<HTMLElement>(BUDGET_SUMMARY)];
 	const current = currentMonth();
 	carouselRow(table)?.toggleAttribute(CAROUSEL_ATTR, true);
 	for (const card of cards) {
@@ -200,7 +198,7 @@ function releaseCarousel(): void {
 }
 
 const carouselRow = (table: HTMLElement) =>
-	table.querySelector<HTMLElement>('[data-testid="budget-summary"]')?.parentElement?.parentElement;
+	table.querySelector<HTMLElement>(BUDGET_SUMMARY)?.parentElement?.parentElement;
 
 /** Whether Actual's inline width and offset match the resting ones the CSS pins. */
 function carouselSettled(table: HTMLElement): boolean {

@@ -1,9 +1,9 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { MOBILE_BUDGET_HEADER } from "@lib/actual-dom";
 
 // The budget's banners (uncategorized, overspent, over-budgeted) are a list above the table's
 // header. Each is a card whose content row holds the message and one action button.
-const HEADER = '[data-testid="budget-table-header"]';
 const BANNER_ATTR = "data-abt-m-banner";
 
 /** Actual sets each banner's kind only as its background colour, so it's matched against the theme's. */
@@ -18,7 +18,7 @@ function kindOf(card: HTMLElement, probe: HTMLElement): string {
 }
 
 function markBanners() {
-	const header = document.querySelector(HEADER);
+	const header = document.querySelector(MOBILE_BUDGET_HEADER);
 	if (!header) {
 		return;
 	}

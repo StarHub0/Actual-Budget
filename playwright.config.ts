@@ -5,7 +5,8 @@ export default defineConfig({
 	testDir: "tests/smoke",
 	timeout: 90_000,
 	expect: { timeout: 15_000 },
-	retries: process.env.CI ? 1 : 0,
+	// A retry would find the server already set up.
+	retries: 0,
 	workers: 1,
 	reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
 	use: {

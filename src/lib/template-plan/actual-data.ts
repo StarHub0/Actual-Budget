@@ -6,6 +6,7 @@ import type { Category } from "./priority-plan";
 import { templateEntriesFromGoalDef } from "./templates";
 import type { TemplateEntry } from "./templates";
 import { createLogger } from "@lib/utilities/logger";
+import { ENVELOPE_AMOUNT } from "@lib/actual-dom";
 
 const log = createLogger("template-plan");
 
@@ -33,7 +34,7 @@ export function isBackendReady(): boolean {
 	if (!document.querySelector('a[href="/budget"]')) {
 		return false;
 	}
-	return !!document.querySelector('[data-testid^="budget2"][data-testid*="!sum-amount-"]');
+	return !!document.querySelector(ENVELOPE_AMOUNT);
 }
 
 export function waitForBackendReady(): Promise<void> {
@@ -127,9 +128,7 @@ export async function awaitSnapshotMonth(start: SnapshotDescriptor): Promise<Sna
 
 export function getVisibleSheets(): string[] {
 	try {
-		const cells = document.querySelectorAll(
-			'[data-testid^="budget2"][data-testid*="!sum-amount-"]',
-		);
+		const cells = document.querySelectorAll(ENVELOPE_AMOUNT);
 		const sheets = new Set<string>();
 		for (const c of Array.from(cells)) {
 			const m = c.getAttribute("data-testid")?.match(/^(budget\d{6})/);

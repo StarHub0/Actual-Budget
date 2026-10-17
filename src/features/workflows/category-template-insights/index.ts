@@ -23,13 +23,14 @@ import {
 } from "./data";
 import InsightsPopover from "./InsightsPopover.svelte";
 import type { CategoryInsight } from "./types";
+import { CATEGORY_NAME, ROW } from "@lib/actual-dom";
 
 const BAR_CLASS = "abt-cti-bar";
 const BAR_ATTR = "data-abt-cti-row";
 export const STATE_ATTR = "data-abt-cti-state";
 // The bars used to have their own hide flag; it is folded into this setting once (see init).
 const LEGACY_BARS_KEY = "abt-cti-bars-enabled";
-const ROW_SELECTOR = '[data-testid="row"]:has([data-testid="category-name"])';
+const ROW_SELECTOR = `${ROW}:has(${CATEGORY_NAME})`;
 const HOVER_DELAY_MS = 200;
 // Long enough to fold one edit's burst of cell updates into a single re-read.
 const REFRESH_MS = 100;
@@ -180,7 +181,7 @@ function decorateRow(row: HTMLElement, entry: CategoryInsight) {
 	}
 	updateRowBar(row, entry);
 
-	const nameCell = row.querySelector<HTMLElement>('[data-testid="category-name"]');
+	const nameCell = row.querySelector<HTMLElement>(CATEGORY_NAME);
 	if (nameCell) {
 		nameCell.style.cursor = "help";
 	}
@@ -203,7 +204,7 @@ function undecorateRow(row: HTMLElement) {
 		col.removeEventListener("mouseleave", onColMouseLeave);
 		delete (col as any).__abtCtiRow;
 	}
-	const nameCell = row.querySelector<HTMLElement>('[data-testid="category-name"]');
+	const nameCell = row.querySelector<HTMLElement>(CATEGORY_NAME);
 
 	if (nameCell) {
 		nameCell.style.removeProperty("cursor");

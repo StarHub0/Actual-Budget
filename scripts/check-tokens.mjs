@@ -1,5 +1,6 @@
 // Flags hand-written values that have a token in src/lib/styles/ui.css, so the scales don't
 // drift apart again, and Actual's hashed class names, which change with every Actual release.
+// Test-id selectors live in src/lib/actual-dom.ts, which the smoke test checks against Actual.
 // A deliberate exception carries a `raw:` comment on the same line,
 // e.g. `border-radius: 11px; /* raw: fixed to match the shortcut tiles */`.
 
@@ -20,6 +21,12 @@ const HASHED = {
 	// Emotion hashes always contain a digit, which keeps BEM names like `creator__css-input` out.
 	re: /(?<![\w-])css-(?=[a-z]*\d)[a-z0-9]{5,8}\b/g,
 	hint: "anchor on a data-testid, role, structure or a native-hooks data-abt-* marker",
+};
+
+const REGISTRY = "src/lib/actual-dom.ts";
+const TEST_ID = {
+	re: /\[data-testid[\^*$]?=/g,
+	hint: `import the selector from ${REGISTRY}, adding it there if it's new`,
 };
 
 const RULES = [
@@ -61,10 +68,13 @@ for (const base of SCAN) {
 	for (const file of walk(join(root, base))) {
 		const rel = relative(root, file);
 		const rules = SKIP.some((s) => rel.startsWith(s)) ? [HASHED] : [HASHED, ...RULES];
+		if (rel.startsWith("src/") && rel !== REGISTRY) {
+			rules.push(TEST_ID);
+		}
 		readFileSync(file, "utf8")
 			.split("\n")
 			.forEach((line, i) => {
-				if (line.includes("raw:")) {
+				if (line.includes("raw:") || /^\s*(\/\/|\*|\/\*)/.test(line)) {
 					return;
 				}
 				for (const { re, hint } of rules) {
@@ -76,11 +86,21 @@ for (const base of SCAN) {
 	}
 }
 
+// base.css can't import the registry, so each test id it uses must be listed there.
+const registry = readFileSync(join(root, REGISTRY), "utf8");
+readFileSync(join(root, "public/css/base.css"), "utf8")
+	.split("\n")
+	.forEach((line, i) => {
+		for (const m of line.matchAll(/\[data-testid([\^*$]?)="([^"]+)"\]/g)) {
+			if (!registry.includes(m[1] ? m[0] : `byTestId("${m[2]}")`)) {
+				problems.push(`public/css/base.css:${i + 1}  ${m[0]}  → add it to ${REGISTRY}`);
+			}
+		}
+	});
+
 if (problems.length) {
 	console.error(problems.join("\n"));
-	console.error(
-		`\n${problems.length} raw value(s) or hashed class(es). Mark deliberate ones with a "raw:" comment.`,
-	);
+	console.error(`\n${problems.length} problem(s). Mark deliberate ones with a "raw:" comment.`);
 	process.exit(1);
 }
 console.log("Tokens check passed.");

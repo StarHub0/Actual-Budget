@@ -1,10 +1,11 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
+import { byTestId } from "@lib/actual-dom";
 
 const NEW_ATTR = "data-abt-tx-new";
 const VALUE_CELLS = ["date", "payee", "notes", "category", "debit", "credit"]
-	.map((id) => `[data-testid="${id}"] > div`)
+	.map((id) => `${byTestId(id)} > div`)
 	.join(", ");
 
 // The bridge reads Actual's own `added` flag for each row, which content scripts can't see.

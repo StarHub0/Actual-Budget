@@ -1,3 +1,4 @@
+import { BUDGET_TABLE, TRANSACTION_TABLE } from "@lib/actual-dom";
 /*
  * Dev builds only: times each DOM watcher run, named by the feature that started it. Slow runs
  * show as "abt:" marks in the browser's performance profile; for the totals, run
@@ -134,7 +135,7 @@ function listen(): void {
 	});
 }
 
-const PAGE = '[data-testid="transaction-table"], [data-testid="budget-table"], [role="main"]';
+const PAGE = `${TRANSACTION_TABLE}, ${BUDGET_TABLE}, [role="main"]`;
 
 /** Median time to restyle `el` from scratch: hidden then shown, then a style-only flush. */
 function restyle(el: HTMLElement): number {

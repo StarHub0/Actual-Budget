@@ -16,6 +16,14 @@ import { Page, matchesPage } from "@lib/utilities/pages";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import FilterControl from "./FilterControl.svelte";
 import { filterState, type CategoryFilter } from "./state.svelte";
+import {
+	BALANCE_CELL,
+	BUDGETED_CELL,
+	BUDGET_TABLE,
+	BUDGET_TOTALS,
+	CATEGORY_NAME,
+	ROW,
+} from "@lib/actual-dom";
 
 const HIDDEN_ATTR = "data-abt-filter-hidden";
 const CONTROL_ATTR = "data-abt-category-filter";
@@ -47,13 +55,12 @@ function rowCategory(row: Element): string | null {
 }
 
 const isExpenseGroup = (row: Element) =>
-	!!row.querySelector('[data-testid="balance"]') &&
-	!row.querySelector('[data-testid="category-name"]');
+	!!row.querySelector(BALANCE_CELL) && !row.querySelector(CATEGORY_NAME);
 
 /** A category matches in any shown month, so multi-month views keep the same rows. */
 async function loadStatuses(table: HTMLElement): Promise<Map<string, Status>> {
 	const ids = new Set<string>();
-	for (const row of table.querySelectorAll('[data-testid="row"]')) {
+	for (const row of table.querySelectorAll(ROW)) {
 		const id = rowCategory(row);
 		if (id) {
 			ids.add(id);
@@ -108,7 +115,7 @@ function setHidden(row: Element, hidden: boolean): void {
 }
 
 function applyRows(table: HTMLElement): void {
-	const rows = [...table.querySelectorAll('[data-testid="row"]')];
+	const rows = [...table.querySelectorAll(ROW)];
 	if (!visible) {
 		for (const row of rows) {
 			setHidden(row, false);
@@ -165,7 +172,7 @@ async function refresh(table: HTMLElement, refreeze: boolean): Promise<void> {
 }
 
 function pick(filter: CategoryFilter): void {
-	const table = document.querySelector<HTMLElement>('[data-testid="budget-table"]');
+	const table = document.querySelector<HTMLElement>(BUDGET_TABLE);
 	filterState.filter = filter;
 	if (!table) {
 		return;
@@ -176,7 +183,7 @@ function pick(filter: CategoryFilter): void {
 /** In the month header like the mockup when it's on, else in the category column header. */
 function mountControl(table: HTMLElement): void {
 	const slot = document.querySelector(HEADER_SLOT);
-	const bar = table.querySelector('[data-testid="budget-totals"]')?.firstElementChild;
+	const bar = table.querySelector(BUDGET_TOTALS)?.firstElementChild;
 	const parent = slot ?? bar;
 	if (!parent || control?.node.parentElement === parent) {
 		return;
@@ -219,7 +226,7 @@ function onTableChange({ table, shown, changed, changedCells }: BudgetTableChang
 
 /** Drag-to-reorder would drop categories among rows the filter hides. */
 function blockDrag(e: DragEvent): void {
-	if (visible && (e.target as Element | null)?.closest?.('[data-testid="budget-table"]')) {
+	if (visible && (e.target as Element | null)?.closest?.(BUDGET_TABLE)) {
 		e.preventDefault();
 		e.stopPropagation();
 	}
@@ -243,21 +250,21 @@ function skipHiddenRows(e: KeyboardEvent): void {
 	if (!visible || (e.key !== "Enter" && e.key !== "Tab")) {
 		return;
 	}
-	const table = (e.target as Element | null)?.closest?.('[data-testid="budget-table"]');
-	const origin = (e.target as Element).closest('[data-testid="row"]');
+	const table = (e.target as Element | null)?.closest?.(BUDGET_TABLE);
+	const origin = (e.target as Element).closest(ROW);
 	if (!table || !origin) {
 		return;
 	}
 	// Waits for Actual to render the next editor, then moves it on if it landed in a hidden row.
 	pendingEdit?.disconnect();
 	pendingEdit = new MutationObserver(() => {
-		const input = table.querySelector<HTMLInputElement>('[data-testid="budget"] input');
+		const input = table.querySelector<HTMLInputElement>(`${BUDGETED_CELL} input`);
 		if (!input || input === e.target) {
 			return;
 		}
 		pendingEdit?.disconnect();
 		pendingEdit = null;
-		const landed = input.closest('[data-testid="row"]');
+		const landed = input.closest(ROW);
 		if (landed && isHiddenRow(landed)) {
 			moveEditor(table, origin, landed, input);
 		}
@@ -266,11 +273,9 @@ function skipHiddenRows(e: KeyboardEvent): void {
 }
 
 function moveEditor(table: Element, origin: Element, landed: Element, input: Element): void {
-	const rows = [...table.querySelectorAll('[data-testid="row"]')].filter(rowCategory);
+	const rows = [...table.querySelectorAll(ROW)].filter(rowCategory);
 	const step = rows.indexOf(landed) >= rows.indexOf(origin) ? 1 : -1;
-	const column = [...landed.querySelectorAll('[data-testid="budget"]')].indexOf(
-		input.closest('[data-testid="budget"]')!,
-	);
+	const column = [...landed.querySelectorAll(BUDGETED_CELL)].indexOf(input.closest(BUDGETED_CELL)!);
 	let target = origin;
 	for (let i = rows.indexOf(landed) + step; i >= 0 && i < rows.length; i += step) {
 		if (!isHiddenRow(rows[i])) {
@@ -279,7 +284,7 @@ function moveEditor(table: Element, origin: Element, landed: Element, input: Ele
 		}
 	}
 	// Past the last shown row, pressing the row it came from closes the editor.
-	const cell = target.querySelectorAll('[data-testid="budget"]')[column];
+	const cell = target.querySelectorAll(BUDGETED_CELL)[column];
 	if (cell) {
 		press(cell.firstElementChild ?? cell);
 	}
@@ -310,7 +315,7 @@ function sync(): void {
 		}
 		return;
 	}
-	const table = document.querySelector<HTMLElement>('[data-testid="budget-table"]');
+	const table = document.querySelector<HTMLElement>(BUDGET_TABLE);
 	if (!table) {
 		return;
 	}
@@ -340,14 +345,14 @@ export const budgetCategoryFilter = defineSetting({
 		[${HIDDEN_ATTR}] { display: none !important; }
 		[${CONTROL_ATTR}] { display: contents; }
 		/* Actual's category header row has no gap, so the control spaces itself from its icons. */
-		[data-testid="budget-totals"] [${CONTROL_ATTR}] > * { margin-right: var(--abt-space-2); }
+		${BUDGET_TOTALS} [${CONTROL_ATTR}] > * { margin-right: var(--abt-space-2); }
 	`,
 	init: () => {
 		changes = collectChanges(REFRESH_MS, () =>
 			tableShown ? refresh(tableShown, false) : undefined,
 		);
 		const unwatch = watchDom(sync);
-		const unwatchTable = watchElement('[data-testid="budget-table"]', sync);
+		const unwatchTable = watchElement(BUDGET_TABLE, sync);
 		const unwatchCells = watchBudgetTable(onTableChange);
 		const unwatchSlot = watchElement(HEADER_SLOT, sync);
 		document.addEventListener("dragstart", blockDrag, true);

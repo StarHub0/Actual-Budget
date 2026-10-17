@@ -1,4 +1,5 @@
 import { getCurrentPath } from "./route-watcher";
+import { SIDEBAR_NAV } from "@lib/actual-dom";
 
 /** Known top-level routes in the Actual Budget app, matched as a `pathname` substring. */
 export enum Page {
@@ -51,7 +52,7 @@ function usesNestedSettings(): boolean {
 	if (nestedSettings) {
 		return true;
 	}
-	const nav = document.querySelector('[data-testid="sidebar-primary-buttons"]');
+	const nav = document.querySelector(SIDEBAR_NAV);
 	nestedSettings =
 		!!document.querySelector('a[href^="/settings/"]') ||
 		(!!nav?.querySelector('a[href="/settings"]') && !nav.querySelector('a[href="/payees"]'));

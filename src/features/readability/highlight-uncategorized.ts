@@ -1,21 +1,22 @@
 import { defineSetting } from "@features/types";
 import HighlightUncategorizedPreview from "./previews/HighlightUncategorized.svelte";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { CATEGORY_CELL, ROW } from "@lib/actual-dom";
 
 const CSS = `
-	[data-testid="row"].abt-uncategorized {
+	${ROW}.abt-uncategorized {
 		background: color-mix(in srgb, var(--color-warningText) 12%, transparent) !important;
 	}
 
-	[data-testid="row"].abt-uncategorized > div {
+	${ROW}.abt-uncategorized > div {
 		border-color: transparent !important;
 	}
 `;
 
 function markRows() {
 	// From the category cells, so the budget table's rows (which have none) aren't visited.
-	for (const catCell of document.querySelectorAll('[data-testid="row"] [data-testid="category"]')) {
-		const row = catCell.closest('[data-testid="row"]');
+	for (const catCell of document.querySelectorAll(`${ROW} ${CATEGORY_CELL}`)) {
+		const row = catCell.closest(ROW);
 		const text = catCell.textContent?.trim() || "";
 		row?.classList.toggle("abt-uncategorized", text === "Categorize" || text === "");
 	}

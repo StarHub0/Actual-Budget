@@ -4,6 +4,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "border-radius",
+				"type": "custom",
+				"defaultValue": "0.5rem",
+				"platform": "desktop",
 				"label": "Border Radius",
 				"description": "Corner roundness for cards and buttons app-wide.",
 				"icon": null,
@@ -11,6 +15,10 @@
 				"writes": null
 			},
 			{
+				"key": "background-pattern",
+				"type": "custom",
+				"defaultValue": "None",
+				"platform": "desktop",
 				"label": "Background Pattern",
 				"description": "A subtle pattern behind the app background.",
 				"icon": null,
@@ -18,6 +26,10 @@
 				"writes": null
 			},
 			{
+				"key": "themed-scrollbars",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Themed Scrollbars",
 				"description": "Thin scrollbars tinted to match the theme.",
 				"icon": "sliders",
@@ -25,6 +37,10 @@
 				"writes": null
 			},
 			{
+				"key": "header-border",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Header Border",
 				"description": "Add a border under the top navigation bar.",
 				"icon": "square",
@@ -32,6 +48,10 @@
 				"writes": null
 			},
 			{
+				"key": "privacy-style",
+				"type": "select",
+				"defaultValue": "script",
+				"platform": "desktop",
 				"label": "Privacy Style",
 				"description": "How amounts look while privacy mode hides them.",
 				"icon": "eyeOff",
@@ -39,6 +59,10 @@
 				"writes": null
 			},
 			{
+				"key": "modern-titlebar",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Modern Titlebar",
 				"description": "Restyles the top bar's buttons with matching icons and status chips.",
 				"icon": "layout",
@@ -46,6 +70,10 @@
 				"writes": null
 			},
 			{
+				"key": "modern-toasts",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Modern Toasts",
 				"description": "Restyles notifications as compact cards with a coloured accent.",
 				"icon": "layout",
@@ -59,6 +87,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "experimental-sidebar",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Live sidebar",
 				"description": "ABT's sidebar, with live balances, account groups, search and shortcuts. Off shows Actual's own.",
 				"icon": null,
@@ -66,6 +98,10 @@
 				"writes": "Renames an account or runs its bank sync when you do so from the sidebar."
 			},
 			{
+				"key": "experimental-sidebar-layout-mode",
+				"type": "custom",
+				"defaultValue": "split",
+				"platform": "desktop",
 				"label": "Live sidebar layout",
 				"description": "Standard sidebar, or an icon bar with a separate accounts panel. Applies when the live sidebar is on.",
 				"icon": null,
@@ -73,6 +109,10 @@
 				"writes": null
 			},
 			{
+				"key": "actual-sidebar-account-spacing",
+				"type": "custom",
+				"defaultValue": ".15rem",
+				"platform": "desktop",
 				"label": "Sidebar Density",
 				"description": "Adjust the spacing of accounts, nav links, and search in the live sidebar.",
 				"icon": null,
@@ -80,6 +120,10 @@
 				"writes": null
 			},
 			{
+				"key": "sidebar-search-enabled",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Sidebar Search Bar",
 				"description": "Quickly filter accounts, categories, and pages.",
 				"icon": "search",
@@ -87,6 +131,10 @@
 				"writes": null
 			},
 			{
+				"key": "sidebar-shortcuts-enabled",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Sidebar Shortcuts",
 				"description": "Pin quick links and tools to the sidebar.",
 				"icon": "star",
@@ -94,6 +142,10 @@
 				"writes": null
 			},
 			{
+				"key": "account-icon-picker",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "all",
 				"label": "Account Icon Picker",
 				"description": "Set a custom favicon or emoji icon per account.",
 				"icon": "image",
@@ -101,6 +153,10 @@
 				"writes": null
 			},
 			{
+				"key": "sidebar-group-totals",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Account Group Totals",
 				"description": "Show each account group's combined balance beside its name.",
 				"icon": "calculator",
@@ -108,6 +164,10 @@
 				"writes": null
 			},
 			{
+				"key": "actual-balancecolors",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Color Negative Account Balances",
 				"description": "Highlight negative account balances in red.",
 				"icon": "palette",
@@ -121,6 +181,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "actual-slimmer-budgetrows",
+				"type": "custom",
+				"defaultValue": "2.25rem",
+				"platform": "desktop",
 				"label": "Budget Table Row Height",
 				"description": "Adjust how tall each budget table row is.",
 				"icon": null,
@@ -128,6 +192,10 @@
 				"writes": null
 			},
 			{
+				"key": "hide-months-on-scroll",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Hide Month Selection On Scroll",
 				"description": "Collapse the month navigation row while scrolling the budget table.",
 				"icon": "calendar",
@@ -135,6 +203,10 @@
 				"writes": null
 			},
 			{
+				"key": "budget-page-borders",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Budget Page Borders",
 				"description": "Add borders around sections of the budget table.",
 				"icon": "square",
@@ -142,6 +214,10 @@
 				"writes": null
 			},
 			{
+				"key": "budget-card-styling",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Budget Card Styling",
 				"description": "Add a spending flow bar to the current month's budget card.",
 				"icon": "networth",
@@ -149,6 +225,10 @@
 				"writes": null
 			},
 			{
+				"key": "category-progress-indicators",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Category Progress Indicators",
 				"description": "A progress ring next to each budget balance — hover for spending details.",
 				"icon": "gauge",
@@ -156,6 +236,10 @@
 				"writes": null
 			},
 			{
+				"key": "balance-status-pills",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Balance Status Pills",
 				"description": "Show goal balances as funded, underfunded or overspent pills.",
 				"icon": "gauge",
@@ -163,6 +247,10 @@
 				"writes": null
 			},
 			{
+				"key": "actual-daily",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Show Daily Available",
 				"description": "Show what an account's balance allows per day for the rest of the month.",
 				"icon": "calculator",
@@ -170,6 +258,10 @@
 				"writes": null
 			},
 			{
+				"key": "budget-totals-label-styling",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Budget Totals Label Styling",
 				"description": "Mute and uppercase the Budgeted/Spent/Balance labels.",
 				"icon": "layout",
@@ -177,6 +269,10 @@
 				"writes": null
 			},
 			{
+				"key": "category-color-dots",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Category Color Dots",
 				"description": "Show a colored dot for each transaction's category.",
 				"icon": "palette",
@@ -184,6 +280,10 @@
 				"writes": null
 			},
 			{
+				"key": "category-emoji-picker",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Category Emoji Picker",
 				"description": "Set a custom emoji icon for each category.",
 				"icon": "image",
@@ -191,6 +291,10 @@
 				"writes": "Adds the emoji you pick to the category's name."
 			},
 			{
+				"key": "actual-template-apply-breakdown",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Budget Insights",
 				"description": "Month summary, template breakdowns, and priority planning in a side panel.",
 				"icon": "layout",
@@ -198,6 +302,10 @@
 				"writes": "Applies the month's budget templates when you click Apply."
 			},
 			{
+				"key": "next-month-coverage-method",
+				"type": "select",
+				"defaultValue": "goal-templates",
+				"platform": "desktop",
 				"label": "Next Month Coverage Method",
 				"description": "Choose the target used by Next Month Coverage in Plan → Overview.",
 				"icon": "layout",
@@ -205,6 +313,10 @@
 				"writes": null
 			},
 			{
+				"key": "actual-category-template-insights",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Category Template Insights",
 				"description": "Progress bars showing how funded each category's template is.",
 				"icon": "interest",
@@ -212,6 +324,10 @@
 				"writes": null
 			},
 			{
+				"key": "cti-hide-funded",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Quiet Funded Bars",
 				"description": "Leave fully funded categories as an empty track, so the ones still needing money stand out.",
 				"icon": "eyeOff",
@@ -219,6 +335,10 @@
 				"writes": null
 			},
 			{
+				"key": "goal-funding",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Goal Funding",
 				"description": "Click a category's balance to see its goal progress and assign money to an underfunded goal.",
 				"icon": "interest",
@@ -232,6 +352,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "alternating-transaction-rows",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Alternating Transaction Row Colors",
 				"description": "Zebra-stripe the transaction table for easier scanning.",
 				"icon": "rows",
@@ -239,6 +363,10 @@
 				"writes": null
 			},
 			{
+				"key": "actual-amountcolors",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Color Transactions",
 				"description": "Color negative and positive transactions.",
 				"icon": "palette",
@@ -246,6 +374,10 @@
 				"writes": null
 			},
 			{
+				"key": "dim-reconciled",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Dim Reconciled Transactions",
 				"description": "Fade reconciled rows in the transaction table.",
 				"icon": "eyeOff",
@@ -253,6 +385,10 @@
 				"writes": null
 			},
 			{
+				"key": "highlight-uncategorized",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Highlight Uncategorized Transactions",
 				"description": "Flag transactions that are missing a category.",
 				"icon": "star",
@@ -260,6 +396,10 @@
 				"writes": null
 			},
 			{
+				"key": "new-transaction-style",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Quiet New Transactions",
 				"description": "Mark newly imported transactions with an accent bar instead of bold colored text.",
 				"icon": "sparkles",
@@ -267,6 +407,10 @@
 				"writes": null
 			},
 			{
+				"key": "tag-styling",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "all",
 				"label": "Tag Styling",
 				"description": "Color #tags in notes and transaction fields.",
 				"icon": "palette",
@@ -274,6 +418,10 @@
 				"writes": null
 			},
 			{
+				"key": "resizable-transaction-columns",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Resizable Transaction Columns",
 				"description": "Drag column edges to resize the transaction table.",
 				"icon": "layout",
@@ -281,6 +429,10 @@
 				"writes": null
 			},
 			{
+				"key": "modern-account-toolbar",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Modern Account Toolbar",
 				"description": "Restyles the account page's actions, search and icon buttons with matching icons.",
 				"icon": "layout",
@@ -288,6 +440,10 @@
 				"writes": null
 			},
 			{
+				"key": "modern-reconcile",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Modern Reconcile",
 				"description": "Reconcile in a side panel: live balances, clear transactions from a list, one-click adjustment and undo.",
 				"icon": "shield",
@@ -295,6 +451,10 @@
 				"writes": "Clears transactions you tick, adds an adjustment if you ask, and locks them when you finish."
 			},
 			{
+				"key": "sync-recap",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Sync recap",
 				"description": "After a bank sync or import, review what came in and categorize it in the side panel.",
 				"icon": "download",
@@ -302,6 +462,10 @@
 				"writes": "Sets a transaction's category when you pick one in the recap."
 			},
 			{
+				"key": "transaction-inspector",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Transaction Inspector",
 				"description": "Inspect the transaction you select in a side panel: payee history, the rules that mention it, and its schedule.",
 				"icon": "eye",
@@ -315,6 +479,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "report-card-color-dark",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Dark Report Cards",
 				"description": "Use a darker background for widget cards on the Reports page.",
 				"icon": "palette",
@@ -322,6 +490,10 @@
 				"writes": null
 			},
 			{
+				"key": "report-card-borders",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Report Card Borders",
 				"description": "Add borders around widget cards on the Reports page.",
 				"icon": "square",
@@ -329,6 +501,10 @@
 				"writes": null
 			},
 			{
+				"key": "reports-header",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Modern Reports Header",
 				"description": "Keep the Reports title and dashboard buttons in view while scrolling, titled as a quiet breadcrumb.",
 				"icon": "layout",
@@ -336,6 +512,10 @@
 				"writes": null
 			},
 			{
+				"key": "spending-calendar-enabled",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Spending Calendar",
 				"description": "A calendar view of daily spending, added to the sidebar.",
 				"icon": "calendar",
@@ -343,6 +523,10 @@
 				"writes": null
 			},
 			{
+				"key": "income-breakdown",
+				"type": "checkbox",
+				"defaultValue": true,
+				"platform": "desktop",
 				"label": "Income Breakdown widget",
 				"description": "Adds an Income Breakdown chart to the Reports dashboard's Add widget menu.",
 				"icon": "trendingUp",
@@ -356,6 +540,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "mobile-header",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Header",
 				"description": "Gives page headers a native look: the page's colour, a hairline, and a plain title.",
 				"icon": "layout",
@@ -363,6 +551,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-tab-bar",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Tab bar",
 				"description": "Replaces the slide-up menu with a tab bar, and puts the other pages under More.",
 				"icon": "layout",
@@ -370,6 +562,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-cards",
+				"type": "select",
+				"defaultValue": "off",
+				"platform": "mobile",
 				"label": "Cards",
 				"description": "Budget groups, account lists and report widgets as rounded cards, or flush sections.",
 				"icon": "square",
@@ -377,6 +573,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-accounts",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Accounts",
 				"description": "Lists accounts in your sidebar groups, with their icons and group totals.",
 				"icon": "rows",
@@ -384,6 +584,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-budget-banners",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Budget banners",
 				"description": "Restyles the overspent and uncategorized banners as quiet cards with a coloured icon.",
 				"icon": "alert",
@@ -391,6 +595,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-modal-sheets",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Modals as sheets",
 				"description": "Opens Actual's pop-up windows as sheets from the bottom, closed by swiping down.",
 				"icon": "layout",
@@ -398,6 +606,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-transaction-list",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Transaction list",
 				"description": "Restyles account transactions as a native list, with quiet date headings.",
 				"icon": "rows",
@@ -405,6 +617,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-toasts",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "mobile",
 				"label": "Snackbar toasts",
 				"description": "Shows notifications as compact snackbars above the tab bar, with the action as text.",
 				"icon": "bell",
@@ -412,6 +628,10 @@
 				"writes": null
 			},
 			{
+				"key": "mobile-page-transitions",
+				"type": "select",
+				"defaultValue": "off",
+				"platform": "mobile",
 				"label": "Page transitions",
 				"description": "How each page appears as you move between them.",
 				"icon": "sparkles",
@@ -425,6 +645,10 @@
 		"description": null,
 		"items": [
 			{
+				"key": "budget-month-header",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Month header (experimental)",
 				"description": "Replace the budget page's month strip with a header: a month picker, months-shown control, and Today.",
 				"icon": "calendar",
@@ -432,6 +656,10 @@
 				"writes": null
 			},
 			{
+				"key": "budget-summary-row",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Month cards (experimental)",
 				"description": "Compact month headers when several months are shown; with one, a full-width row of To Budget (or savings, on a tracking budget), spending, targets, and quick budget actions.",
 				"icon": "sparkles",
@@ -439,6 +667,10 @@
 				"writes": "Applies budget templates or covers overspending when you click those actions."
 			},
 			{
+				"key": "budget-category-filter",
+				"type": "checkbox",
+				"defaultValue": false,
+				"platform": "desktop",
 				"label": "Category filter (experimental)",
 				"description": "Filter the budget table to categories that need attention (overspent or short of their target) or are funded.",
 				"icon": "filter",

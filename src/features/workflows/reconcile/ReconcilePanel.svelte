@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { TRANSACTION_TABLE } from "@lib/actual-dom";
 	import { sidepanel } from "@features/core/side-panel";
 	import Icon from "@lib/components/Icon.svelte";
 	import Callout from "@lib/components/panel/Callout.svelte";
@@ -107,7 +108,7 @@
 		if (!started) {
 			return;
 		}
-		const table = document.querySelector('[data-testid="transaction-table"]');
+		const table = document.querySelector(TRANSACTION_TABLE);
 		if (!table) {
 			return;
 		}

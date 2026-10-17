@@ -1,6 +1,7 @@
 import { defineSetting } from "@features/types";
 import { fmtMoney, loadCurrency } from "@lib/utilities/currency";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { ACCOUNT_BALANCE } from "@lib/actual-dom";
 
 const DAILY_ID = "daily";
 
@@ -31,7 +32,7 @@ function dailyAllowance(cents: number): { perDay: number; days: number } | null 
 }
 
 function displayDailyBalance() {
-	const balanceBtn = document.querySelector("*[data-testid=account-balance]");
+	const balanceBtn = document.querySelector(`*${ACCOUNT_BALANCE}`);
 	let dailyNode = document.querySelector<HTMLElement>(`#${DAILY_ID}`);
 	if (!balanceBtn) {
 		return;

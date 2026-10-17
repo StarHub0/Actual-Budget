@@ -7,13 +7,14 @@ import { Page, matchesPage } from "@lib/utilities/pages";
 import { getValue, setValue } from "@lib/utilities/store";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import { createLogger } from "@lib/utilities/logger";
+import { CATEGORY_NAME, ROW } from "@lib/actual-dom";
 
 const log = createLogger("emoji");
 
 const STORAGE_KEY = "category-emoji-picker";
 const ICONS_KEY = "abt-category-icons";
 const ATTR = "data-abt-emoji";
-const ROW_SELECTOR = '[data-testid="row"]:has([data-testid="category-name"])';
+const ROW_SELECTOR = `${ROW}:has(${CATEGORY_NAME})`;
 const EMOJI_RE = /^(\p{Emoji_Presentation}|\p{Emoji}️)\s*/u;
 
 // ── Category icon storage ────────────────────────────────────────
@@ -64,12 +65,12 @@ const CSS = `
 		display: none;
 	}
 
-	[data-testid="row"] *:hover > .abt-emoji-btn--empty {
+	${ROW} *:hover > .abt-emoji-btn--empty {
 		display: inline-flex;
 		opacity: 0.4;
 	}
 
-	[data-testid="row"] .abt-emoji-btn--empty:hover {
+	${ROW} .abt-emoji-btn--empty:hover {
 		opacity: 1;
 	}
 
@@ -183,7 +184,7 @@ function openPicker(anchor: HTMLElement, catId: string, currentName: string) {
 }
 
 function decorateRow(row: HTMLElement) {
-	const nameEl = row.querySelector<HTMLElement>('[data-testid="category-name"]');
+	const nameEl = row.querySelector<HTMLElement>(CATEGORY_NAME);
 	if (!nameEl) {
 		return;
 	}
@@ -245,7 +246,7 @@ function cleanup() {
 	closePopover();
 	for (const row of document.querySelectorAll<HTMLElement>(`[${ATTR}]`)) {
 		row.removeAttribute(ATTR);
-		const nameEl = row.querySelector<HTMLElement>('[data-testid="category-name"]');
+		const nameEl = row.querySelector<HTMLElement>(CATEGORY_NAME);
 		if (!nameEl) {
 			continue;
 		}

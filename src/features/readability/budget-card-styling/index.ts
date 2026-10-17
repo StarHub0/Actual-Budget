@@ -6,9 +6,10 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { watchRoute } from "@lib/utilities/route-watcher";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import FlowBar from "./FlowBar.svelte";
+import { BUDGET_SUMMARY } from "@lib/actual-dom";
 
 const CSS = `
-	[data-testid="budget-summary"] {
+	${BUDGET_SUMMARY} {
 		border-radius: var(--border-radius);
 		overflow: hidden;
 		transition: box-shadow 0.15s, border-color 0.15s;
@@ -20,7 +21,7 @@ const CSS = `
 
 	/* ── "To Budget" section styling ─────────────────────────────── */
 
-	[data-testid="budget-summary"] [data-cellname*="object Object"] span {
+	${BUDGET_SUMMARY} [data-cellname*="object Object"] span {
 		font-weight: 600 !important;
 	}
 
@@ -89,9 +90,7 @@ async function processCard(card: HTMLElement) {
 	// Style the "To Budget:" label
 	const toBudgetCell = card.querySelector<HTMLElement>('[data-cellname*="object Object"]');
 	if (toBudgetCell) {
-		const toBudgetSection = toBudgetCell.closest<HTMLElement>(
-			'[data-testid="budget-summary"] > div',
-		);
+		const toBudgetSection = toBudgetCell.closest<HTMLElement>(`${BUDGET_SUMMARY} > div`);
 		if (toBudgetSection) {
 			const label = toBudgetSection.querySelector<HTMLElement>("div:not([data-cellname])");
 			if (
@@ -106,7 +105,7 @@ async function processCard(card: HTMLElement) {
 
 	const breakdown = card
 		.querySelector<HTMLElement>('[data-cellname*="!available-funds"]')
-		?.closest<HTMLElement>('[data-testid="budget-summary"] > div');
+		?.closest<HTMLElement>(`${BUDGET_SUMMARY} > div`);
 	if (!breakdown) {
 		return;
 	}
@@ -163,13 +162,13 @@ function processCards() {
 			removeFlow(card);
 		}
 	}
-	for (const card of document.querySelectorAll<HTMLElement>('[data-testid="budget-summary"]')) {
+	for (const card of document.querySelectorAll<HTMLElement>(BUDGET_SUMMARY)) {
 		processCard(card);
 	}
 }
 
 function cleanupCards() {
-	for (const card of document.querySelectorAll<HTMLElement>('[data-testid="budget-summary"]')) {
+	for (const card of document.querySelectorAll<HTMLElement>(BUDGET_SUMMARY)) {
 		card.classList.remove("abt-current-month");
 		card.querySelector(".abt-flow-hidden")?.classList.remove("abt-flow-hidden");
 	}

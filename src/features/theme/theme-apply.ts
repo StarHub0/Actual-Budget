@@ -2,6 +2,7 @@ import { getTheme, themes } from "@lib/design";
 import { applyGlobalCSS } from "@lib/utilities/dom";
 import { editorState } from "./editor-state.svelte";
 import { isUserTheme, userThemeState } from "./user-themes.svelte";
+import { BANK_SYNC_PROVIDER } from "@lib/actual-dom";
 
 export type RemoteTheme = {
 	name: string;
@@ -348,7 +349,7 @@ a[href^="/accounts"] {
 
 /* A bank sync provider's "Configured" uses noticeTextDark, meant for text on solid notice pills;
    here that's the page colour. Configured cards are the ones with a menu button. */
-[data-testid^="bank-sync-provider-"]:has(> div:first-child > button) > div:first-child > div:first-child > span {
+${BANK_SYNC_PROVIDER}:has(> div:first-child > button) > div:first-child > div:first-child > span {
 	color: var(--color-noticeTextLight) !important;
 }`;
 

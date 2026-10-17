@@ -2,10 +2,10 @@ import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import AccountsList from "./AccountsList.svelte";
+import { MOBILE_ACCOUNT_ROW } from "@lib/actual-dom";
 
 // Actual's accounts page: a container holding its headings and account lists, inside the page's
 // pull-to-refresh. ABT's list goes in the same container, so the header and pull-to-refresh stay.
-const ACCOUNT_ROW = '[data-testid="account-list-item"]';
 const CONTAINER_ATTR = "data-abt-m-accounts";
 const OWN_ATTR = "data-abt-m-accounts-own";
 
@@ -37,7 +37,7 @@ export const mobileAccounts = defineSetting({
 				return;
 			}
 			const container = document
-				.querySelector(ACCOUNT_ROW)
+				.querySelector(MOBILE_ACCOUNT_ROW)
 				?.closest('[role="listbox"]')?.parentElement;
 			if (!container) {
 				return;

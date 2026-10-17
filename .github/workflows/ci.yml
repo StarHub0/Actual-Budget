@@ -42,8 +42,11 @@ jobs:
       - name: Build (Firefox)
         run: pnpm build:firefox
 
-      - name: Generate features manifest
-        run: pnpm generate:features-manifest
+      # The website and the smoke test read the committed copy.
+      - name: Features manifest is current
+        run: |
+          pnpm generate:features-manifest
+          git diff --exit-code website/src/data/features.json
 
       - name: Build sidecar image
         run: docker build -f docker/Dockerfile .

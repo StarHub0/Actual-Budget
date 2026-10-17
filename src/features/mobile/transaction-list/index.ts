@@ -1,5 +1,6 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { MODAL } from "@lib/actual-dom";
 
 /*
  * Actual's mobile transaction list: a virtualized listbox of date sections, each a <header> and
@@ -13,8 +14,7 @@ const CONTENT = `${ROW} button > div`;
 function markLists() {
 	for (const list of document.querySelectorAll('[role="listbox"]')) {
 		// Date headers set it apart from autocomplete lists, which sit inside modals anyway.
-		const isTransactions =
-			!list.closest('[data-testid$="-modal"]') && !!list.querySelector("header");
+		const isTransactions = !list.closest(MODAL) && !!list.querySelector("header");
 		if (isTransactions !== list.hasAttribute(LIST_ATTR)) {
 			list.toggleAttribute(LIST_ATTR, isTransactions);
 		}

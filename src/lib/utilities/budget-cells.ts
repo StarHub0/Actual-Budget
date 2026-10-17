@@ -3,14 +3,14 @@ import { isBulkEditing, onBulkEditEnd } from "./bulk-edit";
 import { watchElement } from "./dom-watcher";
 import { UUID } from "./ids";
 import { monthToSheet } from "./months";
+import { BUDGET_TABLE, CATEGORY_AMOUNT_CELL, SELECTED_MONTH } from "@lib/actual-dom";
 
 /*
  * One observer on the budget table for every feature that follows its cells. Each batch says
  * which months are shown and which months' cells changed, from the cells' names (`budget202609!...`).
  */
-const BUDGET_TABLE = '[data-testid="budget-table"]';
 // Actual's month header, which the month header feature hides but leaves mounted.
-const SHOWN_MONTH = '[data-testid="selected-budget-month"][data-month]';
+const SHOWN_MONTH = `${SELECTED_MONTH}[data-month]`;
 const SHEET_RE = /^(budget\d{6})!/;
 const CELL_CATEGORY_RE = new RegExp(`^(budget\\d{6})!.*?(${UUID})`);
 const ROW_CATEGORY_RE = new RegExp(`(${UUID})`);
@@ -35,7 +35,7 @@ let stopFinding: (() => void) | null = null;
 
 /** The category a budget table row is for, from its cells' test ids; null for groups and headers. */
 export function rowCategoryId(row: Element): string | null {
-	const cell = row.querySelector('[data-testid*="sum-amount-"], [data-testid*="leftover-"]');
+	const cell = row.querySelector(CATEGORY_AMOUNT_CELL);
 	return cell?.getAttribute("data-testid")?.match(ROW_CATEGORY_RE)?.[1] ?? null;
 }
 

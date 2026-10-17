@@ -53,6 +53,7 @@ async function setup({ deferRestore = false } = {}) {
 		AbortController,
 	});
 	const overrides = {
+		BUDGET_TABLE: '[data-testid="budget-table"]',
 		defineSetting: (setting) => setting,
 		templatePlanState: state,
 		getValue: async (_key, fallback) => fallback,

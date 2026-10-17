@@ -2,6 +2,7 @@ import { defineSetting } from "@features/types";
 import { type IconName, iconMask } from "@lib/utilities/icons";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { findAccountToolbar } from "@lib/utilities/native-ui";
+import { ACCOUNT_BALANCE } from "@lib/actual-dom";
 
 /*
  * Adapter CSS for the account page's toolbar (Bank Sync, Import, Add New, Filter, search, then
@@ -315,7 +316,7 @@ export const modernAccountToolbar = defineSetting({
 		const labels = new Map<Text, string>();
 
 		const tidyDetails = () => {
-			const row = document.querySelector('[data-testid="account-balance"]')?.parentElement ?? null;
+			const row = document.querySelector(ACCOUNT_BALANCE)?.parentElement ?? null;
 			if (row !== details) {
 				details?.removeAttribute(DETAILS_ATTR);
 				details = row;

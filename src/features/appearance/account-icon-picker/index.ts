@@ -3,14 +3,14 @@ import { onListChange, query } from "@lib/utilities/actual-api";
 import { createElement } from "@lib/utilities/dom";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import { getValue, setValue, watchValue } from "@lib/utilities/store";
+import { ACCOUNT_NAME, MOBILE_ACCOUNT_ROW } from "@lib/actual-dom";
 
 const ROOT_TOGGLE_ATTR = "data-abt-account-icons";
 const STORAGE_KEY_PREFIX = "abt-account-icons";
-const ACCOUNT_TITLE_SELECTOR = '[data-testid="account-name"]';
 const ACCOUNT_ICON_IMG_CLASS = "abt-account-icon-img";
 const ICON_SIZE = 28;
 // Mobile's accounts page: each row's name, drawn with its icon through a CSS variable.
-const MOBILE_ROW_NAME = '[data-testid="account-list-item"] [data-testid="account-name"]';
+const MOBILE_ROW_NAME = `${MOBILE_ACCOUNT_ROW} ${ACCOUNT_NAME}`;
 const MOBILE_ICON_ATTR = "data-abt-m-account-icon";
 const EMOJI_ASSET_BASE_URL = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg";
 
@@ -99,7 +99,7 @@ export async function removeAccountIcon(accountId: string): Promise<void> {
 
 /** The account page's title; the live sidebar draws its own icons. */
 function titleEls(): HTMLElement[] {
-	return [...document.querySelectorAll<HTMLElement>(ACCOUNT_TITLE_SELECTOR)].filter(
+	return [...document.querySelectorAll<HTMLElement>(ACCOUNT_NAME)].filter(
 		(el) => !el.closest("a[href^='/accounts/']"),
 	);
 }

@@ -1,16 +1,25 @@
 import { defineSetting } from "@features/types";
 import ColorTransactionsPreview from "./previews/ColorTransactions.svelte";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import {
+	ACCOUNT_CELL,
+	CATEGORY_CELL,
+	CREDIT_CELL,
+	DATE_CELL,
+	DEBIT_CELL,
+	NOTES_CELL,
+	PAYEE_CELL,
+	TRANSACTION_ROW,
+} from "@lib/actual-dom";
 
 const UPCOMING_ATTR = "data-abt-upcoming";
-const ROW = '[data-testid="transaction-table"] [data-testid="row"]';
 
 // Marks rows only when their state changes; CSS colours them, so a row Actual reuses for
 // another transaction loses the colour with the mark.
 function markUpcomingRows() {
-	for (const row of document.querySelectorAll(ROW)) {
+	for (const row of document.querySelectorAll(TRANSACTION_ROW)) {
 		const upcoming =
-			row.querySelector('[data-testid="category"]')?.firstElementChild?.textContent === "Upcoming";
+			row.querySelector(CATEGORY_CELL)?.firstElementChild?.textContent === "Upcoming";
 		if (upcoming !== row.hasAttribute(UPCOMING_ATTR)) {
 			row.toggleAttribute(UPCOMING_ATTR, upcoming);
 		}
@@ -35,13 +44,13 @@ export const colorTransactions = defineSetting({
 		defaultValue: true,
 	},
 	css: () => `
-		*[data-testid='credit'] {
+		*${CREDIT_CELL} {
 			color: var(--color-numberPositive) !important;
 		}
-		*[data-testid='debit'] {
+		*${DEBIT_CELL} {
 			color: var(--color-numberNegative) !important;
 		}
-		[${UPCOMING_ATTR}] :is([data-testid="date"], [data-testid="account"], [data-testid="payee"], [data-testid="notes"]) {
+		[${UPCOMING_ATTR}] :is(${DATE_CELL}, ${ACCOUNT_CELL}, ${PAYEE_CELL}, ${NOTES_CELL}) {
 			color: var(--ctp-peach, var(--color-warningText));
 		}
 	`,

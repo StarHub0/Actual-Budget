@@ -10,11 +10,11 @@ import { watchDom } from "@lib/utilities/dom-watcher";
 import { onOutsideClick, positionPopover } from "@lib/utilities/popover";
 import { type Mounted, mountToNodeWithReturn } from "@lib/utilities/svelte";
 import ColorPicker from "./ColorPicker.svelte";
+import { CATEGORY_CELL, CATEGORY_NAME, ROW } from "@lib/actual-dom";
 
 const STORAGE_KEY = "category-color-dots";
 const ATTR = "data-abt-color-dot";
 const TX_ATTR = "data-abt-tx-dot";
-const ROW = '[data-testid="row"]';
 
 let categoryNameToId = new Map<string, string>();
 let categoryMapLoaded = false;
@@ -107,7 +107,7 @@ function openColorPicker(anchor: HTMLElement, catId: string) {
 const dotColors = new WeakMap<HTMLElement, string>();
 
 function decorateRow(row: HTMLElement) {
-	const nameEl = row.querySelector<HTMLElement>('[data-testid="category-name"]');
+	const nameEl = row.querySelector<HTMLElement>(CATEGORY_NAME);
 	if (!nameEl) {
 		return;
 	}
@@ -149,7 +149,7 @@ function decorateRow(row: HTMLElement) {
 }
 
 function decorateTransactionRow(row: HTMLElement) {
-	const catCell = row.querySelector<HTMLElement>('[data-testid="category"]');
+	const catCell = row.querySelector<HTMLElement>(CATEGORY_CELL);
 	if (!catCell) {
 		return;
 	}
@@ -194,13 +194,13 @@ function decorateTransactionRow(row: HTMLElement) {
 }
 
 function scanRows() {
-	for (const name of document.querySelectorAll('[data-testid="category-name"]')) {
+	for (const name of document.querySelectorAll(CATEGORY_NAME)) {
 		const row = name.closest<HTMLElement>(ROW);
 		if (row) {
 			decorateRow(row);
 		}
 	}
-	for (const cell of document.querySelectorAll('[data-testid="category"]')) {
+	for (const cell of document.querySelectorAll(CATEGORY_CELL)) {
 		const row = cell.closest<HTMLElement>(ROW);
 		if (row) {
 			decorateTransactionRow(row);

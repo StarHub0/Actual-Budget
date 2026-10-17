@@ -1,3 +1,4 @@
+import { SETTINGS } from "@lib/actual-dom";
 /** Actual's settings nav (actualbudget/actual#9110); older Actual lists every setting on one page. */
 export const SETTINGS_NAV_LINK = '[role="navigation"] > a[href="/settings/general"]';
 export const TWEAKS_HASH = "#tweaks";
@@ -20,5 +21,5 @@ export function hasSettingsPages(): boolean {
  * card of the one-page settings.
  */
 export function settingsAnchor(): string {
-	return hasSettingsPages() ? `[${TWEAKS_HOST_ATTR}]` : "[data-testid='settings'] > :nth-child(2)";
+	return hasSettingsPages() ? `[${TWEAKS_HOST_ATTR}]` : `${SETTINGS} > :nth-child(2)`;
 }

@@ -1,6 +1,7 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
 import DimReconciledPreview from "./previews/DimReconciled.svelte";
+import { CLEARED_CELL, ROW, byTestId } from "@lib/actual-dom";
 
 // Marked in JS: as `row:has(<lock>)`, every test id Actual rewrote anywhere restyled the page.
 const RECONCILED_ATTR = "data-abt-reconciled";
@@ -19,14 +20,12 @@ const DIMMED_CELLS = [
 	"balance",
 	"cleared",
 ]
-	.map((id) => `[${RECONCILED_ATTR}] [data-testid="${id}"]`)
+	.map((id) => `[${RECONCILED_ATTR}] ${byTestId(id)}`)
 	.join(",\n\t\t\t");
 
 function markRows() {
-	for (const cleared of document.querySelectorAll('[data-testid="row"] [data-testid="cleared"]')) {
-		cleared
-			.closest('[data-testid="row"]')
-			?.toggleAttribute(RECONCILED_ATTR, !!cleared.querySelector(LOCK));
+	for (const cleared of document.querySelectorAll(`${ROW} ${CLEARED_CELL}`)) {
+		cleared.closest(ROW)?.toggleAttribute(RECONCILED_ATTR, !!cleared.querySelector(LOCK));
 	}
 }
 

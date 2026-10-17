@@ -8,6 +8,7 @@ import {
 	TWEAKS_SECTIONS_ATTR,
 	settingsNav,
 } from "@lib/utilities/settings-page";
+import { SETTINGS } from "@lib/actual-dom";
 
 const LINK_ATTR = "data-abt-tweaks-link";
 /** On Actual's settings nav, widened so the tab's section names fit on one line. */
@@ -80,8 +81,7 @@ function syncMobile(): void {
 	} else {
 		link?.remove();
 	}
-	const list =
-		location.hash === TWEAKS_HASH ? document.querySelector('[data-testid="settings"]') : null;
+	const list = location.hash === TWEAKS_HASH ? document.querySelector(SETTINGS) : null;
 	if (nav || !list?.parentElement) {
 		close();
 		return;

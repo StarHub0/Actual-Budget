@@ -1,14 +1,14 @@
 import { defineSetting } from "@features/types";
 import { watchDom } from "@lib/utilities/dom-watcher";
+import { AMOUNT_INPUT, MODAL } from "@lib/actual-dom";
 
 // Every Actual modal: an overlay with a `<name>-modal` test id, a wrapper sized to the visible
 // viewport (so it clears the keyboard), react-aria's modal, the dialog, then the content box.
-const OVERLAY = '[data-testid$="-modal"]';
-const DIALOG = `${OVERLAY} [role="dialog"]`;
+const DIALOG = `${MODAL} [role="dialog"]`;
 const BOX = `${DIALOG} > div:first-of-type`;
 // Actual's calculator field (no system keyboard); its keypad, fixed to the screen's bottom but
 // rendered inside the modal, comes right after it.
-const CALCULATOR_INPUT = 'input[data-testid="amount-input"][inputmode="none"]';
+const CALCULATOR_INPUT = `input${AMOUNT_INPUT}[inputmode="none"]`;
 /** On a modal's overlay while its keypad is up. */
 const KEYPAD_ATTR = "data-abt-m-keypad";
 const KEYPAD_PANEL_ATTR = "data-abt-m-keypad-panel";
@@ -31,7 +31,7 @@ function watchKeypads(): () => void {
 				panels.delete(panel);
 			}
 		}
-		for (const overlay of document.querySelectorAll(OVERLAY)) {
+		for (const overlay of document.querySelectorAll(MODAL)) {
 			const panel = overlay.querySelector(CALCULATOR_INPUT)?.nextElementSibling;
 			if (!(panel instanceof HTMLElement) || panels.has(panel)) {
 				continue;
@@ -137,7 +137,7 @@ export const mobileModalSheets = defineSetting({
 		defaultValue: false,
 	},
 	css: () => `
-		${OVERLAY} > div {
+		${MODAL} > div {
 			justify-content: flex-end !important;
 			align-items: stretch !important;
 			overflow: hidden !important;
@@ -147,7 +147,7 @@ export const mobileModalSheets = defineSetting({
 		/* The overlay runs under iOS's translucent keyboard, past the sheet (sized to the visible
 		   viewport); painted in the sheet's colour, the keyboard sits on the sheet, not the page.
 		   ::before, so it paints under the sheet it overlaps. */
-		${OVERLAY}::before {
+		${MODAL}::before {
 			content: "";
 			position: absolute;
 			inset: calc(var(--visual-viewport-height, 100vh) - var(--abt-space-6)) 0 0;
@@ -175,7 +175,7 @@ export const mobileModalSheets = defineSetting({
 			transition-timing-function: ${SHEET_EASE} !important;
 		}
 
-		${OVERLAY} > div > div,
+		${MODAL} > div > div,
 		${DIALOG} {
 			width: 100%;
 		}

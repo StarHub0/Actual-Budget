@@ -3,6 +3,7 @@ import { watchDom, watchElement } from "@lib/utilities/dom-watcher";
 import { Page, matchesPage } from "@lib/utilities/pages";
 import { getCurrentPath, watchRoute } from "@lib/utilities/route-watcher";
 import { hasSettingsPages } from "@lib/utilities/settings-page";
+import { HELP_BUTTON, REPORTS_PAGE, ROW, SETTINGS, TABLE } from "@lib/actual-dom";
 
 // Settings' sub-pages first, so /settings/payees reads as Payees.
 const COLUMN_PAGES = [
@@ -15,9 +16,7 @@ const COLUMN_PAGES = [
 	Page.Schedules,
 ];
 
-const HELP = '[data-testid="help-menu-button"]';
 // Actual wraps dashboards and single reports in the same test id; a dashboard's id is a UUID.
-const REPORTS = '[data-testid="reports-page"]';
 const DASHBOARD_PATH =
 	/^\/reports(\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?\/?$/i;
 
@@ -29,16 +28,17 @@ export const nativeHooks = {
 		watchRoute(() => void refreshBudgetType());
 		// The titlebar renders before the budget loads, but the content grid holding it is only
 		// told apart once a page has rendered; found from Help (Titlebar > cluster > wrapper > button).
-		watchElement(HELP, () => {
-			const header = document.querySelector(HELP)?.parentElement?.parentElement?.parentElement;
+		watchElement(HELP_BUTTON, () => {
+			const header =
+				document.querySelector(HELP_BUTTON)?.parentElement?.parentElement?.parentElement;
 			if (header && header.parentElement?.firstElementChild === header) {
 				mark(header, "data-abt-header");
 			}
 		});
 		// Actual's settings nav came with cards grouped under headings; base.css styles each layout.
-		watchElement('[data-testid="settings"]', () => {
+		watchElement(SETTINGS, () => {
 			if (hasSettingsPages()) {
-				for (const list of document.querySelectorAll('[data-testid="settings"]')) {
+				for (const list of document.querySelectorAll(SETTINGS)) {
 					mark(list, "data-abt-settings-grouped");
 				}
 			}
@@ -47,7 +47,7 @@ export const nativeHooks = {
 			// List pages (not the transaction table) wrap a header row and the table, which some
 			// pages nest in a single-child div.
 			if (!location.pathname.startsWith("/accounts")) {
-				for (const table of document.querySelectorAll('[data-testid="table"]')) {
+				for (const table of document.querySelectorAll(TABLE)) {
 					if (table.closest('[role="dialog"]')) {
 						continue;
 					}
@@ -68,8 +68,8 @@ export const nativeHooks = {
 				frames.push(...document.querySelectorAll('[role="main"]'));
 			}
 			for (const frame of frames) {
-				const header = frame.querySelector('[data-testid="row"]');
-				if (header && !header.closest('[data-testid="table"]')) {
+				const header = frame.querySelector(ROW);
+				if (header && !header.closest(TABLE)) {
 					mark(header.parentElement?.parentElement ?? null, "data-abt-card-table");
 				}
 			}
@@ -83,7 +83,7 @@ export const nativeHooks = {
 			if (column && column.dataset.abtPage !== page) {
 				column.dataset.abtPage = page;
 			}
-			const reports = document.querySelector(REPORTS);
+			const reports = document.querySelector(REPORTS_PAGE);
 			const dashboard = !!reports && DASHBOARD_PATH.test(pathOf(reports, path));
 			if (reports && reports.hasAttribute("data-abt-reports-dashboard") !== dashboard) {
 				reports.toggleAttribute("data-abt-reports-dashboard", dashboard);

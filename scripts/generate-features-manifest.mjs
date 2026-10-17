@@ -65,6 +65,52 @@ function stringLiteralValue(node) {
 	return undefined;
 }
 
+function literalValue(node) {
+	if (!node) {
+		return null;
+	}
+	if (ts.isStringLiteralLike(node)) {
+		return node.text;
+	}
+	if (ts.isNumericLiteral(node)) {
+		return Number(node.text);
+	}
+	if (node.kind === ts.SyntaxKind.TrueKeyword) {
+		return true;
+	}
+	if (node.kind === ts.SyntaxKind.FalseKeyword) {
+		return false;
+	}
+	return null;
+}
+
+/** A string literal, or a const holding one, declared in the same file or imported relatively. */
+function resolveString(source, filePath, node) {
+	if (!node || stringLiteralValue(node) !== undefined) {
+		return stringLiteralValue(node) ?? null;
+	}
+	if (!ts.isIdentifier(node)) {
+		return null;
+	}
+	let value = null;
+	source.forEachChild((statement) => {
+		if (ts.isVariableStatement(statement)) {
+			for (const decl of statement.declarationList.declarations) {
+				if (ts.isIdentifier(decl.name) && decl.name.text === node.text) {
+					value = stringLiteralValue(decl.initializer) ?? null;
+				}
+			}
+		}
+	});
+	if (value !== null) {
+		return value;
+	}
+	const imported = buildImportMap(source, dirname(filePath)).get(node.text);
+	return imported
+		? resolveString(parse(imported), imported, ts.factory.createIdentifier(node.text))
+		: null;
+}
+
 function findProperty(objectLiteral, name) {
 	const prop = objectLiteral.properties.find(
 		(p) => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === name,
@@ -102,7 +148,13 @@ function extractSettingMeta(filePath, name) {
 		return null;
 	}
 
+	const context = findProperty(found, "context");
+	const contextLiteral = context && ts.isObjectLiteralExpression(context) ? context : null;
 	return {
+		key: resolveString(source, filePath, findProperty(contextLiteral ?? found, "key")),
+		type: stringLiteralValue(findProperty(found, "type")) ?? null,
+		defaultValue: literalValue(contextLiteral && findProperty(contextLiteral, "defaultValue")),
+		platform: stringLiteralValue(findProperty(found, "platform")) ?? "desktop",
 		label: stringLiteralValue(findProperty(found, "label")) ?? "",
 		description: stringLiteralValue(findProperty(found, "description")) ?? null,
 		icon: stringLiteralValue(findProperty(found, "icon")) ?? null,

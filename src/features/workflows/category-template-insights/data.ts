@@ -4,6 +4,7 @@ import { isoDate } from "@lib/utilities/months";
 import type { GoalDefEntry } from "@lib/types/actual-schema";
 import type { CategoryInsight, LinkedSchedule, ProgressInfo, RawSchedule } from "./types";
 import { createLogger } from "@lib/utilities/logger";
+import { BUDGETED_CELL } from "@lib/actual-dom";
 
 const log = createLogger("insights");
 
@@ -240,7 +241,7 @@ export async function loadMonthValues(sheet: string, ids: Iterable<string>): Pro
 }
 
 function getBudgetedCents(row: HTMLElement): number | null {
-	const el = row.querySelector('[data-testid="budget"]');
+	const el = row.querySelector(BUDGETED_CELL);
 	if (!el) {
 		return null;
 	}

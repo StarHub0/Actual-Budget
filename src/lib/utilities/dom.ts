@@ -74,16 +74,6 @@ export function applyGlobalCSS(cssText: string, styleId = "global-css"): void {
 }
 
 /**
- * Returns a CSS attribute selector string for a `data-testid` attribute.
- *
- * @example
- * dataTestId("my-key") // => '[data-testid="my-key"]'
- */
-export function dataTestId(id: string): string {
-	return `[data-testid="${id}"]`;
-}
-
-/**
  * Creates a MutationObserver that debounces its callback to one call per
  * animation frame. Returns `{ observe, disconnect }` matching the native API.
  */

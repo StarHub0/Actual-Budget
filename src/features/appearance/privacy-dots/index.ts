@@ -1,5 +1,6 @@
 import { defineSetting } from "@features/types";
 import PrivacyPicker from "./Picker.svelte";
+import { ACCOUNT_BALANCE } from "@lib/actual-dom";
 
 /*
  * How hidden amounts look in privacy mode, for ABT's numbers and Actual's own. Actual's privacy
@@ -84,7 +85,7 @@ function fixed(style: "dots" | "script"): string {
 	}
 
 	/* The account header's balance is a button, which centres its text; the amount reads from the left. */
-	.abt-privacy-enabled [data-testid="account-balance"] div[aria-hidden="true"] :not(:has(*))::after {
+	.abt-privacy-enabled ${ACCOUNT_BALANCE} div[aria-hidden="true"] :not(:has(*))::after {
 		text-align: left !important;
 	}
 
