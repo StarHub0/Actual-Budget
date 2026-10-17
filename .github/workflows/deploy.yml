@@ -20,7 +20,11 @@ env:
   PROJECT_NAME: actual-budget-tweaks
 
 jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
   release:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -133,8 +137,8 @@ jobs:
             -f content="$ENCODED" \
             -f sha="$SHA"
 
+      # Last, so a failure (an expired token, say) fails the run without holding anything back.
       - name: Submit to Chrome Web Store
-        continue-on-error: true
         run: |
           pnpm wxt submit \
             --chrome-zip .output/*-chrome.zip

@@ -32,7 +32,8 @@ async function setup({ deferRestore = false } = {}) {
 		console,
 		document: {
 			getElementById: (id) => [...nodes].find((node) => node.id === id),
-			querySelector: () => null,
+			// The budget page has rendered, which Insights waits for before reopening.
+			querySelector: (selector) => (selector === '[data-testid="budget-table"]' ? {} : null),
 			createElement: node,
 			createTextNode: (text) => text,
 			body: { appendChild: (node) => nodes.add(node) },

@@ -1,0 +1,65 @@
+name: Smoke
+
+# Opens every page of a real Actual with every tweak on: nightly against Actual's in-progress
+# build (edge) to catch its changes before they ship, and against its latest release.
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        actual: [latest, edge]
+    services:
+      actual:
+        image: actualbudget/actual-server:${{ matrix.actual }}
+        ports:
+          - 5006:5006
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (Chrome)
+        run: pnpm build
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Start the sidecar
+        run: |
+          PORT=3005 ACTUAL_ORIGIN=http://localhost:5006 ASSETS_DIR=$PWD/.output/chrome-mv3 \
+            PACKAGE_JSON_PATH=$PWD/package.json node docker/server.js &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3005/ > /dev/null && exit 0
+            sleep 1
+          done
+          echo "Actual or the sidecar didn't start" && exit 1
+
+      - name: Smoke test
+        run: pnpm test:smoke
+        env:
+          SMOKE_URL: http://localhost:3005
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-${{ matrix.actual }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14

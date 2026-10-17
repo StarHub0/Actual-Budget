@@ -34,3 +34,6 @@ web-ext.config.ts
 website/dist
 website/.astro
 sidebar-test/*
+# Playwright smoke test output
+playwright-report/
+test-results/

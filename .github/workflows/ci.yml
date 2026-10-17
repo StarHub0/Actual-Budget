@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+  # Releases run this first, so nothing ships that fails it.
+  workflow_call:
 
 jobs:
   verify:
@@ -30,6 +32,9 @@ jobs:
 
       - name: Token check
         run: pnpm check:tokens
+
+      - name: Unit tests
+        run: pnpm test
 
       - name: Build (Chrome)
         run: pnpm build
