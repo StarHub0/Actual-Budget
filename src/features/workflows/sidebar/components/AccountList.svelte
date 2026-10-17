@@ -15,6 +15,7 @@
 	import {
 		assignAccount,
 		createGroup,
+		groupOf,
 		loadAssignments,
 		loadCollapsedGroups,
 		loadGroups,
@@ -151,9 +152,17 @@
 			.sort((a, b) => a.order - b.order);
 	}
 
-	function bucketOf(accountId: string): string | null {
-		const groupId = assignments[accountId];
-		return groupId && groups[groupId] ? groupId : null;
+	function bucketOf(account: SidebarAccount): string | null {
+		return groupOf(account, assignments, groups);
+	}
+
+	// On/off budget and closed are Actual's own; a drag only reorders or regroups within one.
+	function sectionOf(id: string | null): string | null {
+		const account = accounts.find((a) => a.id === id);
+		if (!account) {
+			return null;
+		}
+		return account.closed ? "closed" : account.offbudget ? "offbudget" : "onbudget";
 	}
 
 	// ---- category (sub-group) CRUD ----
@@ -289,7 +298,7 @@
 	}
 
 	function onDragOver(e: DragEvent, targetId: string) {
-		if (!dragSrcId || dragSrcId === targetId) {
+		if (!dragSrcId || dragSrcId === targetId || sectionOf(dragSrcId) !== sectionOf(targetId)) {
 			return;
 		}
 		e.preventDefault();
@@ -303,7 +312,7 @@
 	}
 
 	function onGroupDragOver(e: DragEvent, groupId: string) {
-		if (!dragSrcId) {
+		if (!dragSrcId || sectionOf(dragSrcId) !== groups[groupId]?.section) {
 			return;
 		}
 		e.preventDefault();
@@ -315,7 +324,7 @@
 	}
 
 	function onGroupDrop(e: DragEvent, groupId: string) {
-		if (!dragSrcId) {
+		if (!dragSrcId || sectionOf(dragSrcId) !== groups[groupId]?.section) {
 			return;
 		}
 		e.preventDefault();
@@ -333,12 +342,13 @@
 		targetGroupId: string | null,
 		sectionItems: SidebarAccount[],
 	) {
-		if (!dragSrcId || dragSrcId === targetId) {
+		if (!dragSrcId || dragSrcId === targetId || sectionOf(dragSrcId) !== sectionOf(targetId)) {
 			return;
 		}
 		e.preventDefault();
 
-		if (bucketOf(dragSrcId) !== targetGroupId) {
+		const dragged = accounts.find((a) => a.id === dragSrcId);
+		if (dragged && bucketOf(dragged) !== targetGroupId) {
 			const nextAssignments = assignAccount(assignments, dragSrcId, targetGroupId);
 			assignments = nextAssignments;
 			saveAssignments(budgetId, nextAssignments);
@@ -493,7 +503,7 @@
 							{/each}
 						</div>
 					{:else}
-						{@const ungrouped = section.items.filter((a) => !bucketOf(a.id))}
+						{@const ungrouped = section.items.filter((a) => !bucketOf(a))}
 						{#if ungrouped.length}
 							<div class="account-list">
 								{#each ungrouped as account (account.id)}
@@ -519,7 +529,7 @@
 							</div>
 						{/if}
 						{#each groupsForSection(kind) as group (group.id)}
-							{@const itemsInGroup = section.items.filter((a) => bucketOf(a.id) === group.id)}
+							{@const itemsInGroup = section.items.filter((a) => bucketOf(a) === group.id)}
 							<GroupHeader
 								{group}
 								count={itemsInGroup.length}

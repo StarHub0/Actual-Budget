@@ -27,6 +27,7 @@
 		type AccountGroup,
 		loadAssignments,
 		loadCollapsedGroups,
+		groupOf,
 		loadGroups,
 		saveCollapsedGroups,
 		watchAssignments,
@@ -241,13 +242,15 @@
 		return Object.values(groups)
 			.filter((g) => g.section === kind)
 			.sort((a, b) => a.order - b.order)
-			.map((group) => ({ group, items: items.filter((a) => assignments[a.id] === group.id) }))
+			.map((group) => ({
+				group,
+				items: items.filter((a) => groupOf(a, assignments, groups) === group.id),
+			}))
 			.filter((g) => g.items.length);
 	}
 
 	function isGrouped(account: SidebarAccount): boolean {
-		const id = assignments[account.id];
-		return !!id && !!groups[id];
+		return !!groupOf(account, assignments, groups);
 	}
 
 	function openAccount(id: string) {

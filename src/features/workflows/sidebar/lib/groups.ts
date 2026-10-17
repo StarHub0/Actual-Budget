@@ -107,6 +107,19 @@ export function removeGroup(
 	return { groups: nextGroups, assignments: nextAssignments };
 }
 
+/**
+ * The group an account shows under. Only a group in its own section counts: one left from the other
+ * section (the account moved on or off budget) would otherwise hide it from both.
+ */
+export function groupOf(
+	account: { id: string; offbudget: boolean },
+	assignments: Record<string, string>,
+	groups: Record<string, AccountGroup>,
+): string | null {
+	const group = groups[assignments[account.id]];
+	return group?.section === (account.offbudget ? "offbudget" : "onbudget") ? group.id : null;
+}
+
 export function assignAccount(
 	assignments: Record<string, string>,
 	accountId: string,
