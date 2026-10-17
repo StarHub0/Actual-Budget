@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v0.1.98
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.97...v0.1.98)
+
+### 🩹 Fixes
+
+- Keep accounts visible in the live sidebar when their group is in the other section ([58c7926](https://github.com/aelxxs/actual-budget-tweaks/commit/58c7926))
+- Let the month picker step forward from years before the budget starts ([71cff66](https://github.com/aelxxs/actual-budget-tweaks/commit/71cff66))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.97 ([b6a5fba](https://github.com/aelxxs/actual-budget-tweaks/commit/b6a5fba))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.97
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.96...v0.1.97)
