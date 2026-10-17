@@ -1,6 +1,19 @@
 # Changelog
 
 
+## v0.1.99
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.98...v0.1.99)
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.98 ([8dd308c](https://github.com/aelxxs/actual-budget-tweaks/commit/8dd308c))
+- Add a privacy policy page to the website ([f0e6a8d](https://github.com/aelxxs/actual-budget-tweaks/commit/f0e6a8d))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.98
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.97...v0.1.98)
