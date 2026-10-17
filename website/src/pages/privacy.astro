@@ -1,0 +1,126 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+	title="Privacy policy — Actual Budget Tweaks"
+	description="What Actual Budget Tweaks stores, what it sends, and to whom."
+>
+	<main class="docs center">
+		<header class="docs__header stack stack--sm">
+			<a href="/" class="docs__back">&larr; Back to home</a>
+			<h1>Privacy policy</h1>
+			<p class="docs__lead">
+				Actual Budget Tweaks (ABT) is a browser extension and self-hosted sidecar that adds optional
+				features to Actual Budget. It has no servers, no accounts and no analytics. The developer
+				never receives your budget data or anything about you.
+			</p>
+			<p>Last updated: October 17, 2026</p>
+		</header>
+
+		<section class="docs__section">
+			<h2>What ABT reads</h2>
+			<p>
+				ABT runs only on the Actual Budget address you enter in its popup. There, it reads your
+				budget through Actual's own interface in the page (accounts, balances, categories,
+				transactions and schedules) to show its features, such as live balances in the sidebar.
+				Your budget data stays between your browser and your own Actual server.
+			</p>
+		</section>
+
+		<section class="docs__section">
+			<h2>What ABT stores</h2>
+			<ul>
+				<li>
+					<strong>Your ABT settings</strong>, in your browser's extension storage on your device.
+				</li>
+				<li>
+					<strong>A copy of those settings in your budget</strong>, saved as Actual preferences so
+					they follow you to other devices. This copy lives on your own Actual server.
+				</li>
+				<li>
+					<strong>Data you create in ABT</strong>, such as account icons, category colours,
+					account groups and custom themes, stored the same two ways.
+				</li>
+			</ul>
+			<p>
+				ABT changes your budget only when you take an action that does so, such as renaming an
+				account from its sidebar.
+			</p>
+		</section>
+
+		<section class="docs__section">
+			<h2>What ABT sends, and to whom</h2>
+			<p>
+				ABT contacts these third-party services only to provide a feature you use. None of them
+				receive your budget data.
+			</p>
+			<div class="docs__table-wrap">
+				<table>
+					<thead>
+						<tr><th>Service</th><th>When</th><th>What is sent</th></tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Google favicon service (t1.gstatic.com)</td>
+							<td>You give an account a website icon</td>
+							<td>The website address you chose</td>
+						</tr>
+						<tr>
+							<td>jsDelivr (cdn.jsdelivr.net)</td>
+							<td>You pick an emoji icon</td>
+							<td>A request for that emoji's image</td>
+						</tr>
+						<tr>
+							<td>GitHub (raw.githubusercontent.com)</td>
+							<td>You browse community themes, or ABT shows its release notes</td>
+							<td>A request for the theme or changelog file</td>
+						</tr>
+						<tr>
+							<td>Yahoo Finance (query2.finance.yahoo.com)</td>
+							<td>You add a stock widget to the sidebar</td>
+							<td>The ticker symbol you entered</td>
+						</tr>
+						<tr>
+							<td>ExchangeRate-API (api.exchangerate-api.com)</td>
+							<td>You use the currency converter</td>
+							<td>The currency you convert from</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<p>
+				Like any web request, these services see your IP address and browser details. Their own
+				privacy policies apply to those requests.
+			</p>
+		</section>
+
+		<section class="docs__section">
+			<h2>What ABT does not do</h2>
+			<ul>
+				<li>It does not collect, sell, share or transfer your data to the developer or anyone else.</li>
+				<li>It does not use analytics, tracking or advertising.</li>
+				<li>It does not run on any website other than the Actual address you set.</li>
+			</ul>
+		</section>
+
+		<section class="docs__section">
+			<h2>Removing your data</h2>
+			<p>
+				Uninstalling the extension deletes everything it stored in your browser. The settings copy in
+				each budget is a set of Actual preferences prefixed with <code>abt:</code>; it stays in that
+				budget file on your server and is not read once ABT is removed.
+			</p>
+		</section>
+
+		<section class="docs__section">
+			<h2>Contact</h2>
+			<p>
+				Questions about this policy can be raised on
+				<a href="https://github.com/aelxxs/actual-budget-tweaks/issues" target="_blank" rel="noopener"
+					>GitHub</a
+				>.
+			</p>
+		</section>
+	</main>
+</Base>
