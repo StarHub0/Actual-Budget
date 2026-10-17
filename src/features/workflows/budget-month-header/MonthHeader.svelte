@@ -128,6 +128,8 @@
 				onpick={(y, m) => go(monthKey(y, m))}
 				loadMarks={loadMonthMarks}
 				isDisabled={(y, m) => outOfBounds(monthKey(y, m))}
+				minYear={parseMonth(bounds.start).year}
+				maxYear={parseMonth(bounds.end).year}
 			/>
 		{/if}
 	</div>

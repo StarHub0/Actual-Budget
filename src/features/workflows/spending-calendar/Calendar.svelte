@@ -79,6 +79,11 @@
 
 	const isAtCurrentMonth = $derived(monthsFromNow(year, month) === 0);
 	const isAtMaxMonth = $derived(monthsFromNow(year, month) >= MAX_FUTURE_MONTHS);
+	const today = new Date();
+	const maxPickerYear = new Date(
+		today.getFullYear(),
+		today.getMonth() + MAX_FUTURE_MONTHS,
+	).getFullYear();
 	// Days are reassigned after every load, so the loader's income set is current by then.
 	const summary = $derived(summarizeMonth(days, loader.incomeCategoryIds));
 	const maxSpent = $derived(maxDaySpent(days));
@@ -381,6 +386,7 @@
 				bind:open={pickerOpen}
 				onpick={setMonth}
 				isDisabled={(y, m) => monthsFromNow(y, m) > MAX_FUTURE_MONTHS}
+				maxYear={maxPickerYear}
 			/>
 			{#if hasLoadedOnce}
 				<MonthSummary {summary} stale={loading} />

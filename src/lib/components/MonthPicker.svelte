@@ -27,6 +27,8 @@
 		open = $bindable(false),
 		onpick,
 		isDisabled = () => false,
+		minYear,
+		maxYear,
 		loadMarks,
 		variant = "title",
 	}: {
@@ -37,6 +39,10 @@
 		open?: boolean;
 		onpick: (year: number, month: number) => void;
 		isDisabled?: (year: number, month: number) => boolean;
+		/** The years the arrows stop at; each arrow checks only its own edge, so a year outside
+		 * the range can still step back towards it. */
+		minYear?: number;
+		maxYear?: number;
 		/** Status dots for one picker year, keyed by month index. */
 		loadMarks?: (year: number) => Promise<Partial<Record<number, MonthMark>>>;
 		/** "title" is the calendar's page heading; "compact" sits inline in a toolbar. */
@@ -136,6 +142,7 @@
 				type="button"
 				class="abt-btn abt-btn--sm abt-btn--icon abt-btn--ghost"
 				aria-label="Previous year"
+				disabled={minYear !== undefined && pickerYear <= minYear}
 				onclick={() => pickerYear--}
 			>
 				<svg
@@ -154,7 +161,7 @@
 				type="button"
 				class="abt-btn abt-btn--sm abt-btn--icon abt-btn--ghost"
 				aria-label="Next year"
-				disabled={isDisabled(pickerYear + 1, 0)}
+				disabled={maxYear !== undefined && pickerYear >= maxYear}
 				onclick={() => pickerYear++}
 			>
 				<svg
