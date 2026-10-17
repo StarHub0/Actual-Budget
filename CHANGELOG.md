@@ -1,6 +1,24 @@
 # Changelog
 
 
+## v0.1.100
+
+[compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.99...v0.1.100)
+
+### 💅 Refactors
+
+- Centralize Actual's test ids and check them in the smoke test ([6b25580](https://github.com/aelxxs/actual-budget-tweaks/commit/6b25580))
+- Move Actual's roles, links, layout and cell selectors into actual-dom ([8a69bf3](https://github.com/aelxxs/actual-budget-tweaks/commit/8a69bf3))
+
+### 🏡 Chore
+
+- Update Firefox auto-update manifest for v0.1.99 ([53d4856](https://github.com/aelxxs/actual-budget-tweaks/commit/53d4856))
+- Gate releases on CI and smoke test ABT against Actual latest and edge ([973ec53](https://github.com/aelxxs/actual-budget-tweaks/commit/973ec53))
+
+### ❤️ Contributors
+
+- Alexis Vielma <alexis.vielma.us@gmail.com>
+
 ## v0.1.99
 
 [compare changes](https://github.com/aelxxs/actual-budget-tweaks/compare/v0.1.98...v0.1.99)
