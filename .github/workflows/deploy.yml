@@ -21,6 +21,7 @@ env:
 
 jobs:
   verify:
+    if: github.repository == 'aelxxs/actual-budget-tweaks'
     uses: ./.github/workflows/ci.yml
 
   release:

@@ -1,0 +1,94 @@
+name: Publish Actual + Tweaks
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["website/**", "images/**", "*.md"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: actual-tweaks-image
+  cancel-in-progress: false
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install and verify fork
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm format
+          pnpm check
+          pnpm lint
+          pnpm check:tokens
+          pnpm test
+          node --test docker/all-in-one/config.test.mjs
+      - name: Build combined image
+        run: docker build --tag actual-tweaks:test .
+      - name: Test startup, injection, persistence and shutdown
+        run: |
+          set -euo pipefail
+          docker volume create actual-tweaks-test
+          docker run -d --name actual-tweaks-test -p 127.0.0.1:3005:3005 -v actual-tweaks-test:/data -e PORT=3005 -e ACTUAL_ORIGIN=https://ignored.example.com actual-tweaks:test
+          ready() {
+            for i in $(seq 1 90); do
+              if docker exec actual-tweaks-test node /opt/actual-tweaks/healthcheck.mjs; then return 0; fi
+              sleep 2
+            done
+            docker logs actual-tweaks-test
+            return 1
+          }
+          ready
+          curl --fail http://127.0.0.1:3005/abt/browser-shim.js -o /tmp/abt-shim.js
+          grep -q 'chrome' /tmp/abt-shim.js
+          docker exec actual-tweaks-test node -e "require('node:fs').writeFileSync('/data/persistence-test', 'saved')"
+          docker restart --time 15 actual-tweaks-test
+          ready
+          docker exec actual-tweaks-test node -e "require('node:assert/strict').equal(require('node:fs').readFileSync('/data/persistence-test','utf8'),'saved')"
+          docker stop --time 15 actual-tweaks-test
+          test "$(docker inspect --format '{{.State.ExitCode}}' actual-tweaks-test)" = "0"
+          docker rm actual-tweaks-test
+          docker volume rm actual-tweaks-test
+      - name: Test browser against a fresh budget
+        run: |
+          docker run -d --name actual-tweaks-browser -p 127.0.0.1:3005:3005 actual-tweaks:test
+          pnpm exec playwright install --with-deps chromium
+          pnpm test:smoke
+        env:
+          SMOKE_URL: http://localhost:3005
+      - name: Docker logs
+        if: always()
+        run: |
+          docker logs actual-tweaks-test 2>/dev/null || true
+          docker logs actual-tweaks-browser 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-test-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested image
+        env:
+          REPOSITORY: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          IMAGE="ghcr.io/${REPOSITORY,,}"
+          docker tag actual-tweaks:test "$IMAGE:latest"
+          docker tag actual-tweaks:test "$IMAGE:sha-$COMMIT"
+          docker push "$IMAGE:sha-$COMMIT"
+          docker push "$IMAGE:latest"
+          echo "Image: $IMAGE:latest" >> "$GITHUB_STEP_SUMMARY"
