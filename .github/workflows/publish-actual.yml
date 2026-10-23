@@ -47,7 +47,7 @@ jobs:
           }
           ready
           curl --fail http://127.0.0.1:3005/abt/browser-shim.js -o /tmp/abt-shim.js
-          grep -q 'chrome' /tmp/abt-shim.js
+          grep -q 'abt-sidecar-mvp' /tmp/abt-shim.js
           docker exec actual-tweaks-test node -e "require('node:fs').writeFileSync('/data/persistence-test', 'saved')"
           docker restart --time 15 actual-tweaks-test
           ready
